@@ -5,9 +5,12 @@ function [ftl,ftu]=plotM2Dfit(M,X,plotTitle,xLabel,subfolder)
     disp("Creating 2D plot of M vs "+xLabel+" and fitting peaks");
 
     M=normalize(M,"range");
-    coeffs=["C1" "C2" "C3" "t2p" "t2"];
-    fttype = fittype("C1+(C2*exp(-x/t2p)+C3*exp(x/t2p))*exp(-x/t2)",coefficients=coeffs);
-    options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 -1000 -1000 0.001 0.001],'Upper',[1 1000 1000 10 10],'StartPoint',[0 1 1 0.6 0.6]);
+    %coeffs=["C1" "C2" "C3" "t2p" "t2"];
+    coeffs=["C1r" "C1i" "C2r" "C2i" "C3r" "C3i" "t2p" "t2"];
+    %fttype1 = fittype("C1+(C2*exp(-x/t2p)+C3*exp(x/t2p))*exp(-x/t2)",coefficients=coeffs);
+    fttype = fittype("abs(C1r+1i*C1i+((C2r+1i*C2i)*exp(-x/t2p)+(C3r+1i*C3i)*exp(x/t2p))*exp(-x/t2))",coefficients=coeffs);
+    %options1=fitoptions('Method','NonlinearLeastSquares','Lower',[0 -1000 -1000 0.001 0.001],'Upper',[1 1000 1000 10 10],'StartPoint',[0 1 1 0.6 0.6]);
+    options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 -1000000 -1000000 -1000000 -1000000 -1000000 0.001 0.001],'Upper',[1 1000000 1000000 1000000 1000000 1000000 10 10],'StartPoint',[0 1 1 1 1 1 0.6 0.6]);
 
     [eu,el] = envelope(M,15,"peaks");
 
