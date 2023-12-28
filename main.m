@@ -18,14 +18,14 @@ T1=13.1; %in s
 T2=0.6; %in s
 
 %Range of flip angles in degree
-amin=60;
-amax=60;
-na=1; %resolution: 0.5 degree
+amin=10;
+amax=180;
+na=18; %resolution: 10 degree
 
 %Range of repetition times in ms
-TRmin=12.6;
-TRmax=12.6;
-nTR=1; %resolution: 1/10 ms
+TRmin=5;
+TRmax=20;
+nTR=151; %resolution: 1/10 ms
 
 %Range of times TR*f between initial alpha/2 and first -alpha pulse, if TR
 %is the time between -/+ alpha pulses
@@ -43,10 +43,10 @@ Meq=1;
 
 %splitfactor loop iterations are used in vectorizedM -> high splitfactor
 %causes less RAM usage, but vectorization is not as efficient
-splitfactor=4; 
+splitfactor=128; 
 
 %Recalculate M, or read existing M from save file M.txt?
-recalculateM=false;
+recalculateM=true;
 
 %-------------END OF SETTINGS-------------
 
@@ -71,13 +71,9 @@ if recalculateM
 
     M=zeros(na,nTR,length(f),length(f_eval),n_tot); %indices: a (1st dimension), TR (2nd dimension), f (3rd dimension), f_eval (4th dimension), pulse (5th dimension)
     
-    for k=1:length(f_eval)
+    for k=1:length(TR)
 
-        for l=1:length(f)
-
-            M(:,:,l,k,:)=vectorizedM(a,TR,w,f(l),f_eval(k),n_tot,Meq,T1,T2,splitfactor); 
-
-        end
+        M(:,k,:,:,:)=vectorizedM(a,TR(k),w,f,f_eval,n_tot,Meq,T1,T2,splitfactor); 
     
     end
 
@@ -100,7 +96,7 @@ plotHist(w,w0,FWHM);
 %Plot M(f_eval_fine) for fixed alpha and fixed TR for all pulses separately
 for k=1:length(f)
 
-    mkdir("Figures", "Loop4_"+num2str(k));
+    mkdir("Figures");
 
     for m=1:length(a)
 
@@ -110,7 +106,7 @@ for k=1:length(f)
 
                 M_=permute(M(m,o,k,:,l),[4 1 2 3 5]);
 
-                plotM2Dfit(M_,f_eval,"bSSFP signal from "+num2str(ns)+" isochromats, after the "+num2str(l)+" th pulse for fixed $\alpha=$ "+num2str(a(m))+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR(o))+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(k))+" $T_R$","$\frac{t}{T_R}$","Loop4_"+num2str(k));
+                plotM2Dfit(M_,f_eval,"bSSFP signal from "+num2str(ns)+" isochromats, after the "+num2str(l)+" th pulse for fixed $\alpha=$ "+num2str(a(m))+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR(o))+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(k))+" $T_R$","$\frac{t}{T_R}$","");
 
             end
 
