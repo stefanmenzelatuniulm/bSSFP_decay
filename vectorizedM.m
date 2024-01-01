@@ -7,9 +7,6 @@
 
 function M_tot = vectorizedM(a,TR,w,f,f_eval,n_tot,Meq,T1,T2,splitfactor)
 
-    %Convert TR to s
-    TR=TR/1000;
-
     %Number of flip angles, repetition times, isochromats, alpha/2 pulse
     %spacings, evaluation times
     [~,na]=size(a);
