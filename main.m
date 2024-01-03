@@ -12,10 +12,10 @@ ns=2^15;
 n_tot=10;
 
 %Metabolite properties (13C lactate)
-w0=300; %in Hz, rotating frame (gamma*B0 is filtered by heterodyne mixing)
-FWHM=21; %in Hz %Simulation depends sensitively on FWHM
-T1=13.1; %in s
-T2=0.6; %in s
+w0=300/1000; %in MHz, rotating frame (gamma*B0 is filtered by heterodyne mixing)
+FWHM=21/1000; %in MHz %Simulation depends sensitively on FWHM
+T1=13.1*1000; %in ms
+T2=0.6*1000; %in ms
 
 %Range of flip angles in degree
 %Calculation much faster for small cosd(alpha) because steady-state approximation can be applied faster 
@@ -57,16 +57,16 @@ recalculateC=true;
 epsilon=0;
 
 %Upper bounds for T1 and T2 (regarding fit, and steady-state approximation)
-T1max=1000; %in s
-T2max=1000; %in s
+T1max=20*1000; %in ms
+T2max=5*1000; %in ms
 
 %-------------END OF SETTINGS-------------
 
 %Flip angles in degree
 a=linspace(amin,amax,na);
 
-%Repetition times in s
-TR=linspace(TRmin,TRmax,nTR)/1000;
+%Repetition times in ms
+TR=linspace(TRmin,TRmax,nTR);
 
 %Evaluate at f_eval*TR
 f_eval=linspace(f_eval_min,f_eval_max,nf_eval);
@@ -135,7 +135,7 @@ for k=1:length(f)
 
                 M_=permute(M(m,o,k,:,l),[4 1 2 3 5]);
 
-                plotM2Dfit(M_,f_eval,C1(m,o,k,l),C2(m,o,k,l),C2s(m,o,k,l),T1max,T2max,ns,"bSSFP signal from "+num2str(ns)+" isochromats, after the "+num2str(l)+" th pulse for fixed $\alpha=$ "+num2str(a(m))+" $^{\circ}$ for fixed $T_R=$ "+num2str(1000*TR(o))+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(k))+" $T_R$","$\frac{t}{T_R}$","");
+                plotM2Dfit(M_,f_eval,C1(m,o,k,l),C2(m,o,k,l),C2s(m,o,k,l),T1max,T2max,TR,f,ns,"bSSFP signal from "+num2str(ns)+" isochromats, after the "+num2str(l)+" th pulse for fixed $\alpha=$ "+num2str(a(m))+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR(o))+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(k))+" $T_R$","$t$ (ms)","");
 
             end
 
