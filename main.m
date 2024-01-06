@@ -19,8 +19,8 @@ T2=0.6*1000; %in ms
 
 %Range of flip angles in degree
 %Calculation much faster for small cosd(alpha) because steady-state approximation can be applied faster 
-amin=50;
-amax=50;
+amin=55;
+amax=55;
 na=1; %resolution: 5 degree
 
 %Range of repetition times in ms
@@ -30,7 +30,7 @@ nTR=1; %resolution: 1/10 ms
 
 %Range of times TR*f between initial alpha/2 and first -alpha pulse, if TR
 %is the time between -/+ alpha pulses
-f=[1];
+f=[1/3];
 
 %Calculate signal at time t_eval=f_eval*TR, measured from the end of the
 %pulse train. f_eval=0 e.g. calculates the signal directly after the end of

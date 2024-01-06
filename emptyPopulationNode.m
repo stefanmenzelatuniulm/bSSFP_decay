@@ -1,0 +1,2 @@
+classdef emptyPopulationNode
+end

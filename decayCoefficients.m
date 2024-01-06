@@ -24,7 +24,7 @@ function [C1 C2 C2s]=decayCoefficients(as,TR,f,n_tot,epsilon,T1max,Meq)
         TR1mf(:,:,k,:)=TR(:,:,k,:)*(1-f(k));
     end
     E1=exp(-TR/T1); %indices: a, TR, f, pulse 
-    E2=exp(-TRf*(1/T2-1/T2p)-TR1mf*(1/T2+1/T2p)); %indices: a, TR, f, pulse -> echo bei f*TR: bis dahin T2 decay T2p rephasing, danach T2* decay
+    E2=exp(-TR/T2); %indices: a, TR, f, pulse -> echo bei f*TR: bis dahin T2 decay T2p rephasing, danach T2* decay
 
     F=Meq*(1-E1); %indices: a, TR, f, pulse
     c1n=1i*sind(a).*E1.*(E1.*cosd(a)).^(n-1)*Meq+1i*sind(a).*E1.*cosd(a).*F.*((1-(E1.*cosd(a)).^(n-1))./(1-E1.*cosd(a)))+1i*sind(a).*F; %indices: a, TR, f, pulse
