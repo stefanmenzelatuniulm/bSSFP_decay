@@ -1,6 +1,6 @@
 classdef populationTree
 
-    properties (Access=private)
+    properties (Access=public)
 
         root longitudinalPopulationNode;
         height int64;
@@ -10,14 +10,9 @@ classdef populationTree
     methods
         
         %Constructor
-        function populationTree = populationTree(rootPopulation)
+        function populationTree = populationTree(root)
             
-            if nargin > 0
-                populationTree.root = rootPopulation;
-            else
-                populationTree.root = populationNode();
-            end
-
+            populationTree.root = root;
             populationTree.height = 0;
     
         end
@@ -25,7 +20,7 @@ classdef populationTree
         %Applies pulse to population tree
         function [transverseBottomNodes,longitudinalBottomNodes,populationTree] = applyPulse(populationTree,a,TR,f)
             
-            [transverseBottomNodes,longitudinalBottomNodes,populationTree] = populationTree.root.applyPulse(a,TR,f,populationTree.height); %bottomNodes is list with entries label+"#"+string(amplitude)+"#"+string(dephasingDegree)
+            [transverseBottomNodes,longitudinalBottomNodes,populationTree.root] = populationTree.root.applyPulse(a,TR,f,populationTree.height); %bottomNodes is list with entries label+"#"+string(amplitude)+"#"+string(dephasingDegree)
             populationTree.height = populationTree.height+1;
 
         end
@@ -35,8 +30,8 @@ classdef populationTree
         %the branches and updating labels
         function populationTree = pruneMerge(populationTree,transverseBottomNodes,longitudinalBottomNodes)
 
-            transverseBottomNodes=split(transpose(transverseBottomNodes),"#");
-            longitudinalBottomNodes=split(transpose(longitudinalBottomNodes),"#");
+            transverseBottomNodes=transpose(split(transpose(transverseBottomNodes),"#"));
+            longitudinalBottomNodes=transpose(split(transpose(longitudinalBottomNodes),"#"));
             
             transverseLabels=transverseBottomNodes(:,1);
             transverseAmplitudes=str2sym(transverseBottomNodes(:,2));
@@ -61,8 +56,7 @@ classdef populationTree
             end
 
             for k=1:length(longitudinalUpdateLabels)
-                %TODO: implement
-                populationTree=populationTree.updateAmplitudeLabels(longitudinalUpdateLabels(k),longitudinalSummedAmplitudes(k),longitudinalUpdateFullLabels(k));
+                populationTree=populationTree.updateAmplitudeLabel(longitudinalUpdateLabels(k),longitudinalSummedAmplitudes(k),longitudinalUpdateFullLabels(k));
             
             end
 
@@ -74,7 +68,7 @@ classdef populationTree
 
             for k=1:length(transverseUpdateLabels)
             
-                populationTree=populationTree.updateAmplitudeLabels(transverseUpdateLabels(k),transverseSummedAmplitudes(k),transverseUpdateFullLabels(k));
+                populationTree=populationTree.updateAmplitudeLabel(transverseUpdateLabels(k),transverseSummedAmplitudes(k),transverseUpdateFullLabels(k));
             
             end
 
@@ -83,8 +77,21 @@ classdef populationTree
         %Prunes node with label
         function populationTree = prune(populationTree,label)
 
-            populationTree.root.prune(label);
+            populationTree.root = populationTree.root.prune(label);
 
+        end
+
+        %Update node with label
+        function populationTree = updateAmplitudeLabel(populationTree,updateLabel,summedAmplitudes,newLabel)
+
+            populationTree.root = populationTree.root.updateAmplitudeLabel(updateLabel,summedAmplitudes,newLabel);
+
+        end
+
+        function plotTree(populationTree,plotDigits)
+
+            populationTree.root.plotNode(plotDigits);
+        
         end
 
     end    

@@ -4,8 +4,7 @@
 function tree=calculatePopulations(n_tot,Meq,a,TR,f)
     
     %Create tree with equilibrium magnetization as root
-    p=population(0,Meq);
-    root=transversePopulationNode(p);
+    root=longitudinalPopulationNode(emptyNode(),emptyNode(),emptyNode(),"",0,0,Meq,0,1);
     tree=populationTree(root);
 
     for k=1:n_tot

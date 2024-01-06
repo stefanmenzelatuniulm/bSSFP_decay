@@ -31,8 +31,12 @@ function [updateIndices,pruneIndices,summedAmplitudes,updateLabels]=populationTr
         for m=1:transverseGC(k) 
             iter1=iter1+1;
             index=transverseDuplicateIndices(iter1);
-            sums(k)=sums(k)+str2sym(amplitudes(index));
-            updateLabels(k)=updateLabels(k)+"&"+labels(k);
+            sums(k)=sums(k)+amplitudes(index);
+            if m~=transverseGC(k)
+                updateLabels(k)=updateLabels(k)+labels(k)+"&";
+            else
+                updateLabels(k)=updateLabels(k)+labels(k);
+            end
         end
 
         for m=1:transverseGC(k) 
