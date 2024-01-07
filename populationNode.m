@@ -1,11 +1,12 @@
 classdef populationNode < emptyNode
 
-    properties (Access=public)
+    properties (Access = public)
     
         parent emptyNode;
         dephasingDegree double; %fraction of TR
         amplitude sym; %function of T1, T2, T2p
         label string;
+        labelAmplitude sym;
         level int64;
         xpos double;
         ypos double;
@@ -16,7 +17,7 @@ classdef populationNode < emptyNode
     methods
 
         %Constructor
-        function populationNode = populationNode(parent,label,xpos,ypos,Meq,dephasingDegree,amplitude)
+        function populationNode = populationNode(parent, label, xpos, ypos, Meq, dephasingDegree, amplitude, labelAmplitude)
 
             if nargin > 1
     
@@ -24,8 +25,9 @@ classdef populationNode < emptyNode
                 populationNode.label = label;
                 populationNode.dephasingDegree = dephasingDegree;
                 populationNode.amplitude = amplitude;
+                populationNode.labelAmplitude = labelAmplitude;
 
-                if isa(parent,"populationNode")
+                if isa(parent, "populationNode")
                     populationNode.level = parent.level+1;
                 else
                     populationNode.level = 0;
@@ -45,6 +47,7 @@ classdef populationNode < emptyNode
                 populationNode.Meq = 1;
                 populationNode.dephasingDegree = 0;
                 populationNode.amplitude = sym(1);
+                populationNode.labelAmplitude = sym(1);
 
             end
     

@@ -12,8 +12,8 @@ ns=2^15;
 n_tot=10;
 
 %Metabolite properties (13C lactate)
-w0=300/1000; %in MHz, rotating frame (gamma*B0 is filtered by heterodyne mixing)
-FWHM=21/1000; %in MHz %Simulation depends sensitively on FWHM
+w0=300/1000; %in kHz, rotating frame (gamma*B0 is filtered by heterodyne mixing)
+FWHM=21/1000; %in kHz %Simulation depends sensitively on FWHM
 T1=13.1*1000; %in ms
 T2=0.6*1000; %in ms
 
@@ -21,12 +21,12 @@ T2=0.6*1000; %in ms
 %Calculation much faster for small cosd(alpha) because steady-state approximation can be applied faster 
 amin=55;
 amax=55;
-na=1; %resolution: 5 degree
+na=1;
 
 %Range of repetition times in ms
 TRmin=10;
 TRmax=10;
-nTR=1; %resolution: 1/10 ms
+nTR=1; 
 
 %Range of times TR*f between initial alpha/2 and first -alpha pulse, if TR
 %is the time between -/+ alpha pulses
@@ -37,7 +37,7 @@ f=[1/3];
 %the pulse train
 f_eval_min=0;
 f_eval_max=1;
-nf_eval=1001; %resolution: 1/1000 TR
+nf_eval=1001; 
 
 %Equilibrium magnetization
 Meq=1;
