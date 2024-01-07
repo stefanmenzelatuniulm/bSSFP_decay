@@ -39,7 +39,7 @@ f_eval_min=0;
 f_eval_max=1;
 nf_eval=1001; 
 
-%Equilibrium magnetization
+%Equilibrium magnetization per isochromat
 Meq=1;
 
 %splitfactor loop iterations are used in vectorizedM -> high splitfactor

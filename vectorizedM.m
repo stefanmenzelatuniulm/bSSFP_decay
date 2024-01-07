@@ -1,8 +1,9 @@
 %Calculates magnetization for flip angles a, repetition times TR, Larmor
-%frequencies w, initial a/2 pulse followed after t = f*TR by n_tot -/+ alpha
-%pulses. Evaluates the signal at t = f_eval*TR, with t measured after the end
-%of the pulse train. f*TR is the spacing between the initial a/2 pulse and
-%the first -a pulse. Returns M_tot = M(a, TR, f, f_eval, pulse). Will calculate
+%frequencies w, initial a/2 pulse followed after t = f*TR by n_tot -/+
+%alpha pulses. Evaluates the signal at t = f_eval*TR, with t measured after
+%the end of the pulse train. f*TR is the spacing between the initial a/2
+%pulse and the first -a pulse. Meq is the equilibrium magnetization per
+%isochromat. Returns M_tot = M(a, TR, f, f_eval, pulse). Will calculate
 %M_tot for every isochromat and then sum the result over the isochromats
 
 function M_tot = vectorizedM(a, TR, w, f, f_eval, n_tot, Meq, T1, T2, hyperpolarization, splitfactor)
