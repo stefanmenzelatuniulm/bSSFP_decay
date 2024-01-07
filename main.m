@@ -60,6 +60,9 @@ epsilon=0;
 T1max=20*1000; %in ms
 T2max=5*1000; %in ms
 
+%Hyperpolarization factor
+hyperpolarization=1;
+
 %-------------END OF SETTINGS-------------
 
 %Flip angles in degree
@@ -86,7 +89,7 @@ if recalculateM
     for k=1:nTR
         
         disp("Calculating M for the "+num2str(k)+"th repetition time...");
-        M(:,k,:,:,:)=vectorizedM(a,TR(k),w,f,f_eval,n_tot,Meq,T1,T2,splitfactor); 
+        M(:,k,:,:,:)=vectorizedM(a,TR(k),w,f,f_eval,n_tot,Meq,T1,T2,hyperpolarization,splitfactor); 
     
     end
 

@@ -10,7 +10,7 @@ classdef longitudinalPopulationNode < populationNode
     methods
 
         %Constructor
-        function longitudinalPopulationNode = longitudinalPopulationNode(parent, transverseChild, longitudinalChild, label, xpos, ypos, Meq, dephasingDegree, amplitude, labelAmplitude)
+        function longitudinalPopulationNode = longitudinalPopulationNode(parent, transverseChild, longitudinalChild, label, xpos, ypos, dephasingDegree, amplitude, amplitudeLabel)
 
             if nargin > 1
 
@@ -25,10 +25,9 @@ classdef longitudinalPopulationNode < populationNode
 
                 longitudinalPopulationNode.xpos = xpos;
                 longitudinalPopulationNode.ypos = ypos;
-                longitudinalPopulationNode.Meq = Meq;
                 longitudinalPopulationNode.dephasingDegree = dephasingDegree;
                 longitudinalPopulationNode.amplitude = amplitude;
-                longitudinalPopulationNode.labelAmplitude = labelAmplitude;
+                longitudinalPopulationNode.amplitudeLabel = amplitudeLabel;
                 longitudinalPopulationNode.transverseChild = transverseChild;
                 longitudinalPopulationNode.longitudinalChild = longitudinalChild;  
 
@@ -39,10 +38,10 @@ classdef longitudinalPopulationNode < populationNode
                 longitudinalPopulationNode.level = 0;
                 longitudinalPopulationNode.xpos = 0;
                 longitudinalPopulationNode.ypos = 0;
-                longitudinalPopulationNode.Meq = 1;
                 longitudinalPopulationNode.dephasingDegree = 0;
-                longitudinalPopulationNode.amplitude = sym(1);
-                longitudinalPopulationNode.labelAmplitude = sym(1);
+                syms Meq;
+                longitudinalPopulationNode.amplitude = Meq;
+                longitudinalPopulationNode.amplitudeLabel = Meq;
                 longitudinalPopulationNode.transverseChild = emptyNode();
                 longitudinalPopulationNode.longitudinalChild = emptyNode();         
             
@@ -50,21 +49,20 @@ classdef longitudinalPopulationNode < populationNode
     
         end
 
-        function [transverseBottomNodes, longitudinalBottomNodes, longitudinalPopulationNodeObject] = applyPulse(longitudinalPopulationNodeObject, a_, TR_, f, height, Meq, yScale)
+        function [transverseBottomNodes, longitudinalBottomNodes, longitudinalPopulationNodeObject] = applyPulse(longitudinalPopulationNodeObject, a_, TR_, f, height, yScale)
             
             transverseBottomNodes = [];
             longitudinalBottomNodes = [];
             
             if longitudinalPopulationNodeObject.level == height %Pulse only changes nodes at the bottom of the tree
  
-                syms T1 T2 T2p TR a;
+                syms T1 T2 T2p TR a Meq;
                 E1 = exp(-f*TR/T1);
-                F = Meq*(1-E1);
                 E2 = exp(-f*TR/T2);
                 
                 %Not inverted phase
-                oldDephasingDegree = transversePopulationNodeObject.dephasingDegree;
-                dephasingDegreeNotInverted = oldDephasingDegree+f*TR;
+                oldDephasingDegree = longitudinalPopulationNodeObject.dephasingDegree;
+                dephasingDegreeNotInverted = subs(oldDephasingDegree+f*TR, TR, TR_);
 
                 if oldDephasingDegree <= 0 && dephasingDegreeNotInverted <= 0
 
@@ -72,10 +70,10 @@ classdef longitudinalPopulationNode < populationNode
 
                 elseif oldDephasingDegree <= 0 && dephasingDegreeNotInverted >= 0
 
-                    a = -TR*oldDephasingDegree/(dephasingDegreeNotInverted-oldDephasingDegree);
-                    b = TR*dephasingDegreeNotInverted/(dephasingDegreeNotInverted-oldDephasingDegree);
+                    as = -oldDephasingDegree/(dephasingDegreeNotInverted-oldDephasingDegree);
+                    b = dephasingDegreeNotInverted/(dephasingDegreeNotInverted-oldDephasingDegree);
 
-                    E2p = exp(a*f*TR/T2p)*exp(-b*f*TR/T2p);
+                    E2p = exp(as*f*TR/T2p)*exp(-b*f*TR/T2p);
 
                 else %oldDephasingDegree>0 -> dephasingDegreeNotInverted>0
 
@@ -86,20 +84,20 @@ classdef longitudinalPopulationNode < populationNode
                 %Transverse child 
                 if ~isa(longitudinalPopulationNodeObject.transverseChild, "populationNode") %only change empty children
                     amplitude = subs(subs(longitudinalPopulationNodeObject.amplitude*1i*sind(a)*E2*E2p, TR, TR_), a, a_);
-                    labelAmplitude = longitudinalPopulationNodeObject.labelAmplitude*1i*sind(a)*E2*E2p;
+                    amplitudeLabel = longitudinalPopulationNodeObject.amplitudeLabel*1i*sind(a)*E2*E2p;
                     if height>0
                         newLabel = longitudinalPopulationNodeObject.label+"_1";
                     else
                         newLabel = "1";
                     end
-                    longitudinalPopulationNodeObject.transverseChild = transversePopulationNode(longitudinalPopulationNodeObject, emptyNode(), emptyNode(), emptyNode(), emptyNode(), newLabel, longitudinalPopulationNodeObject.xpos+f*TR, yScale*dephasingDegree, Meq, dephasingDegree, amplitude, labelAmplitude);
-                    transverseBottomNodes = [transverseBottomNodes, longitudinalPopulationNodeObject.transverseChild.label+"#"+string(longitudinalPopulationNodeObject.transverseChild.amplitude)+"#"+string(longitudinalPopulationNodeObject.transverseChild.dephasingDegree)];
+                    longitudinalPopulationNodeObject.transverseChild = transversePopulationNode(longitudinalPopulationNodeObject, emptyNode(), emptyNode(), emptyNode(), emptyNode(), newLabel, longitudinalPopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*dephasingDegreeNotInverted, dephasingDegreeNotInverted, amplitude, amplitudeLabel);
+                    transverseBottomNodes = [transverseBottomNodes, longitudinalPopulationNodeObject.transverseChild.label+"#"+string(longitudinalPopulationNodeObject.transverseChild.amplitude)+"#"+string(longitudinalPopulationNodeObject.transverseChild.amplitudeLabel)+"#"+string(longitudinalPopulationNodeObject.transverseChild.dephasingDegree)];
                 end
 
-                %Longitudinal child 
+                %Longitudinal child
                 if ~isa(longitudinalPopulationNodeObject.longitudinalChild, "populationNode") 
-                    amplitude = subs(subs(cosd(a)*(longitudinalPopulationNodeObject.amplitude*E1+F), TR, TR_), a, a_);
-                    labelAmplitude = cosd(a)*(longitudinalPopulationNodeObject.labelAmplitude*E1+F);
+                    amplitude = subs(subs((cosd(a)*longitudinalPopulationNodeObject.amplitude-Meq)*E1+Meq, TR, TR_), a, a_);
+                    amplitudeLabel = (cosd(a)*longitudinalPopulationNodeObject.amplitudeLabel-Meq)*E1+Meq;
                     %Care: distinguish between function
                     %longitudinalPopulationNode and object
                     %longitudinalPopulationNodeObject
@@ -108,14 +106,14 @@ classdef longitudinalPopulationNode < populationNode
                     else
                         newLabel = "0";
                     end
-                    longitudinalPopulationNodeObject.longitudinalChild = longitudinalPopulationNode(longitudinalPopulationNodeObject, emptyNode(), emptyNode(), newLabel, longitudinalPopulationNodeObject.xpos+f*TR, yScale*oldDephasingDegree, Meq, oldDephasingDegree, amplitude, labelAmplitude);
-                    longitudinalBottomNodes = [longitudinalBottomNodes, longitudinalPopulationNodeObject.longitudinalChild.label+"#"+string(longitudinalPopulationNodeObject.longitudinalChild.amplitude)+"#"+string(longitudinalPopulationNodeObject.longitudinalChild.dephasingDegree)];
+                    longitudinalPopulationNodeObject.longitudinalChild = longitudinalPopulationNode(longitudinalPopulationNodeObject, emptyNode(), emptyNode(), newLabel, longitudinalPopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*oldDephasingDegree, oldDephasingDegree, amplitude, amplitudeLabel);
+                    longitudinalBottomNodes = [longitudinalBottomNodes, longitudinalPopulationNodeObject.longitudinalChild.label+"#"+string(longitudinalPopulationNodeObject.longitudinalChild.amplitude)+"#"+string(longitudinalPopulationNodeObject.longitudinalChild.amplitudeLabel)+"#"+string(longitudinalPopulationNodeObject.longitudinalChild.dephasingDegree)];
                 end
          
             else
 
-                [transverseBottomNodes1, longitudinalBottomNodes1, ~] = applyPulse(longitudinalPopulationNodeObject.transverseChild, a_, TR_, f, height, Meq, yScale);
-                [transverseBottomNodes2, longitudinalBottomNodes2, ~] = applyPulse(longitudinalPopulationNodeObject.longitudinalChild, a_, TR_, f, height, Meq, yScale);
+                [transverseBottomNodes1, longitudinalBottomNodes1, ~] = applyPulse(longitudinalPopulationNodeObject.transverseChild, a_, TR_, f, height, yScale);
+                [transverseBottomNodes2, longitudinalBottomNodes2, ~] = applyPulse(longitudinalPopulationNodeObject.longitudinalChild, a_, TR_, f, height, yScale);
                 
                 transverseBottomNodes = cat(2, transverseBottomNodes1, transverseBottomNodes2);
                 longitudinalBottomNodes = cat(2, longitudinalBottomNodes1, longitudinalBottomNodes2);
@@ -145,34 +143,33 @@ classdef longitudinalPopulationNode < populationNode
         end
         
         %Updates node with label
-        function longitudinalPopulationNode = updateAmplitudeLabel(longitudinalPopulationNode, updateLabel, summedAmplitudes, newLabel)
+        function longitudinalPopulationNode = updateAmplitudeLabel(longitudinalPopulationNode, updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel)
 
             if isa(longitudinalPopulationNode.transverseChild, "populationNode") && longitudinalPopulationNode.transverseChild.label == updateLabel
 
                 longitudinalPopulationNode.transverseChild.label = newLabel;
                 longitudinalPopulationNode.transverseChild.amplitude = summedAmplitudes;
+                longitudinalPopulationNode.transverseChild.amplitude = summedAmplitudeLabels;
 
             elseif isa(longitudinalPopulationNode.longitudinalChild, "populationNode") && longitudinalPopulationNode.longitudinalChild.label == updateLabel
 
                 longitudinalPopulationNode.longitudinalChild.label = newLabel;
                 longitudinalPopulationNode.longitudinalChild.amplitude = summedAmplitudes;
+                longitudinalPopulationNode.longitudinalChild.amplitude = summedAmplitudeLabels;
 
             else
                     
-                longitudinalPopulationNode = longitudinalPopulationNode.transverseChild.updateAmplitudeLabel(updateLabel, summedAmplitudes, newLabel);
-                longitudinalPopulationNode = longitudinalPopulationNode.longitudinalChild.updateAmplitudeLabel(updateLabel, summedAmplitudes, newLabel);
+                longitudinalPopulationNode = longitudinalPopulationNode.transverseChild.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
+                longitudinalPopulationNode = longitudinalPopulationNode.longitudinalChild.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
 
             end
 
         end
 
-        function plotNode(longitudinalPopulationNode, plotDigits)
-
-            oldDigits = digits;
-            digits(plotDigits);
+        function plotNode(longitudinalPopulationNode)
             
             plot(longitudinalPopulationNode.xpos, longitudinalPopulationNode.ypos, '.', 'color', [0, 0.65, 0], 'MarkerSize', 2);
-            text(longitudinalPopulationNode.xpos, longitudinalPopulationNode.ypos, longitudinalPopulationNode.label+" "+string(vpa(longitudinalPopulationNode.amplitude)), 'FontSize', 3);
+            text(longitudinalPopulationNode.xpos, longitudinalPopulationNode.ypos, longitudinalPopulationNode.label+newline+string(longitudinalPopulationNode.amplitudeLabel), 'FontSize', 3);
             
             if isa(longitudinalPopulationNode.longitudinalChild, "populationNode")
                 line([longitudinalPopulationNode.xpos, longitudinalPopulationNode.longitudinalChild.xpos], [longitudinalPopulationNode.ypos, longitudinalPopulationNode.longitudinalChild.ypos], 'color', [0.8, 0.8, 0.8]);
@@ -181,8 +178,6 @@ classdef longitudinalPopulationNode < populationNode
             if isa(longitudinalPopulationNode.transverseChild, "populationNode")
                 line([longitudinalPopulationNode.xpos, longitudinalPopulationNode.transverseChild.xpos], [longitudinalPopulationNode.ypos, longitudinalPopulationNode.transverseChild.ypos], 'color', [0.8, 0.8, 0.8]);
             end
-
-            digits(oldDigits);
 
         end
 

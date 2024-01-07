@@ -4,7 +4,6 @@ classdef populationTree
 
         root longitudinalPopulationNode;
         height int64;
-        Meq double;
         yScale double;
 
     end
@@ -12,18 +11,16 @@ classdef populationTree
     methods
         
         %Constructor
-        function populationTree = populationTree(root, Meq, yScale)
+        function populationTree = populationTree(root, yScale)
 
             if nargin > 1
             
                 populationTree.root = root;
-                populationTree.Meq = Meq;
                 populationTree.yScale = yScale;
 
             else
 
                 populationTree.root = emptyNode();
-                populationTree.Meq = 1;
                 populationTree.yScale = 1;
 
             end
@@ -35,7 +32,7 @@ classdef populationTree
         %Applies pulse to population tree
         function [transverseBottomNodes, longitudinalBottomNodes, populationTree] = applyPulse(populationTree, a, TR, f)
             
-            [transverseBottomNodes, longitudinalBottomNodes, populationTree.root] = populationTree.root.applyPulse(a, TR, f, populationTree.height, populationTree.Meq, populationTree.yScale); %bottomNodes is list with entries label+"#"+string(amplitude)+"#"+string(dephasingDegree)
+            [transverseBottomNodes, longitudinalBottomNodes, populationTree.root] = populationTree.root.applyPulse(a, TR, f, populationTree.height, populationTree.yScale); %bottomNodes is list with entries: label+"#"+string(amplitude)+"#"+string(amplitudeLabel)+"#"+string(dephasingDegree)
             populationTree.height = populationTree.height+1;
 
         end
@@ -50,17 +47,19 @@ classdef populationTree
             
             transverseLabels = transverseBottomNodes(:, 1);
             transverseAmplitudes = str2sym(transverseBottomNodes(:, 2));
-            transverseDephasingDegrees = double(transverseBottomNodes(:, 3));
+            transverseAmplitudeLabels = str2sym(transverseBottomNodes(:, 3));
+            transverseDephasingDegrees = double(transverseBottomNodes(:, 4));
 
             longitudinalLabels = longitudinalBottomNodes(:, 1);
             longitudinalAmplitudes = str2sym(longitudinalBottomNodes(:, 2));
-            longitudinalDephasingDegrees = double(longitudinalBottomNodes(:, 3));
+            longitudinalAmplitudeLabels = str2sym(longitudinalBottomNodes(:, 3));
+            longitudinalDephasingDegrees = double(longitudinalBottomNodes(:, 4));
             
-            [longitudinalUpdateIndices, longitudinalPruneIndices, longitudinalSummedAmplitudes, longitudinalUpdateFullLabels] = populationTreeMergePruneHelper(longitudinalDephasingDegrees, longitudinalAmplitudes, longitudinalLabels);
+            [longitudinalUpdateIndices, longitudinalPruneIndices, longitudinalSummedAmplitudes, longitudinalSummedAmplitudeLabels, longitudinalUpdateFullLabels] = populationTreeMergePruneHelper(longitudinalDephasingDegrees, longitudinalAmplitudes, longitudinalAmplitudeLabels, longitudinalLabels);
             longitudinalPruneLabels = longitudinalLabels(longitudinalPruneIndices);
             longitudinalUpdateLabels = longitudinalLabels(longitudinalUpdateIndices);
 
-            [transverseUpdateIndices, transversePruneIndices, transverseSummedAmplitudes, transverseUpdateFullLabels] = populationTreeMergePruneHelper(transverseDephasingDegrees, transverseAmplitudes, transverseLabels);
+            [transverseUpdateIndices, transversePruneIndices, transverseSummedAmplitudes, transverseSummedAmplitudeLabels, transverseUpdateFullLabels] = populationTreeMergePruneHelper(transverseDephasingDegrees, transverseAmplitudes, transverseAmplitudeLabels, transverseLabels);
             transversePruneLabels = transverseLabels(transversePruneIndices);
             transverseUpdateLabels = transverseLabels(transverseUpdateIndices);
 
@@ -71,7 +70,7 @@ classdef populationTree
             end
 
             for k = 1:length(longitudinalUpdateLabels)
-                populationTree = populationTree.updateAmplitudeLabel(longitudinalUpdateLabels(k), longitudinalSummedAmplitudes(k), longitudinalUpdateFullLabels(k));
+                populationTree = populationTree.updateAmplitudeLabel(longitudinalUpdateLabels(k), longitudinalSummedAmplitudes(k), longitudinalSummedAmplitudeLabels(k), longitudinalUpdateFullLabels(k));
             
             end
 
@@ -83,7 +82,7 @@ classdef populationTree
 
             for k = 1:length(transverseUpdateLabels)
             
-                populationTree = populationTree.updateAmplitudeLabel(transverseUpdateLabels(k), transverseSummedAmplitudes(k), transverseUpdateFullLabels(k));
+                populationTree = populationTree.updateAmplitudeLabel(transverseUpdateLabels(k), transverseSummedAmplitudes(k), transverseSummedAmplitudeLabels(k), transverseUpdateFullLabels(k));
             
             end
 
@@ -97,9 +96,9 @@ classdef populationTree
         end
 
         %Update node with label
-        function populationTree = updateAmplitudeLabel(populationTree, updateLabel, summedAmplitudes, newLabel)
+        function populationTree = updateAmplitudeLabel(populationTree, updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel)
 
-            populationTree.root = populationTree.root.updateAmplitudeLabel(updateLabel, summedAmplitudes, newLabel);
+            populationTree.root = populationTree.root.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
 
         end
 

@@ -1,4 +1,4 @@
-function [updateIndices, pruneIndices, summedAmplitudes, updateLabels] = populationTreeMergePruneHelper(dephasingDegrees, amplitudes, labels)
+function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, updateLabels] = populationTreeMergePruneHelper(dephasingDegrees, amplitudes, amplitudeLabels, labels)
     
     edges = min(dephasingDegrees) : max(dephasingDegrees)+1;
     [counts, values] = histcounts(dephasingDegrees, edges);
@@ -22,6 +22,7 @@ function [updateIndices, pruneIndices, summedAmplitudes, updateLabels] = populat
     transverseGC = transpose(transverseGC); %number of occurrences of duplicate elements
     transverseGR = transpose(transverseGR); %duplicate elements
     sums = sym(zeros(1, length(unique(dephasingDegrees))));
+    sums2 = sym(zeros(1, length(unique(dephasingDegrees))));
     updateLabels = strrep(string(zeros(1, length(unique(dephasingDegrees)))), "0", "");
 
     iter1 = 0;
@@ -32,6 +33,7 @@ function [updateIndices, pruneIndices, summedAmplitudes, updateLabels] = populat
             iter1 = iter1+1;
             index = transverseDuplicateIndices(iter1);
             sums(k) = sums(k)+amplitudes(index);
+            sums2(k) = sums2(k)+amplitudeLabels(index);
             if m~= transverseGC(k)
                 updateLabels(k) = updateLabels(k)+labels(k)+"&";
             else
@@ -43,6 +45,7 @@ function [updateIndices, pruneIndices, summedAmplitudes, updateLabels] = populat
             iter2 = iter2+1;
             index = transverseDuplicateIndices(iter2);
             amplitudes(index) = sums(k); %A now contains the sum over all occurences of each element
+            amplitudeLabels(index) = sums2(k);
         end
 
     
@@ -52,5 +55,6 @@ function [updateIndices, pruneIndices, summedAmplitudes, updateLabels] = populat
     updateIndices = transpose(updateIndices);
     pruneIndices = setdiff(linspace(1, length(amplitudes), length(amplitudes)), updateIndices);
     summedAmplitudes = amplitudes;
+    summedAmplitudeLabels = amplitudeLabels;
 
 end
