@@ -109,8 +109,8 @@ classdef transversePopulationNode < populationNode
 
                 %Transverse child 1 %not inverted phase
                 if ~isa(transversePopulationNodeObject.transverseChild1, "populationNode") %only change empty children
-                    amplitude = subs(subs(transversePopulationNodeObject.amplitude*E2*E2pNotInverted*cosd(a/2)^2, TR, TR_), a, a_);
-                    amplitudeLabel = transversePopulationNodeObject.amplitudeLabel*E2*E2pNotInverted*cosd(a/2)^2;
+                    amplitude = simplify(subs(subs(transversePopulationNodeObject.amplitude*E2*E2pNotInverted*cosd(a/2)^2, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
+                    amplitudeLabel = simplify(transversePopulationNodeObject.amplitudeLabel*E2*E2pNotInverted*cosd(a/2)^2, "IgnoreAnalyticConstraints", true);
                     %Care: distinguish between function
                     %transversePopulationNode and object
                     %transversePopulationNodeObject
@@ -125,8 +125,8 @@ classdef transversePopulationNode < populationNode
 
                 %Longitudinal child 1 %not inverted phase storage
                 if ~isa(transversePopulationNodeObject.longitudinalChild1, "populationNode")
-                    amplitude = subs(subs((1i/2)*sind(a)*E1*transversePopulationNodeObject.amplitude, TR, TR_), a, a_);
-                    amplitudeLabel = (1i/2)*sind(a)*E1*transversePopulationNodeObject.amplitudeLabel;
+                    amplitude = simplify(subs(subs((1i/2)*sind(a)*E1*transversePopulationNodeObject.amplitude, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
+                    amplitudeLabel = simplify((1i/2)*sind(a)*E1*transversePopulationNodeObject.amplitudeLabel, "IgnoreAnalyticConstraints", true);
                     if height>0
                         newLabel = transversePopulationNodeObject.label+"_0";
                     else
@@ -138,8 +138,8 @@ classdef transversePopulationNode < populationNode
 
                 %Transverse child 2 %inverted phase
                 if ~isa(transversePopulationNodeObject.transverseChild2, "populationNode")
-                    amplitude = subs(subs(transversePopulationNodeObject.amplitude*E2*E2pInverted*sind(a/2)^2, TR, TR_), a, a_);
-                    amplitudeLabel = transversePopulationNodeObject.amplitudeLabel*E2*E2pInverted*sind(a/2)^2;
+                    amplitude = simplify(subs(subs(transversePopulationNodeObject.amplitude*E2*E2pInverted*sind(a/2)^2, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
+                    amplitudeLabel = simplify(transversePopulationNodeObject.amplitudeLabel*E2*E2pInverted*sind(a/2)^2, "IgnoreAnalyticConstraints", true);
                     if height>0
                         newLabel = transversePopulationNodeObject.label+"_-1";
                     else
@@ -151,8 +151,8 @@ classdef transversePopulationNode < populationNode
 
                 %Longitudinal child 2 %inverted phase storage
                 if ~isa(transversePopulationNodeObject.longitudinalChild2, "populationNode")
-                    amplitude = subs(subs(-(1i/2)*sind(a)*E1*transversePopulationNodeObject.amplitude, TR, TR_), a, a_);
-                    amplitudeLabel = -(1i/2)*sind(a)*E1*transversePopulationNodeObject.amplitudeLabel;
+                    amplitude = simplify(subs(subs(-(1i/2)*sind(a)*E1*transversePopulationNodeObject.amplitude, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
+                    amplitudeLabel = simplify(-(1i/2)*sind(a)*E1*transversePopulationNodeObject.amplitudeLabel, "IgnoreAnalyticConstraints", true);
                     if height>0
                         newLabel = transversePopulationNodeObject.label+"_0*";
                     else
@@ -164,10 +164,10 @@ classdef transversePopulationNode < populationNode
 
             else
 
-                [transverseBottomNodes1, longitudinalBottomNodes1, ~] = applyPulse(transversePopulationNodeObject.transverseChild1, a_, TR_, f, height, yScale);
-                [transverseBottomNodes2, longitudinalBottomNodes2, ~] = applyPulse(transversePopulationNodeObject.longitudinalChild1, a_, TR_, f, height, yScale);
-                [transverseBottomNodes3, longitudinalBottomNodes3, ~] = applyPulse(transversePopulationNodeObject.transverseChild2, a_, TR_, f, height, yScale);
-                [transverseBottomNodes4, longitudinalBottomNodes4, ~] = applyPulse(transversePopulationNodeObject.longitudinalChild2, a_, TR_, f, height, yScale);
+                [transverseBottomNodes1, longitudinalBottomNodes1, transversePopulationNodeObject.transverseChild1] = applyPulse(transversePopulationNodeObject.transverseChild1, a_, TR_, f, height, yScale);
+                [transverseBottomNodes2, longitudinalBottomNodes2, transversePopulationNodeObject.longitudinalChild1] = applyPulse(transversePopulationNodeObject.longitudinalChild1, a_, TR_, f, height, yScale);
+                [transverseBottomNodes3, longitudinalBottomNodes3, transversePopulationNodeObject.transverseChild2] = applyPulse(transversePopulationNodeObject.transverseChild2, a_, TR_, f, height, yScale);
+                [transverseBottomNodes4, longitudinalBottomNodes4, transversePopulationNodeObject.longitudinalChild2] = applyPulse(transversePopulationNodeObject.longitudinalChild2, a_, TR_, f, height, yScale);
 
                 transverseBottomNodes = cat(2, transverseBottomNodes1, transverseBottomNodes2, transverseBottomNodes3, transverseBottomNodes4);
                 longitudinalBottomNodes = cat(2, longitudinalBottomNodes1, longitudinalBottomNodes2, longitudinalBottomNodes3, longitudinalBottomNodes4);
@@ -177,92 +177,119 @@ classdef transversePopulationNode < populationNode
         end
 
         %Prunes node with label
-        function transversePopulationNode = prune(transversePopulationNode, label)
+        function transversePopulationNodeObject = prune(transversePopulationNodeObject, label)
 
-            if isa(transversePopulationNode.transverseChild1, "populationNode") && transversePopulationNode.transverseChild1.label == label
+            if isa(transversePopulationNodeObject.transverseChild1, "populationNode") && transversePopulationNodeObject.transverseChild1.label == label
 
-                transversePopulationNode.transverseChild1 = emptyNode();
+                transversePopulationNodeObject.transverseChild1 = emptyNode();
 
-            elseif isa(transversePopulationNode.transverseChild2, "populationNode") && transversePopulationNode.transverseChild2.label == label
+            elseif isa(transversePopulationNodeObject.transverseChild2, "populationNode") && transversePopulationNodeObject.transverseChild2.label == label
 
-                transversePopulationNode.transverseChild2 = emptyNode();
+                transversePopulationNodeObject.transverseChild2 = emptyNode();
 
-            elseif isa(transversePopulationNode.longitudinalChild1, "populationNode") && transversePopulationNode.longitudinalChild1.label == label
+            elseif isa(transversePopulationNodeObject.longitudinalChild1, "populationNode") && transversePopulationNodeObject.longitudinalChild1.label == label
 
-                transversePopulationNode.longitudinalChild1 = emptyNode();
+                transversePopulationNodeObject.longitudinalChild1 = emptyNode();
 
-            elseif isa(transversePopulationNode.longitudinalChild2, "populationNode") && transversePopulationNode.longitudinalChild2.label == label
+            elseif isa(transversePopulationNodeObject.longitudinalChild2, "populationNode") && transversePopulationNodeObject.longitudinalChild2.label == label
 
-                transversePopulationNode.longitudinalChild2 = emptyNode();
+                transversePopulationNodeObject.longitudinalChild2 = emptyNode();
 
             else
 
-                transversePopulationNode = prune(transversePopulationNode.transverseChild1, label);
-                transversePopulationNode = prune(transversePopulationNode.transverseChild2, label);
-                transversePopulationNode = prune(transversePopulationNode.longitudinalChild1, label);
-                transversePopulationNode = prune(transversePopulationNode.longitudinalChild2, label);
+                transversePopulationNodeObject = prune(transversePopulationNodeObject.transverseChild1, label);
+                transversePopulationNodeObject = prune(transversePopulationNodeObject.transverseChild2, label);
+                transversePopulationNodeObject = prune(transversePopulationNodeObject.longitudinalChild1, label);
+                transversePopulationNodeObject = prune(transversePopulationNodeObject.longitudinalChild2, label);
 
             end
 
         end
 
-        function transversePopulationNode = updateAmplitudeLabel(transversePopulationNode, updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel)
+        function transversePopulationNodeObject = updateAmplitudeLabel(transversePopulationNodeObject, updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel)
 
-            if isa(transversePopulationNode.transverseChild1, "populationNode") && transversePopulationNode.transverseChild1.label == updateLabel
+            if isa(transversePopulationNodeObject.transverseChild1, "populationNode") && transversePopulationNodeObject.transverseChild1.label == updateLabel
 
-                transversePopulationNode.transverseChild1.label = newLabel;
-                transversePopulationNode.transverseChild1.amplitude = summedAmplitudes;
-                transversePopulationNode.transverseChild1.amplitudeLabel = summedAmplitudeLabels;
+                transversePopulationNodeObject.transverseChild1.label = newLabel;
+                transversePopulationNodeObject.transverseChild1.amplitude = summedAmplitudes;
+                transversePopulationNodeObject.transverseChild1.amplitudeLabel = summedAmplitudeLabels;
 
-            elseif isa(transversePopulationNode.longitudinalChild1, "populationNode") && transversePopulationNode.longitudinalChild1.label == updateLabel
+            elseif isa(transversePopulationNodeObject.longitudinalChild1, "populationNode") && transversePopulationNodeObject.longitudinalChild1.label == updateLabel
 
-                transversePopulationNode.longitudinalChild1.label = newLabel;
-                transversePopulationNode.longitudinalChild1.amplitude = summedAmplitudes;
-                transversePopulationNode.longitudinalChild1.amplitude = summedAmplitudeLabels;
+                transversePopulationNodeObject.longitudinalChild1.label = newLabel;
+                transversePopulationNodeObject.longitudinalChild1.amplitude = summedAmplitudes;
+                transversePopulationNodeObject.longitudinalChild1.amplitudeLabel = summedAmplitudeLabels;
 
-            elseif isa(transversePopulationNode.transverseChild2, "populationNode") && transversePopulationNode.transverseChild2.label == updateLabel
+            elseif isa(transversePopulationNodeObject.transverseChild2, "populationNode") && transversePopulationNodeObject.transverseChild2.label == updateLabel
 
-                transversePopulationNode.transverseChild2.label = newLabel;
-                transversePopulationNode.transverseChild2.amplitude = summedAmplitudes;
-                transversePopulationNode.transverseChild2.amplitude = summedAmplitudeLabels;
+                transversePopulationNodeObject.transverseChild2.label = newLabel;
+                transversePopulationNodeObject.transverseChild2.amplitude = summedAmplitudes;
+                transversePopulationNodeObject.transverseChild2.amplitudeLabel = summedAmplitudeLabels;
 
-            elseif isa(transversePopulationNode.longitudinalChild2, "populationNode") && transversePopulationNode.longitudinalChild2.label == updateLabel
+            elseif isa(transversePopulationNodeObject.longitudinalChild2, "populationNode") && transversePopulationNodeObject.longitudinalChild2.label == updateLabel
 
-                transversePopulationNode.longitudinalChild2.label = newLabel;
-                transversePopulationNode.longitudinalChild2.amplitude = summedAmplitudes;
-                transversePopulationNode.longitudinalChild2.amplitude = summedAmplitudeLabels;
+                transversePopulationNodeObject.longitudinalChild2.label = newLabel;
+                transversePopulationNodeObject.longitudinalChild2.amplitude = summedAmplitudes;
+                transversePopulationNodeObject.longitudinalChild2.amplitudeLabel = summedAmplitudeLabels;
              
             else
                     
-                transversePopulationNode = transversePopulationNode.transverseChild1.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
-                transversePopulationNode = transversePopulationNode.longitudinalChild1.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
-                transversePopulationNode = transversePopulationNode.transverseChild2.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
-                transversePopulationNode = transversePopulationNode.longitudinalChild2.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
+                transversePopulationNodeObject = transversePopulationNodeObject.transverseChild1.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
+                transversePopulationNodeObject = transversePopulationNodeObject.longitudinalChild1.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
+                transversePopulationNodeObject = transversePopulationNodeObject.transverseChild2.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
+                transversePopulationNodeObject = transversePopulationNodeObject.longitudinalChild2.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
 
             end
 
         end
 
-        function plotNode(transversePopulationNode)
+        function plotNode(transversePopulationNodeObject)
+
+            textOffset = 0.075;
+
+            hold on;
             
-            plot(transversePopulationNode.xpos, transversePopulationNode.ypos, '.', 'color', [0, 0.65, 0], 'MarkerSize', 2);
-            text(transversePopulationNode.xpos, transversePopulationNode.ypos, transversePopulationNode.label+newline+string(transversePopulationNode.amplitudeLabel), 'FontSize', 3);
-            
-            if isa(transversePopulationNode.longitudinalChild1, "populationNode")
-                line([transversePopulationNode.xpos, transversePopulationNode.longitudinalChild1.xpos], [transversePopulationNode.ypos, transversePopulationNode.longitudinalChild1.ypos], 'color', [0.8, 0.8, 0.8]);
+            plot(transversePopulationNodeObject.xpos, transversePopulationNodeObject.ypos, '.', 'color', [0.4660 0.6740 0.1880], 'MarkerSize', 30);
+
+            hold on;
+
+            if isa(transversePopulationNodeObject.longitudinalChild1, "populationNode")
+                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.longitudinalChild1.xpos], [transversePopulationNodeObject.ypos, transversePopulationNodeObject.longitudinalChild1.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', ':', 'LineWidth', 2);
+                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.longitudinalChild1.xpos)/2, textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.longitudinalChild1.ypos)/2, transversePopulationNodeObject.longitudinalChild1.label, 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex');
+                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.longitudinalChild1.xpos)/2, -textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.longitudinalChild1.ypos)/2, string("$"+latex(simplify(transversePopulationNodeObject.longitudinalChild1.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex');               
+                hold on;
+                transversePopulationNodeObject.longitudinalChild1.plotNode();
+                hold on;
             end
 
-            if isa(transversePopulationNode.longitudinalChild2, "populationNode")
-                line([transversePopulationNode.xpos, transversePopulationNode.longitudinalChild2.xpos], [transversePopulationNode.ypos, transversePopulationNode.longitudinalChild2.ypos], 'color', [0.8, 0.8, 0.8]);
+            if isa(transversePopulationNodeObject.longitudinalChild2, "populationNode")
+                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.longitudinalChild2.xpos], [transversePopulationNodeObject.ypos, transversePopulationNodeObject.longitudinalChild2.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', ':', 'LineWidth', 2);
+                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.longitudinalChild2.xpos)/2, textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.longitudinalChild2.ypos)/2, transversePopulationNodeObject.longitudinalChild2.label, 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex');
+                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.longitudinalChild2.xpos)/2, -textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.longitudinalChild2.ypos)/2, string("$"+latex(simplify(transversePopulationNodeObject.longitudinalChild2.amplitudeLabel), "IgnoreAnalyticConstraints", true)+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex');
+                hold on;
+                transversePopulationNodeObject.longitudinalChild2.plotNode();
+                hold on;
             end
 
-            if isa(transversePopulationNode.transverseChild1, "populationNode")
-                line([transversePopulationNode.xpos, transversePopulationNode.transverseChild1.xpos], [transversePopulationNode.ypos, transversePopulationNode.transverseChild1.ypos], 'color', [0.8, 0.8, 0.8]);
+            if isa(transversePopulationNodeObject.transverseChild1, "populationNode")
+                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.transverseChild1.xpos], [transversePopulationNodeObject.ypos, transversePopulationNodeObject.transverseChild1.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', '--', 'LineWidth', 2);
+                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.transverseChild1.xpos)/2, textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.transverseChild1.ypos)/2, transversePopulationNodeObject.transverseChild1.label, 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex');
+                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.transverseChild1.xpos)/2, -textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.transverseChild1.ypos)/2, string("$"+latex(simplify(transversePopulationNodeObject.transverseChild1.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex');
+                hold on;
+                transversePopulationNodeObject.transverseChild1.plotNode();
+                hold on;
             end
 
-            if isa(transversePopulationNode.transverseChild2, "populationNode")
-                line([transversePopulationNode.xpos, transversePopulationNode.transverseChild2.xpos], [transversePopulationNode.ypos, transversePopulationNode.transverseChild2.ypos], 'color', [0.8, 0.8, 0.8]);
+            if isa(transversePopulationNodeObject.transverseChild2, "populationNode")
+                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.transverseChild2.xpos], [transversePopulationNodeObject.ypos, transversePopulationNodeObject.transverseChild2.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', '--', 'LineWidth', 2);
+                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.transverseChild2.xpos)/2, textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.transverseChild2.ypos)/2, transversePopulationNodeObject.transverseChild2.label, 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex');
+                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.transverseChild2.xpos)/2, -textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.transverseChild2.ypos)/2, string("$"+latex(simplify(transversePopulationNodeObject.transverseChild2.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex');
+                hold on;
+                transversePopulationNodeObject.transverseChild2.plotNode();
+                hold on;
             end
+
+            hold on;
 
         end
 

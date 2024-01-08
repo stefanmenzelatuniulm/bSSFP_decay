@@ -18,7 +18,7 @@ function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, 
         transverseDuplicateIndices(iter+1:end) = [];
     end
 
-    [transverseGC, transverseGR] = groupcounts(transpose(dephasingDegrees(transverseDuplicateIndices))); 
+    [transverseGC, transverseGR] = groupcounts(dephasingDegrees(transverseDuplicateIndices)); 
     transverseGC = transpose(transverseGC); %number of occurrences of duplicate elements
     transverseGR = transpose(transverseGR); %duplicate elements
     sums = sym(zeros(1, length(unique(dephasingDegrees))));
