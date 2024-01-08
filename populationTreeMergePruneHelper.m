@@ -35,9 +35,9 @@ function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, 
             sums(k) = sums(k)+amplitudes(index);
             sums2(k) = sums2(k)+amplitudeLabels(index);
             if m~= transverseGC(k)
-                updateLabels(k) = updateLabels(k)+labels(k)+"&";
+                updateLabels(k) = updateLabels(k)+labels(index)+"&";
             else
-                updateLabels(k) = updateLabels(k)+labels(k);
+                updateLabels(k) = updateLabels(k)+labels(index);
             end
         end
 
@@ -46,15 +46,17 @@ function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, 
             index = transverseDuplicateIndices(iter2);
             amplitudes(index) = sums(k); %A now contains the sum over all occurences of each element
             amplitudeLabels(index) = sums2(k);
+            labels(index) = updateLabels(k);
         end
 
     
     end
 
-    [~, updateIndices, ~] = unique(amplitudes);
+    [uniqueAmplitudes, updateIndices, ~] = unique(amplitudes);
     updateIndices = transpose(updateIndices);
     pruneIndices = setdiff(linspace(1, length(amplitudes), length(amplitudes)), updateIndices);
-    summedAmplitudes = amplitudes;
-    summedAmplitudeLabels = amplitudeLabels;
+    summedAmplitudes = uniqueAmplitudes;
+    summedAmplitudeLabels = amplitudeLabels(updateIndices);
+    updateLabels = labels(updateIndices);
 
 end

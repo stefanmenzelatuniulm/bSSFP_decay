@@ -86,34 +86,10 @@ classdef transversePopulationNode < populationNode
 
                 end
 
-                %Inverted phase
-                oldDephasingDegree = -oldDephasingDegree;
-                dephasingDegreeInverted = subs(oldDephasingDegree+f*TR, TR, TR_);
-
-                if oldDephasingDegree <= 0 && dephasingDegreeInverted <= 0
-
-                    E2pInverted = exp(f*TR/T2p);
-
-                elseif oldDephasingDegree <= 0 && dephasingDegreeInverted >= 0
-
-                    as = -TR*oldDephasingDegree/(dephasingDegreeInverted-oldDephasingDegree);
-                    b = TR*dephasingDegreeInverted/(dephasingDegreeInverted-oldDephasingDegree);
-
-                    E2pInverted = exp(as*f*TR/T2p)*exp(-b*f*TR/T2p);
-
-                else %oldDephasingDegree>0 -> dephasingDegreeInverted>0
-
-                    E2pInverted = exp(-f*TR/T2p);
-
-                end
-
-                %Transverse child 1 %not inverted phase
+                %Transverse child 1
                 if ~isa(transversePopulationNodeObject.transverseChild1, "populationNode") %only change empty children
                     amplitude = simplify(subs(subs(transversePopulationNodeObject.amplitude*E2*E2pNotInverted*cosd(a/2)^2, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
                     amplitudeLabel = simplify(transversePopulationNodeObject.amplitudeLabel*E2*E2pNotInverted*cosd(a/2)^2, "IgnoreAnalyticConstraints", true);
-                    %Care: distinguish between function
-                    %transversePopulationNode and object
-                    %transversePopulationNodeObject
                     if height>0
                         newLabel = transversePopulationNodeObject.label+"_1";
                     else
@@ -121,9 +97,9 @@ classdef transversePopulationNode < populationNode
                     end
                     transversePopulationNodeObject.transverseChild1 = transversePopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*dephasingDegreeNotInverted, dephasingDegreeNotInverted, amplitude, amplitudeLabel);
                     transverseBottomNodes = [transverseBottomNodes, transversePopulationNodeObject.transverseChild1.label+"#"+string(transversePopulationNodeObject.transverseChild1.amplitude)+"#"+string(transversePopulationNodeObject.transverseChild1.amplitudeLabel)+"#"+string(transversePopulationNodeObject.transverseChild1.dephasingDegree)];
-                end
+                end                 
 
-                %Longitudinal child 1 %not inverted phase storage
+                %Longitudinal child 1
                 if ~isa(transversePopulationNodeObject.longitudinalChild1, "populationNode")
                     amplitude = simplify(subs(subs((1i/2)*sind(a)*E1*transversePopulationNodeObject.amplitude, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
                     amplitudeLabel = simplify((1i/2)*sind(a)*E1*transversePopulationNodeObject.amplitudeLabel, "IgnoreAnalyticConstraints", true);
@@ -134,9 +110,30 @@ classdef transversePopulationNode < populationNode
                     end
                     transversePopulationNodeObject.longitudinalChild1 = longitudinalPopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*oldDephasingDegree, oldDephasingDegree, amplitude, amplitudeLabel);
                     longitudinalBottomNodes = [longitudinalBottomNodes, transversePopulationNodeObject.longitudinalChild1.label+"#"+string(transversePopulationNodeObject.longitudinalChild1.amplitude)+"#"+string(transversePopulationNodeObject.longitudinalChild1.amplitudeLabel)+"#"+string(transversePopulationNodeObject.longitudinalChild1.dephasingDegree)];
+                end               
+
+                %Inverted phase
+                oldDephasingDegree = -oldDephasingDegree;
+                dephasingDegreeInverted = subs(oldDephasingDegree+f*TR, TR, TR_);
+
+                if oldDephasingDegree <= 0 && dephasingDegreeInverted <= 0
+
+                    E2pInverted = exp(f*TR/T2p);
+
+                elseif oldDephasingDegree <= 0 && dephasingDegreeInverted >= 0
+
+                    as = -oldDephasingDegree/(dephasingDegreeInverted-oldDephasingDegree);
+                    b = dephasingDegreeInverted/(dephasingDegreeInverted-oldDephasingDegree);
+
+                    E2pInverted = exp(as*f*TR/T2p)*exp(-b*f*TR/T2p);
+
+                else %oldDephasingDegree>0 -> dephasingDegreeInverted>0
+
+                    E2pInverted = exp(-f*TR/T2p);
+
                 end
 
-                %Transverse child 2 %inverted phase
+                %Transverse child 2
                 if ~isa(transversePopulationNodeObject.transverseChild2, "populationNode")
                     amplitude = simplify(subs(subs(transversePopulationNodeObject.amplitude*E2*E2pInverted*sind(a/2)^2, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
                     amplitudeLabel = simplify(transversePopulationNodeObject.amplitudeLabel*E2*E2pInverted*sind(a/2)^2, "IgnoreAnalyticConstraints", true);
@@ -149,7 +146,7 @@ classdef transversePopulationNode < populationNode
                     transverseBottomNodes = [transverseBottomNodes, transversePopulationNodeObject.transverseChild2.label+"#"+string(transversePopulationNodeObject.transverseChild2.amplitude)+"#"+string(transversePopulationNodeObject.transverseChild2.amplitudeLabel)+"#"+string(transversePopulationNodeObject.transverseChild2.dephasingDegree)];
                 end
 
-                %Longitudinal child 2 %inverted phase storage
+                %Longitudinal child 2
                 if ~isa(transversePopulationNodeObject.longitudinalChild2, "populationNode")
                     amplitude = simplify(subs(subs(-(1i/2)*sind(a)*E1*transversePopulationNodeObject.amplitude, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
                     amplitudeLabel = simplify(-(1i/2)*sind(a)*E1*transversePopulationNodeObject.amplitudeLabel, "IgnoreAnalyticConstraints", true);
@@ -164,10 +161,10 @@ classdef transversePopulationNode < populationNode
 
             else
 
-                [transverseBottomNodes1, longitudinalBottomNodes1, transversePopulationNodeObject.transverseChild1] = applyPulse(transversePopulationNodeObject.transverseChild1, a_, TR_, f, height, yScale);
-                [transverseBottomNodes2, longitudinalBottomNodes2, transversePopulationNodeObject.longitudinalChild1] = applyPulse(transversePopulationNodeObject.longitudinalChild1, a_, TR_, f, height, yScale);
-                [transverseBottomNodes3, longitudinalBottomNodes3, transversePopulationNodeObject.transverseChild2] = applyPulse(transversePopulationNodeObject.transverseChild2, a_, TR_, f, height, yScale);
-                [transverseBottomNodes4, longitudinalBottomNodes4, transversePopulationNodeObject.longitudinalChild2] = applyPulse(transversePopulationNodeObject.longitudinalChild2, a_, TR_, f, height, yScale);
+                [transverseBottomNodes1, longitudinalBottomNodes1, transversePopulationNodeObject.transverseChild1] = transversePopulationNodeObject.transverseChild1.applyPulse(a_, TR_, f, height, yScale);
+                [transverseBottomNodes2, longitudinalBottomNodes2, transversePopulationNodeObject.longitudinalChild1] = transversePopulationNodeObject.longitudinalChild1.applyPulse(a_, TR_, f, height, yScale);
+                [transverseBottomNodes3, longitudinalBottomNodes3, transversePopulationNodeObject.transverseChild2] = transversePopulationNodeObject.transverseChild2.applyPulse(a_, TR_, f, height, yScale);
+                [transverseBottomNodes4, longitudinalBottomNodes4, transversePopulationNodeObject.longitudinalChild2] = transversePopulationNodeObject.longitudinalChild2.applyPulse(a_, TR_, f, height, yScale);
 
                 transverseBottomNodes = cat(2, transverseBottomNodes1, transverseBottomNodes2, transverseBottomNodes3, transverseBottomNodes4);
                 longitudinalBottomNodes = cat(2, longitudinalBottomNodes1, longitudinalBottomNodes2, longitudinalBottomNodes3, longitudinalBottomNodes4);
@@ -197,10 +194,10 @@ classdef transversePopulationNode < populationNode
 
             else
 
-                transversePopulationNodeObject = prune(transversePopulationNodeObject.transverseChild1, label);
-                transversePopulationNodeObject = prune(transversePopulationNodeObject.transverseChild2, label);
-                transversePopulationNodeObject = prune(transversePopulationNodeObject.longitudinalChild1, label);
-                transversePopulationNodeObject = prune(transversePopulationNodeObject.longitudinalChild2, label);
+                transversePopulationNodeObject.transverseChild1 = transversePopulationNodeObject.transverseChild1.prune(label);
+                transversePopulationNodeObject.transverseChild2 = transversePopulationNodeObject.transverseChild2.prune(label);
+                transversePopulationNodeObject.longitudinalChild1 = transversePopulationNodeObject.longitudinalChild1.prune(label);
+                transversePopulationNodeObject.longitudinalChild2 = transversePopulationNodeObject.longitudinalChild2.prune(label);
 
             end
 
@@ -234,58 +231,58 @@ classdef transversePopulationNode < populationNode
              
             else
                     
-                transversePopulationNodeObject = transversePopulationNodeObject.transverseChild1.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
-                transversePopulationNodeObject = transversePopulationNodeObject.longitudinalChild1.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
-                transversePopulationNodeObject = transversePopulationNodeObject.transverseChild2.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
-                transversePopulationNodeObject = transversePopulationNodeObject.longitudinalChild2.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
+                transversePopulationNodeObject.transverseChild1 = transversePopulationNodeObject.transverseChild1.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
+                transversePopulationNodeObject.longitudinalChild1 = transversePopulationNodeObject.longitudinalChild1.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
+                transversePopulationNodeObject.transverseChild2 = transversePopulationNodeObject.transverseChild2.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
+                transversePopulationNodeObject.longitudinalChild2 = transversePopulationNodeObject.longitudinalChild2.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
 
             end
 
         end
 
-        function plotNode(transversePopulationNodeObject)
-
-            textOffset = 0.075;
+        function plotNode(transversePopulationNodeObject, textOffsetX, textOffsetY)
 
             hold on;
             
-            plot(transversePopulationNodeObject.xpos, transversePopulationNodeObject.ypos, '.', 'color', [0.4660 0.6740 0.1880], 'MarkerSize', 30);
+            plot(transversePopulationNodeObject.xpos, transversePopulationNodeObject.ypos, '.', 'color', [0.4660 0.6740 0.1880], 'MarkerSize', 20);
 
             hold on;
 
             if isa(transversePopulationNodeObject.longitudinalChild1, "populationNode")
-                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.longitudinalChild1.xpos], [transversePopulationNodeObject.ypos, transversePopulationNodeObject.longitudinalChild1.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', ':', 'LineWidth', 2);
-                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.longitudinalChild1.xpos)/2, textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.longitudinalChild1.ypos)/2, transversePopulationNodeObject.longitudinalChild1.label, 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex');
-                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.longitudinalChild1.xpos)/2, -textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.longitudinalChild1.ypos)/2, string("$"+latex(simplify(transversePopulationNodeObject.longitudinalChild1.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex');               
+                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.longitudinalChild1.xpos], [transversePopulationNodeObject.ypos, transversePopulationNodeObject.longitudinalChild1.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', ':', 'LineWidth', 1);
+                text(transversePopulationNodeObject.longitudinalChild1.xpos, textOffsetY+transversePopulationNodeObject.longitudinalChild1.ypos, strrep(transversePopulationNodeObject.longitudinalChild1.label, "_", "\_"), 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);
+                text(-textOffsetX+(transversePopulationNodeObject.xpos+transversePopulationNodeObject.longitudinalChild1.xpos)/2, (transversePopulationNodeObject.ypos+transversePopulationNodeObject.longitudinalChild1.ypos)/2, string("$"+latex(simplify(transversePopulationNodeObject.longitudinalChild1.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);               
                 hold on;
-                transversePopulationNodeObject.longitudinalChild1.plotNode();
+                transversePopulationNodeObject.longitudinalChild1.plotNode(textOffsetX, textOffsetY);
                 hold on;
             end
 
             if isa(transversePopulationNodeObject.longitudinalChild2, "populationNode")
-                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.longitudinalChild2.xpos], [transversePopulationNodeObject.ypos, transversePopulationNodeObject.longitudinalChild2.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', ':', 'LineWidth', 2);
-                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.longitudinalChild2.xpos)/2, textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.longitudinalChild2.ypos)/2, transversePopulationNodeObject.longitudinalChild2.label, 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex');
-                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.longitudinalChild2.xpos)/2, -textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.longitudinalChild2.ypos)/2, string("$"+latex(simplify(transversePopulationNodeObject.longitudinalChild2.amplitudeLabel), "IgnoreAnalyticConstraints", true)+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex');
+                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.longitudinalChild2.xpos], [-transversePopulationNodeObject.ypos, transversePopulationNodeObject.longitudinalChild2.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', ':', 'LineWidth', 1);
+                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.xpos], [transversePopulationNodeObject.ypos, -transversePopulationNodeObject.ypos], 'color', [0.4 0.4 0.4], 'LineStyle', ':', 'LineWidth', 1);               
+                text(transversePopulationNodeObject.longitudinalChild2.xpos, textOffsetY+transversePopulationNodeObject.longitudinalChild2.ypos, strrep(transversePopulationNodeObject.longitudinalChild2.label, "_", "\_"), 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);
+                text(-textOffsetX+(transversePopulationNodeObject.xpos+transversePopulationNodeObject.longitudinalChild2.xpos)/2, -transversePopulationNodeObject.ypos, string("$"+latex(simplify(transversePopulationNodeObject.longitudinalChild2.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);
                 hold on;
-                transversePopulationNodeObject.longitudinalChild2.plotNode();
+                transversePopulationNodeObject.longitudinalChild2.plotNode(textOffsetX, textOffsetY);
                 hold on;
             end
 
             if isa(transversePopulationNodeObject.transverseChild1, "populationNode")
-                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.transverseChild1.xpos], [transversePopulationNodeObject.ypos, transversePopulationNodeObject.transverseChild1.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', '--', 'LineWidth', 2);
-                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.transverseChild1.xpos)/2, textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.transverseChild1.ypos)/2, transversePopulationNodeObject.transverseChild1.label, 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex');
-                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.transverseChild1.xpos)/2, -textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.transverseChild1.ypos)/2, string("$"+latex(simplify(transversePopulationNodeObject.transverseChild1.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex');
+                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.transverseChild1.xpos], [transversePopulationNodeObject.ypos, transversePopulationNodeObject.transverseChild1.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', '--', 'LineWidth', 1);
+                text(transversePopulationNodeObject.transverseChild1.xpos, textOffsetY+transversePopulationNodeObject.transverseChild1.ypos, strrep(transversePopulationNodeObject.transverseChild1.label, "_", "\_"), 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);
+                text(-textOffsetX+(transversePopulationNodeObject.xpos+transversePopulationNodeObject.transverseChild1.xpos)/2, (transversePopulationNodeObject.ypos+transversePopulationNodeObject.transverseChild1.ypos)/2, string("$"+latex(simplify(transversePopulationNodeObject.transverseChild1.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);
                 hold on;
-                transversePopulationNodeObject.transverseChild1.plotNode();
+                transversePopulationNodeObject.transverseChild1.plotNode(textOffsetX, textOffsetY);
                 hold on;
             end
 
             if isa(transversePopulationNodeObject.transverseChild2, "populationNode")
-                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.transverseChild2.xpos], [transversePopulationNodeObject.ypos, transversePopulationNodeObject.transverseChild2.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', '--', 'LineWidth', 2);
-                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.transverseChild2.xpos)/2, textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.transverseChild2.ypos)/2, transversePopulationNodeObject.transverseChild2.label, 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex');
-                text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.transverseChild2.xpos)/2, -textOffset+(transversePopulationNodeObject.ypos+transversePopulationNodeObject.transverseChild2.ypos)/2, string("$"+latex(simplify(transversePopulationNodeObject.transverseChild2.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex');
+                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.transverseChild2.xpos], [-transversePopulationNodeObject.ypos, transversePopulationNodeObject.transverseChild2.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', '--', 'LineWidth', 1);
+                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.xpos], [transversePopulationNodeObject.ypos, -transversePopulationNodeObject.ypos], 'color', [0.4 0.4 0.4], 'LineStyle', '--', 'LineWidth', 1);
+                text(transversePopulationNodeObject.transverseChild2.xpos, textOffsetY+transversePopulationNodeObject.transverseChild2.ypos, strrep(transversePopulationNodeObject.transverseChild2.label, "_", "\_"), 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);
+                text(-textOffsetX+(transversePopulationNodeObject.xpos+transversePopulationNodeObject.transverseChild2.xpos)/2, (-transversePopulationNodeObject.ypos+transversePopulationNodeObject.transverseChild2.ypos)/2, string("$"+latex(simplify(transversePopulationNodeObject.transverseChild2.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);
                 hold on;
-                transversePopulationNodeObject.transverseChild2.plotNode();
+                transversePopulationNodeObject.transverseChild2.plotNode(textOffsetX, textOffsetY);
                 hold on;
             end
 

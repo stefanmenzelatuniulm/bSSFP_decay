@@ -11,13 +11,15 @@ classdef populationTree
         n_tot int64;
         hyperpolarizationFactor double;
         yScale double;
+        textOffsetX double;
+        textOffsetY double;
 
     end
         
     methods
         
         %Constructor
-        function populationTree = populationTree(root, a, TR, f, f_eval, n_tot, hyperpolarizationFactor, yScale)
+        function populationTree = populationTree(root, a, TR, f, f_eval, n_tot, hyperpolarizationFactor, yScale, textOffsetX, textOffsetY)
 
             if nargin > 1
             
@@ -29,6 +31,8 @@ classdef populationTree
                 populationTree.hyperpolarizationFactor = hyperpolarizationFactor;
                 populationTree.n_tot = n_tot;
                 populationTree.yScale = yScale;
+                populationTree.textOffsetX = textOffsetX;
+                populationTree.textOffsetY = textOffsetY;
 
             else
 
@@ -40,6 +44,8 @@ classdef populationTree
                 populationTree.n_tot = 1;
                 populationTree.hyperpolarizationFactor = 1;
                 populationTree.yScale = 1;
+                populationTree.textOffsetX = 0;
+                populationTree.textOffsetY = 0;
 
             end
 
@@ -113,6 +119,7 @@ classdef populationTree
             end
 
             for k = 1:length(longitudinalUpdateLabels)
+
                 populationTreeObject = populationTreeObject.updateAmplitudeLabel(longitudinalUpdateLabels(k), longitudinalSummedAmplitudes(k), longitudinalSummedAmplitudeLabels(k), longitudinalUpdateFullLabels(k));
             
             end
@@ -156,18 +163,22 @@ classdef populationTree
             ylabel("Dephasing degree (ms)","interpreter","latex",'fontweight','bold','fontsize',14);
 
             hold on;
-            populationTreeObject.root.plotNode();
+
+            populationTreeObject.root.plotNode(populationTreeObject.textOffsetX, populationTreeObject.textOffsetY);
 
             hold on;
 
-            h(6) = line([0, 0], [0, 0], 'color', [0.2 0.2 0.2], 'LineStyle', ':', 'LineWidth', 2, 'DisplayName', 'Longitudinal pathway');
-            h(5) = line([0, 0], [0, 0], 'color', [0.2 0.2 0.2], 'LineStyle', '--', 'LineWidth', 2, 'DisplayName', 'Transverse pathway');
-            h(3) = plot(0, 0, '.', 'Color', [0.4940 0.1840 0.5560], 'MarkerSize', 30, 'DisplayName', '\color[rgb]{0.4940, 0.1840, 0.5560} Pathway label');
-            h(4) = plot(0, 0, '.', 'Color', [0.8500 0.3250 0.0980], 'MarkerSize', 30, 'DisplayName', '\color[rgb]{0.8500, 0.3250, 0.0980} Pathway amplitude');  
-            h(2) = plot(0, 0, '.', 'color', [0.4660 0.6740 0.1880], 'MarkerSize', 30, 'DisplayName', '\color[rgb]{0.4660, 0.6740, 0.1880} Transverse population');
-            h(1) = plot(0, 0, '.', 'color', [0 0.4470 0.7410], 'MarkerSize', 30, 'DisplayName', '\color[rgb]{0, 0.4470, 0.7410} Longitudinal population');
+            h(6) = line([0, 0], [0, 0], 'color', [0.2 0.2 0.2], 'LineStyle', ':', 'LineWidth', 1, 'DisplayName', 'Longitudinal pathway');
+            h(5) = line([0, 0], [0, 0], 'color', [0.2 0.2 0.2], 'LineStyle', '--', 'LineWidth', 1, 'DisplayName', 'Transverse pathway');
+            h(3) = plot(0, 0, '.', 'Color', [0.4940 0.1840 0.5560], 'MarkerSize', 20, 'DisplayName', '\color[rgb]{0.4940, 0.1840, 0.5560} Pathway label');
+            h(4) = plot(0, 0, '.', 'Color', [0.8500 0.3250 0.0980], 'MarkerSize', 20, 'DisplayName', '\color[rgb]{0.8500, 0.3250, 0.0980} Pathway amplitude');  
+            h(2) = plot(0, 0, '.', 'color', [0.4660 0.6740 0.1880], 'MarkerSize', 20, 'DisplayName', '\color[rgb]{0.4660, 0.6740, 0.1880} Transverse population');
+            h(1) = plot(0, 0, '.', 'color', [0 0.4470 0.7410], 'MarkerSize', 20, 'DisplayName', '\color[rgb]{0, 0.4470, 0.7410} Longitudinal population');
 
             legend(h, 'Location', 'northwest');
+
+            yl = ylim;
+            ylim([min(-0.2,yl(1)), yl(2)]);
 
             saveas(fig,pwd+"\spinPathways.fig");
             saveas(fig,pwd+"\spinPathways.png");
