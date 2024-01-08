@@ -11,7 +11,7 @@ classdef emptyNode
 
     methods
 
-        function emptyNodeObject = prune(emptyNodeObject)            
+        function emptyNodeObject = prune(emptyNodeObject, ~)            
         end
 
         function emptyNodeObject = updateAmplitudeLabel(emptyNodeObject, ~, ~, ~, ~)

@@ -173,7 +173,7 @@ classdef longitudinalPopulationNode < populationNode
 
             if isa(longitudinalPopulationNodeObject.longitudinalChild, "populationNode")
                 line([longitudinalPopulationNodeObject.xpos, longitudinalPopulationNodeObject.longitudinalChild.xpos], [longitudinalPopulationNodeObject.ypos, longitudinalPopulationNodeObject.longitudinalChild.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', ':', 'LineWidth', 1);
-                text(longitudinalPopulationNodeObject.longitudinalChild.xpos, textOffsetY+longitudinalPopulationNodeObject.longitudinalChild.ypos, strrep(longitudinalPopulationNodeObject.longitudinalChild.label, "_", "\_"), 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);
+                text(longitudinalPopulationNodeObject.longitudinalChild.xpos, textOffsetY+longitudinalPopulationNodeObject.longitudinalChild.ypos, strrep(strrep(longitudinalPopulationNodeObject.longitudinalChild.label, "_", "\_"), "&", "\&"), 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);
                 text(-textOffsetX+(longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.longitudinalChild.xpos)/2, (longitudinalPopulationNodeObject.ypos+longitudinalPopulationNodeObject.longitudinalChild.ypos)/2, string("$"+latex(simplify(longitudinalPopulationNodeObject.longitudinalChild.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);               
                 hold on;
                 longitudinalPopulationNodeObject.longitudinalChild.plotNode(textOffsetX, textOffsetY);
@@ -182,7 +182,7 @@ classdef longitudinalPopulationNode < populationNode
 
             if isa(longitudinalPopulationNodeObject.transverseChild, "populationNode")
                 line([longitudinalPopulationNodeObject.xpos, longitudinalPopulationNodeObject.transverseChild.xpos], [longitudinalPopulationNodeObject.ypos, longitudinalPopulationNodeObject.transverseChild.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', '--', 'LineWidth', 1);
-                text(longitudinalPopulationNodeObject.transverseChild.xpos, textOffsetY+longitudinalPopulationNodeObject.transverseChild.ypos, strrep(longitudinalPopulationNodeObject.transverseChild.label, "_", "\_"), 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);
+                text(longitudinalPopulationNodeObject.transverseChild.xpos, textOffsetY+longitudinalPopulationNodeObject.transverseChild.ypos, strrep(strrep(longitudinalPopulationNodeObject.transverseChild.label, "_", "\_"), "&", "\&"), 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);
                 text(-textOffsetX+(longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.transverseChild.xpos)/2, (longitudinalPopulationNodeObject.ypos+longitudinalPopulationNodeObject.transverseChild.ypos)/2, string("$"+latex(simplify(longitudinalPopulationNodeObject.transverseChild.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);               
                 hold on;
                 longitudinalPopulationNodeObject.transverseChild.plotNode(textOffsetX, textOffsetY);

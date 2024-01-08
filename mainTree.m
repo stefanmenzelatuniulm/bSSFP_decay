@@ -5,7 +5,7 @@ clc;
 %-------------SETTINGS-------------
 
 %Number of pulses
-n_tot = 2;
+n_tot = 4;
 
 %Flip angle (deg)
 a = 50;
