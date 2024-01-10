@@ -124,11 +124,11 @@ classdef longitudinalPopulationNode < populationNode
 
             if isa(longitudinalPopulationNodeObject.transverseChild, "populationNode") && longitudinalPopulationNodeObject.transverseChild.label == label
 
-                longitudinalPopulationNodeObject.transverseChild = emptyNode();
+                longitudinalPopulationNodeObject.transverseChild = prunedNode();
 
             elseif isa(longitudinalPopulationNodeObject.longitudinalChild, "populationNode") && longitudinalPopulationNodeObject.longitudinalChild.label == label
 
-                longitudinalPopulationNodeObject.transverseChild = emptyNode();
+                longitudinalPopulationNodeObject.transverseChild = prunedNode();
 
             else
 
@@ -163,29 +163,63 @@ classdef longitudinalPopulationNode < populationNode
 
         end
 
-        function plotNode(longitudinalPopulationNodeObject, textOffsetX, textOffsetY)
-
-            hold on;
-            
-            plot(longitudinalPopulationNodeObject.xpos, longitudinalPopulationNodeObject.ypos, '.', 'color', [0 0.4470 0.7410], 'MarkerSize', 20);
+        function plotPathway(longitudinalPopulationNodeObject, TRnum, fnum)
 
             hold on;
 
             if isa(longitudinalPopulationNodeObject.longitudinalChild, "populationNode")
-                line([longitudinalPopulationNodeObject.xpos, longitudinalPopulationNodeObject.longitudinalChild.xpos], [longitudinalPopulationNodeObject.ypos, longitudinalPopulationNodeObject.longitudinalChild.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', ':', 'LineWidth', 1);
-                text(longitudinalPopulationNodeObject.longitudinalChild.xpos, textOffsetY+longitudinalPopulationNodeObject.longitudinalChild.ypos, strrep(strrep(longitudinalPopulationNodeObject.longitudinalChild.label, "_", "\_"), "&", "\&"), 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);
-                text(-textOffsetX+(longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.longitudinalChild.xpos)/2, (longitudinalPopulationNodeObject.ypos+longitudinalPopulationNodeObject.longitudinalChild.ypos)/2, string("$"+latex(simplify(longitudinalPopulationNodeObject.longitudinalChild.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);               
+                line([longitudinalPopulationNodeObject.xpos, longitudinalPopulationNodeObject.longitudinalChild.xpos], [longitudinalPopulationNodeObject.ypos, longitudinalPopulationNodeObject.longitudinalChild.ypos], 'color', [0 0 0], 'LineStyle', ':', 'LineWidth', 0.5);           
                 hold on;
-                longitudinalPopulationNodeObject.longitudinalChild.plotNode(textOffsetX, textOffsetY);
+                longitudinalPopulationNodeObject.longitudinalChild.plotPathway(TRnum, fnum);
+            end
+
+            if isa(longitudinalPopulationNodeObject.transverseChild, "populationNode")
+                line([longitudinalPopulationNodeObject.xpos, longitudinalPopulationNodeObject.transverseChild.xpos], [longitudinalPopulationNodeObject.ypos, longitudinalPopulationNodeObject.transverseChild.ypos], 'color', [0 0 0], 'LineStyle', '--', 'LineWidth', 0.5);
+                hold on;
+                longitudinalPopulationNodeObject.transverseChild.plotPathway(TRnum, fnum);
+            end
+
+            hold on;
+
+        end
+
+        function [plottedTransverseDephasingDegrees, plottedLongitudinalDephasingDegrees] = plotNode(longitudinalPopulationNodeObject, textOffsetLabelX, textOffsetLabelY, textOffsetPathwayX, textOffsetPathwayY, pathwayLabelFontsize, amplitudeLabelFontsize, plottedTransverseDephasingDegrees, plottedLongitudinalDephasingDegrees, height)
+
+            hold on;
+            
+            if ismembertol(longitudinalPopulationNodeObject.dephasingDegree, plottedTransverseDephasingDegrees, 0.001)
+                c = [0.7969 0.0469 0.7500];
+            else
+                c = [0 0.4470 0.7410];
+            end
+
+            plot(longitudinalPopulationNodeObject.xpos, longitudinalPopulationNodeObject.ypos, '.', 'color', c, 'MarkerSize', 20);
+            plottedLongitudinalDephasingDegrees = [plottedLongitudinalDephasingDegrees, longitudinalPopulationNodeObject.dephasingDegree];
+
+            hold on;
+
+            if isa(longitudinalPopulationNodeObject.longitudinalChild, "populationNode")
+                if longitudinalPopulationNodeObject.longitudinalChild.level == 1 && longitudinalPopulationNodeObject.longitudinalChild.level == height
+                    text(textOffsetLabelX+(longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.longitudinalChild.xpos)/2, textOffsetLabelY+longitudinalPopulationNodeObject.ypos, string("$"+latex(simplify(longitudinalPopulationNodeObject.longitudinalChild.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex');
+                    text(textOffsetPathwayX+longitudinalPopulationNodeObject.longitudinalChild.xpos, textOffsetPathwayY+longitudinalPopulationNodeObject.longitudinalChild.ypos, strrep(strrep(longitudinalPopulationNodeObject.longitudinalChild.label, "_", ","), "&", "\&"), 'FontSize', pathwayLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'); 
+                else
+                    text(textOffsetLabelX+(longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.longitudinalChild.xpos)/2, -textOffsetLabelY+longitudinalPopulationNodeObject.ypos, string("$"+latex(simplify(longitudinalPopulationNodeObject.longitudinalChild.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'); 
+                    text(textOffsetPathwayX+longitudinalPopulationNodeObject.longitudinalChild.xpos, -textOffsetPathwayY+longitudinalPopulationNodeObject.longitudinalChild.ypos, strrep(strrep(longitudinalPopulationNodeObject.longitudinalChild.label, "_", ","), "&", "\&"), 'FontSize', pathwayLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'); 
+                end             
+                hold on;
+                [plottedTransverseDephasingDegreesChild, plottedLongitudinalDephasingDegreesChild] = longitudinalPopulationNodeObject.longitudinalChild.plotNode(textOffsetLabelX, textOffsetLabelY, textOffsetPathwayX, textOffsetPathwayY, pathwayLabelFontsize, amplitudeLabelFontsize, plottedTransverseDephasingDegrees, plottedLongitudinalDephasingDegrees, height);
+                plottedTransverseDephasingDegrees = [plottedTransverseDephasingDegrees, plottedTransverseDephasingDegreesChild];
+                plottedLongitudinalDephasingDegrees = [plottedLongitudinalDephasingDegrees, plottedLongitudinalDephasingDegreesChild];
                 hold on;
             end
 
             if isa(longitudinalPopulationNodeObject.transverseChild, "populationNode")
-                line([longitudinalPopulationNodeObject.xpos, longitudinalPopulationNodeObject.transverseChild.xpos], [longitudinalPopulationNodeObject.ypos, longitudinalPopulationNodeObject.transverseChild.ypos], 'color', [0.2 0.2 0.2], 'LineStyle', '--', 'LineWidth', 1);
-                text(longitudinalPopulationNodeObject.transverseChild.xpos, textOffsetY+longitudinalPopulationNodeObject.transverseChild.ypos, strrep(strrep(longitudinalPopulationNodeObject.transverseChild.label, "_", "\_"), "&", "\&"), 'FontSize', 12, 'Color', [0.4940 0.1840 0.5560], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);
-                text(-textOffsetX+(longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.transverseChild.xpos)/2, (longitudinalPopulationNodeObject.ypos+longitudinalPopulationNodeObject.transverseChild.ypos)/2, string("$"+latex(simplify(longitudinalPopulationNodeObject.transverseChild.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', 12, 'Color', [0.8500 0.3250 0.0980], 'Interpreter', 'latex'); %, 'BackgroundColor', [1 1 1]);               
+                text(textOffsetPathwayX+longitudinalPopulationNodeObject.transverseChild.xpos, textOffsetPathwayY+longitudinalPopulationNodeObject.transverseChild.ypos, strrep(strrep(longitudinalPopulationNodeObject.transverseChild.label, "_", ","), "&", "\&"), 'FontSize', pathwayLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex');
+                text(textOffsetLabelX+(longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.transverseChild.xpos)/2, textOffsetLabelY+(longitudinalPopulationNodeObject.ypos+longitudinalPopulationNodeObject.transverseChild.ypos)/2, string("$"+latex(simplify(longitudinalPopulationNodeObject.transverseChild.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex');               
                 hold on;
-                longitudinalPopulationNodeObject.transverseChild.plotNode(textOffsetX, textOffsetY);
+                [plottedTransverseDephasingDegreesChild, plottedLongitudinalDephasingDegreesChild] = longitudinalPopulationNodeObject.transverseChild.plotNode(textOffsetLabelX, textOffsetLabelY, textOffsetPathwayX, textOffsetPathwayY, pathwayLabelFontsize, amplitudeLabelFontsize, plottedTransverseDephasingDegrees, plottedLongitudinalDephasingDegrees, height);
+                plottedTransverseDephasingDegrees = [plottedTransverseDephasingDegrees, plottedTransverseDephasingDegreesChild];
+                plottedLongitudinalDephasingDegrees = [plottedLongitudinalDephasingDegrees, plottedLongitudinalDephasingDegreesChild];
                 hold on;
             end
 

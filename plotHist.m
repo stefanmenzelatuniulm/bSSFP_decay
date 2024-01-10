@@ -17,7 +17,7 @@ function plotHist(w,w0,FWHM)
     ax.FontSize = 14; 
 
     saveas(fig,pwd+"/Figures/"+"Histw"+num2str(ns)+"isochromats.fig");
-    saveas(fig,pwd+"/Figures/"+"Histw"+num2str(ns)+"isochromats.png");
+    saveas(fig,pwd+"/Figures/"+"Histw"+num2str(ns)+"isochromats.svg");
     
     close(fig);
 
