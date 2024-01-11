@@ -11,19 +11,16 @@ classdef populationTree
         n_tot int64;
         hyperpolarizationFactor double;
         yScale double;
-        textOffsetLabelX double;
-        textOffsetLabelY double;
-        textOffsetPathwayX double;
-        textOffsetPathwayY double;
         pathwayLabelFontSize double;
         amplitudeLabelFontSize double;
+        labelOverlapThreshold double;
 
     end
         
     methods
         
         %Constructor
-        function populationTree = populationTree(root, a, TR, f, f_eval, n_tot, hyperpolarizationFactor, yScale, textOffsetLabelX, textOffsetLabelY, textOffsetPathwayX, textOffsetPathwayY, pathwayLabelFontSize, amplitudeLabelFontSize)
+        function populationTree = populationTree(root, a, TR, f, f_eval, n_tot, hyperpolarizationFactor, yScale, pathwayLabelFontSize, amplitudeLabelFontSize, labelOverlapThreshold)
 
             if nargin > 1
             
@@ -34,13 +31,10 @@ classdef populationTree
                 populationTree.f_eval = f_eval;
                 populationTree.hyperpolarizationFactor = hyperpolarizationFactor;
                 populationTree.n_tot = n_tot;
-                populationTree.yScale = yScale;
-                populationTree.textOffsetLabelX = textOffsetLabelX;
-                populationTree.textOffsetLabelY = textOffsetLabelY;                
-                populationTree.textOffsetPathwayX = textOffsetPathwayX;
-                populationTree.textOffsetPathwayY = textOffsetPathwayY;                
+                populationTree.yScale = yScale;             
                 populationTree.pathwayLabelFontSize = pathwayLabelFontSize;
                 populationTree.amplitudeLabelFontSize = amplitudeLabelFontSize;
+                populationTree.labelOverlapThreshold = labelOverlapThreshold;
 
             else
 
@@ -52,12 +46,9 @@ classdef populationTree
                 populationTree.n_tot = 1;
                 populationTree.hyperpolarizationFactor = 1;
                 populationTree.yScale = 1;
-                populationTree.textOffsetLabelX = 0;
-                populationTree.textOffsetLabelY = 0;                
-                populationTree.textOffsetPathwayX = 0;
-                populationTree.textOffsetPathwayY = 0;                
                 populationTree.pathwayLabelFontSize = 12;               
                 populationTree.amplitudeLabelFontSize = 12;
+                populationTree.labelOverlapThreshold = 0.1;
 
             end
 
@@ -96,25 +87,37 @@ classdef populationTree
         %the branches and updating labels
         function populationTreeObject = pruneMerge(populationTreeObject, transverseBottomNodes, longitudinalBottomNodes)
 
-            transverseBottomNodes = split(transpose(transverseBottomNodes), "#");
-            longitudinalBottomNodes = split(transpose(longitudinalBottomNodes), "#");
+            transverseLabels = strrep(string(zeros(length(transverseBottomNodes), 1)), "0", "");
+            transverseAmplitudes = sym(zeros(length(transverseBottomNodes), 1));
+            transverseAmplitudeLabels = sym(zeros(length(transverseBottomNodes), 1));
+            transverseDephasingDegrees = zeros(length(transverseBottomNodes), 1);
 
-            dim = size(transverseBottomNodes);
+            for k = 1:length(transverseBottomNodes)
 
-            if dim(2) == 1
-                transverseBottomNodes = transpose(transverseBottomNodes);
-                longitudinalBottomNodes = transpose(longitudinalBottomNodes);
+                node = transverseBottomNodes(k);
+
+                transverseLabels(k,1) = node.label;
+                transverseAmplitudes(k,1) = node.amplitude;
+                transverseAmplitudeLabels(k,1) = node.amplitudeLabel;
+                transverseDephasingDegrees(k,1) = node.dephasingDegree;
+
             end
-            
-            transverseLabels = transverseBottomNodes(:, 1);
-            transverseAmplitudes = str2sym(transverseBottomNodes(:, 2));
-            transverseAmplitudeLabels = str2sym(transverseBottomNodes(:, 3));
-            transverseDephasingDegrees = double(transverseBottomNodes(:, 4));
 
-            longitudinalLabels = longitudinalBottomNodes(:, 1);
-            longitudinalAmplitudes = str2sym(longitudinalBottomNodes(:, 2));
-            longitudinalAmplitudeLabels = str2sym(longitudinalBottomNodes(:, 3));
-            longitudinalDephasingDegrees = double(longitudinalBottomNodes(:, 4));
+            longitudinalLabels = strrep(string(zeros(length(longitudinalBottomNodes), 1)), "0", "");
+            longitudinalAmplitudes = sym(zeros(length(longitudinalBottomNodes), 1));
+            longitudinalAmplitudeLabels = sym(zeros(length(longitudinalBottomNodes), 1));
+            longitudinalDephasingDegrees = zeros(length(longitudinalBottomNodes), 1);
+
+            for k = 1:length(longitudinalBottomNodes)
+
+                node = longitudinalBottomNodes(k);
+
+                longitudinalLabels(k,1) = node.label;
+                longitudinalAmplitudes(k,1) = node.amplitude;
+                longitudinalAmplitudeLabels(k,1) = node.amplitudeLabel;
+                longitudinalDephasingDegrees(k,1) = node.dephasingDegree;
+
+            end
             
             [longitudinalUpdateIndices, longitudinalPruneIndices, longitudinalSummedAmplitudes, longitudinalSummedAmplitudeLabels, longitudinalUpdateFullLabels] = populationTreeMergePruneHelper(longitudinalDephasingDegrees, longitudinalAmplitudes, longitudinalAmplitudeLabels, longitudinalLabels);
             longitudinalPruneLabels = longitudinalLabels(longitudinalPruneIndices);
@@ -178,20 +181,21 @@ classdef populationTree
             populationTreeObject.root.plotPathway(populationTreeObject.TR, populationTreeObject.f);
 
             hold on;
-            [~, ~] = populationTreeObject.root.plotNode(populationTreeObject.textOffsetLabelX, populationTreeObject.textOffsetLabelY, populationTreeObject.textOffsetPathwayX, populationTreeObject.textOffsetPathwayY, populationTreeObject.pathwayLabelFontSize, populationTreeObject.amplitudeLabelFontSize, [], [], populationTreeObject.height);
+            populationTreeObject.root.plotNode(populationTreeObject.pathwayLabelFontSize, populationTreeObject.amplitudeLabelFontSize, [], [], populationTreeObject.height, populationTreeObject.f, populationTreeObject.labelOverlapThreshold);
 
             hold on;
 
             h(2) = plot(0, 0, '.', 'color', [0.6350 0.0780 0.1840], 'MarkerSize', 20, 'DisplayName', '\color[rgb]{0.6350 0.0780 0.1840} Transverse population');
-            h(3) = plot(0, 0, '.', 'color', [0.7969 0.0469 0.7500], 'MarkerSize', 20, 'DisplayName', '\color[rgb]{0.7969 0.0469 0.7500} Overlapping transverse & longitudinal populations'); 
-            h(4) = line([0, 0], [0, 0], 'color', [0 0 0], 'LineStyle', ':', 'LineWidth', 0.5, 'DisplayName', 'Longitudinal pathway');
-            h(5) = line([0, 0], [0, 0], 'color', [0 0 0], 'LineStyle', '--', 'LineWidth', 0.5, 'DisplayName', 'Transverse pathway');
+            h(3) = plot(0, 0, '.', 'color', [0.8196 0 1.0000], 'MarkerSize', 20, 'DisplayName', '\color[rgb]{0.8196 0 1.0000} Overlapping transverse & longitudinal populations'); 
+            h(4) = line([0, 0], [0, 0], 'color', [0 0.4470 0.7410], 'LineStyle', ':', 'LineWidth', 0.5, 'DisplayName', 'Longitudinal pathway');
+            h(5) = line([0, 0], [0, 0], 'color', [0.6350 0.0780 0.1840], 'LineStyle', '--', 'LineWidth', 0.5, 'DisplayName', 'Transverse pathway');
             h(1) = plot(0, 0, '.', 'color', [0 0.4470 0.7410], 'MarkerSize', 20, 'DisplayName', '\color[rgb]{0, 0.4470, 0.7410} Longitudinal population');
 
             legend(h, 'Location', 'northwest');
 
-            yl = ylim;
-            ylim([min(-0.2, yl(1)), max([0 yl(2)+max(abs(populationTreeObject.textOffsetPathwayY), abs(populationTreeObject.textOffsetLabelY))])]);
+            yExtentMax = populationTreeObject.TR*populationTreeObject.yScale*populationTreeObject.f+populationTreeObject.TR*populationTreeObject.yScale*(double(populationTreeObject.height)-1);
+            yExtentMin = max(0, populationTreeObject.TR*populationTreeObject.yScale*populationTreeObject.f+populationTreeObject.TR*populationTreeObject.yScale*(double(populationTreeObject.height)-2));
+            ylim([-max(0.2, yExtentMin), yExtentMax]*1.15);
 
             saveas(fig, pwd+"\spinPathways.fig");
             saveas(fig, pwd+"\spinPathways.svg");

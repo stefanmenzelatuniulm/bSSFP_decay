@@ -35,7 +35,7 @@ function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, 
             sums(k) = sums(k)+amplitudes(index);
             sums2(k) = sums2(k)+amplitudeLabels(index);
             if m~= transverseGC(k)
-                updateLabels(k) = updateLabels(k)+labels(index)+"&";
+                updateLabels(k) = updateLabels(k)+labels(index)+" + ";
             else
                 updateLabels(k) = updateLabels(k)+labels(index);
             end

@@ -4,10 +4,10 @@ classdef emptyNode
 
     methods (Static)
 
-        function [plottedTransverseDephasingDegrees, plottedLongitudinalDephasingDegrees] = plotNode(~, ~, ~, ~, ~, ~, ~, ~, ~, ~)
+        function [plottedTransverseNodes, plottedLongitudinalNodes] = plotNode(~, ~, ~, ~, ~, ~, ~, ~)
 
-            plottedTransverseDephasingDegrees = [];
-            plottedLongitudinalDephasingDegrees = [];
+            plottedTransverseNodes = [];
+            plottedLongitudinalNodes = [];
 
         end
 
