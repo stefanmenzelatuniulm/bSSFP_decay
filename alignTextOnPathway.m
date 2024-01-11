@@ -1,5 +1,5 @@
 function alignTextOnPathway(textObject, shiftSign, isAmplitudeLabel, noOverlap)
-
+    
     drawnow; %important for correct value of extent
 
     extent = get(textObject).Extent;
@@ -19,7 +19,7 @@ function alignTextOnPathway(textObject, shiftSign, isAmplitudeLabel, noOverlap)
         end
 
     else %isPathwayLabel
-        
+
         s = get(textObject).String;
 
         if ~isempty(s)

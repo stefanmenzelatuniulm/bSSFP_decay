@@ -50,10 +50,10 @@ classdef longitudinalPopulationNode < populationNode
         end
 
         function [transverseBottomNodes, longitudinalBottomNodes, longitudinalPopulationNodeObject] = applyPulse(longitudinalPopulationNodeObject, a_, TR_, f, height, yScale)
-            
+
             transverseBottomNodes = [];
             longitudinalBottomNodes = [];
-            
+
             if longitudinalPopulationNodeObject.level == height %Pulse only changes nodes at the bottom of the tree
  
                 syms T1 T2 T2p TR a M_eq;
@@ -83,10 +83,23 @@ classdef longitudinalPopulationNode < populationNode
 
                 %Transverse child 
                 if ~isa(longitudinalPopulationNodeObject.transverseChild, "populationNode") %only change empty children
+                    if isa(longitudinalPopulationNodeObject, "populationNode")
+                    	disp("Applying pulse "+longitudinalPopulationNodeObject.label+" -> 1");
+                    end
                     amplitude = simplify(subs(subs(longitudinalPopulationNodeObject.amplitude*1i*sind(a)*E2*E2p, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
-                    amplitudeLabel = simplify(longitudinalPopulationNodeObject.amplitudeLabel*1i*sind(a)*E2*E2p, "IgnoreAnalyticConstraints", true);
+                    %amplitudeLabel = simplify(longitudinalPopulationNodeObject.amplitudeLabel*1i*sind(a)*E2*E2p, "IgnoreAnalyticConstraints", true);
+                    amplitudeLabel = amplitude;
                     if height>0
-                        newLabel = longitudinalPopulationNodeObject.label+", 1";
+                        newLabel = "";
+                        pathways = strtrim(strsplit(longitudinalPopulationNodeObject.label, "+"));
+                        for k = 1:length(pathways)
+                            pathways(k) = pathways(k)+", 1";
+                            if k~=1
+                                newLabel = newLabel+" + "+pathways(k);
+                            else
+                                newLabel = pathways(k);
+                            end
+                        end
                     else
                         newLabel = "1";
                     end
@@ -102,10 +115,22 @@ classdef longitudinalPopulationNode < populationNode
 
                 %Longitudinal child
                 if ~isa(longitudinalPopulationNodeObject.longitudinalChild, "populationNode") 
+                    if isa(longitudinalPopulationNodeObject, "populationNode")
+                    	disp("Applying pulse "+longitudinalPopulationNodeObject.label+" -> 0");
+                    end
                     amplitude = simplify(subs(subs((cosd(a)*longitudinalPopulationNodeObject.amplitude-M_eq)*E1+M_eq, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
-                    amplitudeLabel = simplify((cosd(a)*longitudinalPopulationNodeObject.amplitudeLabel-M_eq)*E1+M_eq, "IgnoreAnalyticConstraints", true);
+                    amplitudeLabel = amplitude;
                     if height>0
-                        newLabel = longitudinalPopulationNodeObject.label+", 0";
+                        newLabel = "";
+                        pathways = strtrim(strsplit(longitudinalPopulationNodeObject.label, "+"));
+                        for k = 1:length(pathways)
+                            pathways(k) = pathways(k)+", 0";
+                            if k~=1
+                                newLabel = newLabel+" + "+pathways(k);
+                            else
+                                newLabel = pathways(k);
+                            end
+                        end
                     else
                         newLabel = "0";
                     end
@@ -121,9 +146,20 @@ classdef longitudinalPopulationNode < populationNode
          
             else
 
-                [transverseBottomNodes1, longitudinalBottomNodes1, longitudinalPopulationNodeObject.transverseChild] = longitudinalPopulationNodeObject.transverseChild.applyPulse(a_, TR_, f, height, yScale);
-                [transverseBottomNodes2, longitudinalBottomNodes2, longitudinalPopulationNodeObject.longitudinalChild] = longitudinalPopulationNodeObject.longitudinalChild.applyPulse(a_, TR_, f, height, yScale);
-                
+                if isa(longitudinalPopulationNodeObject.transverseChild, "transversePopulationNode")
+                    [transverseBottomNodes1, longitudinalBottomNodes1, longitudinalPopulationNodeObject.transverseChild] = longitudinalPopulationNodeObject.transverseChild.applyPulse(a_, TR_, f, height, yScale);
+                else
+                    transverseBottomNodes1 = [];
+                    longitudinalBottomNodes1 = [];
+                end
+
+                 if isa(longitudinalPopulationNodeObject.longitudinalChild, "longitudinalPopulationNode")               
+                    [transverseBottomNodes2, longitudinalBottomNodes2, longitudinalPopulationNodeObject.longitudinalChild] = longitudinalPopulationNodeObject.longitudinalChild.applyPulse(a_, TR_, f, height, yScale);
+                 else
+                    transverseBottomNodes2 = [];
+                    longitudinalBottomNodes2 = [];
+                 end
+
                 transverseBottomNodes = cat(2, transverseBottomNodes1, transverseBottomNodes2);
                 longitudinalBottomNodes = cat(2, longitudinalBottomNodes1, longitudinalBottomNodes2);
 
@@ -135,11 +171,13 @@ classdef longitudinalPopulationNode < populationNode
         function longitudinalPopulationNodeObject = prune(longitudinalPopulationNodeObject, label)
 
             if isa(longitudinalPopulationNodeObject.transverseChild, "populationNode") && longitudinalPopulationNodeObject.transverseChild.label == label
-
+    
+                disp("Pruning "+longitudinalPopulationNodeObject.transverseChild.label);
                 longitudinalPopulationNodeObject.transverseChild = prunedNode();
 
             elseif isa(longitudinalPopulationNodeObject.longitudinalChild, "populationNode") && longitudinalPopulationNodeObject.longitudinalChild.label == label
 
+                disp("Pruning "+longitudinalPopulationNodeObject.longitudinalChild.label);
                 longitudinalPopulationNodeObject.longitudinalChild = prunedNode();
 
             else
@@ -154,14 +192,20 @@ classdef longitudinalPopulationNode < populationNode
         %Updates node with label
         function longitudinalPopulationNodeObject = updateAmplitudeLabel(longitudinalPopulationNodeObject, updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel)
 
-            if isa(longitudinalPopulationNodeObject.transverseChild, "populationNode") && longitudinalPopulationNodeObject.transverseChild.label == updateLabel
+            if updateLabel == newLabel
+                return;
+            end
 
+            if isa(longitudinalPopulationNodeObject.transverseChild, "populationNode") && longitudinalPopulationNodeObject.transverseChild.label == updateLabel
+                
+                disp("Updating "+updateLabel+" with "+newLabel);
                 longitudinalPopulationNodeObject.transverseChild.label = newLabel;
                 longitudinalPopulationNodeObject.transverseChild.amplitude = summedAmplitudes;
                 longitudinalPopulationNodeObject.transverseChild.amplitudeLabel = summedAmplitudeLabels;
 
             elseif isa(longitudinalPopulationNodeObject.longitudinalChild, "populationNode") && longitudinalPopulationNodeObject.longitudinalChild.label == updateLabel
 
+                disp("Updating "+updateLabel+" with "+newLabel);
                 longitudinalPopulationNodeObject.longitudinalChild.label = newLabel;
                 longitudinalPopulationNodeObject.longitudinalChild.amplitude = summedAmplitudes;
                 longitudinalPopulationNodeObject.longitudinalChild.amplitudeLabel = summedAmplitudeLabels;
@@ -218,12 +262,22 @@ classdef longitudinalPopulationNode < populationNode
                     noOverlap = true;
                 end
 
+                amplitudeString = latex(simplify(longitudinalPopulationNodeObject.longitudinalChild.amplitudeLabel, "IgnoreAnalyticConstraints", true));
+                pathwayString = longitudinalPopulationNodeObject.longitudinalChild.label;
+                if strlength(amplitudeString)>1100
+                    amplitudeString = "CharLimit";
+                end
+                if strlength(pathwayString)>1100
+                    pathwayString = char(pathwayString);
+                    pathwayString = string(pathwayString(1:min(1199,end)));
+                end
+
                 if longitudinalPopulationNodeObject.longitudinalChild.level == 1 || abs(f-0.5)>labelOverlapThreshold
-                    alignTextOnPathway(text((longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.longitudinalChild.xpos)/2, longitudinalPopulationNodeObject.ypos, string("$"+latex(simplify(longitudinalPopulationNodeObject.longitudinalChild.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), 1, true, false);
-                    alignTextOnPathway(text(longitudinalPopulationNodeObject.longitudinalChild.xpos, longitudinalPopulationNodeObject.longitudinalChild.ypos, longitudinalPopulationNodeObject.longitudinalChild.label, 'FontSize', pathwayLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), 1, false, noOverlap); 
+                    alignTextOnPathway(text((longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.longitudinalChild.xpos)/2, longitudinalPopulationNodeObject.ypos, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), 1, true, false); 
+                    alignTextOnPathway(text(longitudinalPopulationNodeObject.longitudinalChild.xpos, longitudinalPopulationNodeObject.longitudinalChild.ypos, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), 1, false, noOverlap); 
                 else
-                    alignTextOnPathway(text((longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.longitudinalChild.xpos)/2, longitudinalPopulationNodeObject.ypos, string("$"+latex(simplify(longitudinalPopulationNodeObject.longitudinalChild.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), -1, true, false); 
-                    alignTextOnPathway(text(longitudinalPopulationNodeObject.longitudinalChild.xpos, longitudinalPopulationNodeObject.longitudinalChild.ypos, longitudinalPopulationNodeObject.longitudinalChild.label, 'FontSize', pathwayLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), -1, false, noOverlap); 
+                    alignTextOnPathway(text((longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.longitudinalChild.xpos)/2, longitudinalPopulationNodeObject.ypos, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), -1, true, false); 
+                    alignTextOnPathway(text(longitudinalPopulationNodeObject.longitudinalChild.xpos, longitudinalPopulationNodeObject.longitudinalChild.ypos, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), -1, false, noOverlap); 
                 end  
 
                 hold on;
@@ -240,12 +294,22 @@ classdef longitudinalPopulationNode < populationNode
                     noOverlap = true;
                 end
 
+                amplitudeString = latex(simplify(longitudinalPopulationNodeObject.transverseChild.amplitudeLabel, "IgnoreAnalyticConstraints", true));
+                pathwayString = longitudinalPopulationNodeObject.transverseChild.label;
+                if strlength(amplitudeString)>1100
+                    amplitudeString = "CharLimit";
+                end
+                if strlength(pathwayString)>1100
+                    pathwayString = char(pathwayString);
+                    pathwayString = string(pathwayString(1:min(1199,end)));
+                end                
+
                 if ~contains(longitudinalPopulationNodeObject.label, "0") && ~contains(longitudinalPopulationNodeObject.label, "-1")
-                    alignTextOnPathway(text((longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.transverseChild.xpos)/2, (longitudinalPopulationNodeObject.ypos+longitudinalPopulationNodeObject.transverseChild.ypos)/2, string("$"+latex(simplify(longitudinalPopulationNodeObject.transverseChild.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, true, true);
-                    alignTextOnPathway(text(longitudinalPopulationNodeObject.transverseChild.xpos, longitudinalPopulationNodeObject.transverseChild.ypos, longitudinalPopulationNodeObject.transverseChild.label, 'FontSize', pathwayLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, false, noOverlap);                     
+                    alignTextOnPathway(text((longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.transverseChild.xpos)/2, (longitudinalPopulationNodeObject.ypos+longitudinalPopulationNodeObject.transverseChild.ypos)/2, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, true, true);
+                    alignTextOnPathway(text(longitudinalPopulationNodeObject.transverseChild.xpos, longitudinalPopulationNodeObject.transverseChild.ypos, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, false, noOverlap);                     
                 else
-                    alignTextOnPathway(text((longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.transverseChild.xpos)/2, (longitudinalPopulationNodeObject.ypos+longitudinalPopulationNodeObject.transverseChild.ypos)/2, string("$"+latex(simplify(longitudinalPopulationNodeObject.transverseChild.amplitudeLabel, "IgnoreAnalyticConstraints", true))+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, true, false);
-                    alignTextOnPathway(text(longitudinalPopulationNodeObject.transverseChild.xpos, longitudinalPopulationNodeObject.transverseChild.ypos, longitudinalPopulationNodeObject.transverseChild.label, 'FontSize', pathwayLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, false, noOverlap); 
+                    alignTextOnPathway(text((longitudinalPopulationNodeObject.xpos+longitudinalPopulationNodeObject.transverseChild.xpos)/2, (longitudinalPopulationNodeObject.ypos+longitudinalPopulationNodeObject.transverseChild.ypos)/2, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, true, false);
+                    alignTextOnPathway(text(longitudinalPopulationNodeObject.transverseChild.xpos, longitudinalPopulationNodeObject.transverseChild.ypos, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, false, noOverlap); 
                 end          
 
                 hold on;

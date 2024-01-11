@@ -14,13 +14,15 @@ classdef populationTree
         pathwayLabelFontSize double;
         amplitudeLabelFontSize double;
         labelOverlapThreshold double;
+        n_steady_state int64;
+        summedTransverseAmplitudes sym;
 
     end
         
     methods
         
         %Constructor
-        function populationTree = populationTree(root, a, TR, f, f_eval, n_tot, hyperpolarizationFactor, yScale, pathwayLabelFontSize, amplitudeLabelFontSize, labelOverlapThreshold)
+        function populationTree = populationTree(root, a, TR, f, f_eval, n_tot, hyperpolarizationFactor, yScale, pathwayLabelFontSize, amplitudeLabelFontSize, labelOverlapThreshold, n_steady_state)
 
             if nargin > 1
             
@@ -30,11 +32,12 @@ classdef populationTree
                 populationTree.f = f;
                 populationTree.f_eval = f_eval;
                 populationTree.hyperpolarizationFactor = hyperpolarizationFactor;
-                populationTree.n_tot = n_tot;
+                populationTree.n_tot = n_tot+1; %counting a/2 preparation pulse
                 populationTree.yScale = yScale;             
                 populationTree.pathwayLabelFontSize = pathwayLabelFontSize;
                 populationTree.amplitudeLabelFontSize = amplitudeLabelFontSize;
                 populationTree.labelOverlapThreshold = labelOverlapThreshold;
+                populationTree.n_steady_state = n_steady_state;
 
             else
 
@@ -49,33 +52,50 @@ classdef populationTree
                 populationTree.pathwayLabelFontSize = 12;               
                 populationTree.amplitudeLabelFontSize = 12;
                 populationTree.labelOverlapThreshold = 0.1;
+                populationTree.n_steady_state = intmax("int64");
 
             end
 
             populationTree.height = 0;
+            populationTree.summedTransverseAmplitudes = sym(zeros(1, n_tot)); %sum of transverse amplitudes after k pulses 
     
         end
 
         %Applies pulse to population tree
         function [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject] = applyPulses(populationTreeObject)
 
-            for k = 1:populationTreeObject.n_tot
-            
+            for k = 1:min(populationTreeObject.n_tot, populationTreeObject.n_steady_state)
+     
                 if populationTreeObject.height == 0
     
-                    [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject.root] = populationTreeObject.root.applyPulse(populationTreeObject.a, populationTreeObject.TR, populationTreeObject.f, populationTreeObject.height, populationTreeObject.yScale); %bottomNodes is list with entries: label+"#"+string(amplitude)+"#"+string(amplitudeLabel)+"#"+string(dephasingDegree)
+                    [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject.root] = populationTreeObject.root.applyPulse(populationTreeObject.a/2, populationTreeObject.TR, populationTreeObject.f, populationTreeObject.height, populationTreeObject.yScale); %bottomNodes is list with entries: label+"#"+string(amplitude)+"#"+string(amplitudeLabel)+"#"+string(dephasingDegree)
     
-                elseif populationTreeObject.height == populationTreeObject.n_tot
+                elseif populationTreeObject.height == populationTreeObject.n_tot-1
     
-                     [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject.root] = populationTreeObject.root.applyPulse(populationTreeObject.a, populationTreeObject.TR, populationTreeObject.f_eval, populationTreeObject.height, populationTreeObject.yScale);
-    
+                     [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject.root] = populationTreeObject.root.applyPulse(((-1)^(k+1))*populationTreeObject.a, populationTreeObject.TR, populationTreeObject.f_eval, populationTreeObject.height, populationTreeObject.yScale);                
+               
                 else
     
-                     [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject.root] = populationTreeObject.root.applyPulse(populationTreeObject.a, populationTreeObject.TR, 1, populationTreeObject.height, populationTreeObject.yScale);  
+                     [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject.root] = populationTreeObject.root.applyPulse(((-1)^(k+1))*populationTreeObject.a, populationTreeObject.TR, 1, populationTreeObject.height, populationTreeObject.yScale);  
     
                 end
     
                 populationTreeObject.height = populationTreeObject.height+1;
+
+                %Calculate sum of transverse amplitudes
+                summedAmplitudes = sym(0);
+                
+                for m = 1:length(transverseBottomNodes)
+                
+                    node = transverseBottomNodes(k);
+                    summedAmplitudes = summedAmplitudes+node.amplitude;
+                
+                end
+    
+                summedAmplitudes = simplify(summedAmplitudes, "IgnoreAnalyticConstraints", true);
+
+                populationTreeObject.summedTransverseAmplitudes(k) = summedAmplitudes;
+               
                 populationTreeObject = populationTreeObject.pruneMerge(transverseBottomNodes, longitudinalBottomNodes);
 
             end
@@ -123,7 +143,7 @@ classdef populationTree
             longitudinalPruneLabels = longitudinalLabels(longitudinalPruneIndices);
             longitudinalUpdateLabels = longitudinalLabels(longitudinalUpdateIndices);
 
-            [transverseUpdateIndices, transversePruneIndices, transverseSummedAmplitudes, transverseSummedAmplitudeLabels, transverseUpdateFullLabels] = populationTreeMergePruneHelper(transverseDephasingDegrees, transverseAmplitudes, transverseAmplitudeLabels, transverseLabels);
+            [transverseUpdateIndices, transversePruneIndices, sTransverseAmplitudes, transverseSummedAmplitudeLabels, transverseUpdateFullLabels] = populationTreeMergePruneHelper(transverseDephasingDegrees, transverseAmplitudes, transverseAmplitudeLabels, transverseLabels);
             transversePruneLabels = transverseLabels(transversePruneIndices);
             transverseUpdateLabels = transverseLabels(transverseUpdateIndices);
 
@@ -147,7 +167,7 @@ classdef populationTree
 
             for k = 1:length(transverseUpdateLabels)
             
-                populationTreeObject = populationTreeObject.updateAmplitudeLabel(transverseUpdateLabels(k), transverseSummedAmplitudes(k), transverseSummedAmplitudeLabels(k), transverseUpdateFullLabels(k));
+                populationTreeObject = populationTreeObject.updateAmplitudeLabel(transverseUpdateLabels(k), sTransverseAmplitudes(k), transverseSummedAmplitudeLabels(k), transverseUpdateFullLabels(k));
             
             end
 
@@ -196,9 +216,11 @@ classdef populationTree
             yExtentMax = populationTreeObject.TR*populationTreeObject.yScale*populationTreeObject.f+populationTreeObject.TR*populationTreeObject.yScale*(double(populationTreeObject.height)-1);
             yExtentMin = max(0, populationTreeObject.TR*populationTreeObject.yScale*populationTreeObject.f+populationTreeObject.TR*populationTreeObject.yScale*(double(populationTreeObject.height)-2));
             ylim([-max(0.2, yExtentMin), yExtentMax]*1.15);
+            xl = xlim;
+            xlim([xl(1), xl(2)+0.25*double(populationTreeObject.height)*populationTreeObject.TR]);
 
-            saveas(fig, pwd+"\spinPathways.fig");
-            saveas(fig, pwd+"\spinPathways.svg");
+            saveas(fig, pwd+"\spinPathways"+num2str(populationTreeObject.n_tot)+".fig");
+            saveas(fig, pwd+"\spinPathways"+num2str(populationTreeObject.n_tot)+".svg");
 
             close(fig);
         
