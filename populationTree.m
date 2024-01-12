@@ -64,6 +64,8 @@ classdef populationTree
         %Applies pulse to population tree
         function [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject] = applyPulses(populationTreeObject)
 
+            syms x T2p T2;
+
             for k = 1:min(populationTreeObject.n_tot, populationTreeObject.n_steady_state)
      
                 if populationTreeObject.height == 0
@@ -86,9 +88,10 @@ classdef populationTree
                 summedAmplitudes = sym(0);
                 
                 for m = 1:length(transverseBottomNodes)
-                
-                    node = transverseBottomNodes(k);
-                    summedAmplitudes = summedAmplitudes+node.amplitude;
+                s
+                    node = transverseBottomNodes(m);
+                    
+                    summedAmplitudes = summedAmplitudes+node.amplitudeDirectlyAfterPulse*exp(-abs(x-abs(node.dephasingDegree))/T2p)*exp(abs(node.dephasingDegree)/T2p)*exp(-x/T2); 
                 
                 end
     
@@ -99,6 +102,8 @@ classdef populationTree
                 populationTreeObject = populationTreeObject.pruneMerge(transverseBottomNodes, longitudinalBottomNodes);
 
             end
+
+            populationTreeObject.summedTransverseAmplitudes = populationTreeObject.summedTransverseAmplitudes(2:end);
 
         end
 
@@ -213,14 +218,14 @@ classdef populationTree
 
             legend(h, 'Location', 'northwest');
 
-            yExtentMax = populationTreeObject.TR*populationTreeObject.yScale*populationTreeObject.f+populationTreeObject.TR*populationTreeObject.yScale*(double(populationTreeObject.height)-1);
+            yExtentMax = populationTreeObject.TR*populationTreeObject.yScale*populationTreeObject.f+populationTreeObject.TR*populationTreeObject.yScale*(double(populationTreeObject.height)-2)+populationTreeObject.f_eval*populationTreeObject.TR*populationTreeObject.yScale*(double(populationTreeObject.height)-2);
             yExtentMin = max(0, populationTreeObject.TR*populationTreeObject.yScale*populationTreeObject.f+populationTreeObject.TR*populationTreeObject.yScale*(double(populationTreeObject.height)-2));
             ylim([-max(0.2, yExtentMin), yExtentMax]*1.15);
             xl = xlim;
-            xlim([xl(1), xl(2)+0.25*double(populationTreeObject.height)*populationTreeObject.TR]);
+            xlim([xl(1), xl(2)+0.25*(double(populationTreeObject.height-2)*populationTreeObject.TR+populationTreeObject.f_eval*populationTreeObject.TR)]);
 
-            saveas(fig, pwd+"\spinPathways"+num2str(populationTreeObject.n_tot)+".fig");
-            saveas(fig, pwd+"\spinPathways"+num2str(populationTreeObject.n_tot)+".svg");
+            saveas(fig, pwd+"\spinPathways"+num2str(populationTreeObject.n_tot-1)+".fig");
+            saveas(fig, pwd+"\spinPathways"+num2str(populationTreeObject.n_tot-1)+".svg");
 
             close(fig);
         

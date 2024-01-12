@@ -27,7 +27,7 @@ function summedTransverseAmplitudes = sumTransverseAmplitudes(n_tot, a, TR, f, n
     
     %Create tree with equilibrium magnetization as root
     syms M_eq;
-    root = longitudinalPopulationNode(emptyNode(), emptyNode(), emptyNode(), "", 0, 0, 0, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq);
+    root = longitudinalPopulationNode(emptyNode(), emptyNode(), emptyNode(), "", 0, 0, 0, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq);
     tree = populationTree(root, a, TR, f, f_eval, n_tot, hyperpolarizationFactor, yScale, pathwayLabelFontSize, amplitudeLabelFontSize, labelOverlapThreshold, n_steady_state);
     
     %Apply pulses

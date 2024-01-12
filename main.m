@@ -1,4 +1,3 @@
-%TODO: implement afactor
 %implement amplitude property without relaxation
 
 clear all;
@@ -95,7 +94,6 @@ deleteFigures("Figures");
 %Plot histogram of w
 %plotHist(w,w0,FWHM);
 
-%Calculate relaxation coefficients
 if recalculateAmplitudes
 
     transverseAmplitudes = sumTransverseAmplitudes(n_tot, a, TR, f, n_steady_state, hyperpolarization, true);

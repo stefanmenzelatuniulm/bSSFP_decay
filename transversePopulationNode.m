@@ -12,7 +12,7 @@ classdef transversePopulationNode < populationNode
     methods
 
         %Constructor
-        function transversePopulationNode = transversePopulationNode(parent, transverseChild1, transverseChild2, longitudinalChild1, longitudinalChild2, label, xpos, ypos, dephasingDegree, amplitude, amplitudeLabel)
+        function transversePopulationNode = transversePopulationNode(parent, transverseChild1, transverseChild2, longitudinalChild1, longitudinalChild2, label, xpos, ypos, dephasingDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse)
 
             if nargin > 1
 
@@ -29,6 +29,7 @@ classdef transversePopulationNode < populationNode
                 transversePopulationNode.ypos = ypos;
                 transversePopulationNode.dephasingDegree = dephasingDegree;
                 transversePopulationNode.amplitude = amplitude;
+                transversePopulationNode.amplitudeDirectlyAfterPulse = amplitudeDirectlyAfterPulse;
                 transversePopulationNode.amplitudeLabel = amplitudeLabel;
                 transversePopulationNode.transverseChild1 = transverseChild1;
                 transversePopulationNode.longitudinalChild1 = longitudinalChild1;  
@@ -44,6 +45,7 @@ classdef transversePopulationNode < populationNode
                 transversePopulationNode.ypos = 0;
                 transversePopulationNode.dephasingDegree = 0;
                 transversePopulationNode.amplitude = sym(1);
+                transversePopulationNode.amplitudeDirectlyAfterPulse = sym(1);
                 transversePopulationNode.amplitudeLabel = sym(1);
                 transversePopulationNode.transverseChild1 = emptyNode();
                 transversePopulationNode.longitudinalChild1 = emptyNode();   
@@ -60,6 +62,12 @@ classdef transversePopulationNode < populationNode
             longitudinalBottomNodes = [];
             
             if transversePopulationNodeObject.level == height %Pulse only changes nodes at the bottom of the tree
+
+                if height == 0
+                    aFactor = 0.5;
+                else
+                    aFactor = (-1)^height;
+                end
 
                 syms T1 T2 T2p TR a;
                 E1 = exp(-f*TR/T1);
@@ -91,15 +99,11 @@ classdef transversePopulationNode < populationNode
                     if isa(transversePopulationNodeObject, "populationNode")
                     	disp("Applying pulse "+transversePopulationNodeObject.label+" -> 1");
                     end
-                    
-                    if transversePopulationNodeObject.transverseChild1.level == 1
-                        aFactor = 0.5;
-                    else
-                        aFactor = (-1)^(transversePopulationNodeObject.transverseChild1.level+1);
-                    end
 
+                    amplitudeLabel = simplify(transversePopulationNodeObject.amplitudeLabel*E2*E2pNotInverted*cosd(aFactor*a/2)^2, "IgnoreAnalyticConstraints", true);       
                     amplitude = simplify(subs(subs(transversePopulationNodeObject.amplitude*E2*E2pNotInverted*cosd(a/2)^2, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
-                    amplitudeLabel = simplify(transversePopulationNodeObject.amplitudeLabel*E2*E2pNotInverted*cosd(aFactor*a/2)^2, "IgnoreAnalyticConstraints", true);
+                    amplitudeDirectlyAfterPulse = simplify(subs(subs(transversePopulationNodeObject.amplitude*cosd(a/2)^2, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
+
                     if height>0
                         newLabel = "";
                         pathways = strtrim(strsplit(transversePopulationNodeObject.label, "+"));
@@ -114,7 +118,7 @@ classdef transversePopulationNode < populationNode
                     else
                         newLabel = "1";
                     end
-                    transversePopulationNodeObject.transverseChild1 = transversePopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*dephasingDegreeNotInverted, dephasingDegreeNotInverted, amplitude, amplitudeLabel);
+                    transversePopulationNodeObject.transverseChild1 = transversePopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*dephasingDegreeNotInverted, dephasingDegreeNotInverted, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse);
                     
                     if transversePopulationNodeObject.transverseChild1.level == height+1
 
@@ -128,9 +132,12 @@ classdef transversePopulationNode < populationNode
                 if ~isa(transversePopulationNodeObject.longitudinalChild1, "populationNode")
                     if isa(transversePopulationNodeObject, "populationNode")
                     	disp("Applying pulse "+transversePopulationNodeObject.label+" -> 0");
-                    end                   
+                    end 
+
+                    amplitudeLabel = simplify((1i/2)*sind(aFactor*a)*E1*transversePopulationNodeObject.amplitudeLabel, "IgnoreAnalyticConstraints", true);
                     amplitude = simplify(subs(subs((1i/2)*sind(a)*E1*transversePopulationNodeObject.amplitude, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
-                    amplitudeLabel = amplitude;
+                    amplitudeDirectlyAfterPulse = simplify(subs(subs((1i/2)*sind(a)*transversePopulationNodeObject.amplitude, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
+
                     if height>0
                         newLabel = "";
                         pathways = strtrim(strsplit(transversePopulationNodeObject.label, "+"));
@@ -145,7 +152,7 @@ classdef transversePopulationNode < populationNode
                     else
                         newLabel = "0";
                     end
-                    transversePopulationNodeObject.longitudinalChild1 = longitudinalPopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*oldDephasingDegree, oldDephasingDegree, amplitude, amplitudeLabel);
+                    transversePopulationNodeObject.longitudinalChild1 = longitudinalPopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*oldDephasingDegree, oldDephasingDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse);
                     
                     if transversePopulationNodeObject.longitudinalChild1.level == height+1
 
@@ -180,9 +187,12 @@ classdef transversePopulationNode < populationNode
                 if ~isa(transversePopulationNodeObject.transverseChild2, "populationNode")
                     if isa(transversePopulationNodeObject, "populationNode")
                     	disp("Applying pulse "+transversePopulationNodeObject.label+" -> -1");
-                    end                    
+                    end  
+
+                    amplitudeLabel = simplify(transversePopulationNodeObject.amplitudeLabel*E2*E2pInverted*sind(aFactor*a/2)^2, "IgnoreAnalyticConstraints", true);                   
                     amplitude = simplify(subs(subs(transversePopulationNodeObject.amplitude*E2*E2pInverted*sind(a/2)^2, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
-                    amplitudeLabel = amplitude;
+                    amplitudeDirectlyAfterPulse = simplify(subs(subs(transversePopulationNodeObject.amplitude*sind(a/2)^2, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
+
                     if height>0
                         newLabel = "";
                         pathways = strtrim(strsplit(transversePopulationNodeObject.label, "+"));
@@ -197,7 +207,7 @@ classdef transversePopulationNode < populationNode
                     else
                         newLabel = "-1";
                     end
-                    transversePopulationNodeObject.transverseChild2 = transversePopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*dephasingDegreeInverted, dephasingDegreeInverted, amplitude, amplitudeLabel);
+                    transversePopulationNodeObject.transverseChild2 = transversePopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*dephasingDegreeInverted, dephasingDegreeInverted, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse);
                     
                     if transversePopulationNodeObject.transverseChild2.level == height+1
 
@@ -211,9 +221,12 @@ classdef transversePopulationNode < populationNode
                 if ~isa(transversePopulationNodeObject.longitudinalChild2, "populationNode")
                     if isa(transversePopulationNodeObject, "populationNode")
                     	disp("Applying pulse "+transversePopulationNodeObject.label+" -> 0*");
-                    end                    
+                    end   
+
+                    amplitudeLabel = simplify(-(1i/2)*sind(aFactor*a)*E1*transversePopulationNodeObject.amplitudeLabel, "IgnoreAnalyticConstraints", true);                    
                     amplitude = simplify(subs(subs(-(1i/2)*sind(a)*E1*transversePopulationNodeObject.amplitude, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
-                    amplitudeLabel = amplitude;
+                    amplitudeDirectlyAfterPulse = simplify(subs(subs(-(1i/2)*sind(a)*transversePopulationNodeObject.amplitude, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);                    
+
                     if height>0
                         newLabel = "";
                         pathways = strtrim(strsplit(transversePopulationNodeObject.label, "+"));
@@ -228,7 +241,7 @@ classdef transversePopulationNode < populationNode
                     else
                         newLabel = "0*";
                     end
-                    transversePopulationNodeObject.longitudinalChild2 = longitudinalPopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*oldDephasingDegree, oldDephasingDegree, amplitude, amplitudeLabel);
+                    transversePopulationNodeObject.longitudinalChild2 = longitudinalPopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*oldDephasingDegree, oldDephasingDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse);
                     
                     if transversePopulationNodeObject.longitudinalChild2.level == height+1
 
