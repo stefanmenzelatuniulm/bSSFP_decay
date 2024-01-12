@@ -10,7 +10,7 @@ classdef longitudinalPopulationNode < populationNode
     methods
 
         %Constructor
-        function longitudinalPopulationNode = longitudinalPopulationNode(parent, transverseChild, longitudinalChild, label, xpos, ypos, dephasingDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse)
+        function longitudinalPopulationNode = longitudinalPopulationNode(parent, transverseChild, longitudinalChild, label, xpos, ypos, dephasingDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeDirectlyAfterPulseWithoutT2p)
 
             if nargin > 1
 
@@ -28,6 +28,7 @@ classdef longitudinalPopulationNode < populationNode
                 longitudinalPopulationNode.dephasingDegree = dephasingDegree;
                 longitudinalPopulationNode.amplitude = amplitude;
                 longitudinalPopulationNode.amplitudeDirectlyAfterPulse = amplitudeDirectlyAfterPulse;
+                longitudinalPopulationNode.amplitudeDirectlyAfterPulseWithoutT2p = amplitudeDirectlyAfterPulseWithoutT2p;
                 longitudinalPopulationNode.amplitudeLabel = amplitudeLabel;
                 longitudinalPopulationNode.transverseChild = transverseChild;
                 longitudinalPopulationNode.longitudinalChild = longitudinalChild;  
@@ -44,6 +45,7 @@ classdef longitudinalPopulationNode < populationNode
                 longitudinalPopulationNode.amplitude = M_eq;
                 longitudinalPopulationNode.amplitudeDirectlyAfterPulse = sym(1);
                 longitudinalPopulationNode.amplitudeLabel = M_eq;
+                longitudinalPopulationNode.amplitudeDirectlyAfterPulseWithoutT2p = sym(1);
                 longitudinalPopulationNode.transverseChild = emptyNode();
                 longitudinalPopulationNode.longitudinalChild = emptyNode();         
             

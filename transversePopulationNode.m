@@ -12,7 +12,7 @@ classdef transversePopulationNode < populationNode
     methods
 
         %Constructor
-        function transversePopulationNode = transversePopulationNode(parent, transverseChild1, transverseChild2, longitudinalChild1, longitudinalChild2, label, xpos, ypos, dephasingDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse)
+        function transversePopulationNode = transversePopulationNode(parent, transverseChild1, transverseChild2, longitudinalChild1, longitudinalChild2, label, xpos, ypos, dephasingDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p)
 
             if nargin > 1
 
@@ -30,6 +30,7 @@ classdef transversePopulationNode < populationNode
                 transversePopulationNode.dephasingDegree = dephasingDegree;
                 transversePopulationNode.amplitude = amplitude;
                 transversePopulationNode.amplitudeDirectlyAfterPulse = amplitudeDirectlyAfterPulse;
+                transversePopulationNode.amplitudeWithoutT2p = amplitudeWithoutT2p;
                 transversePopulationNode.amplitudeLabel = amplitudeLabel;
                 transversePopulationNode.transverseChild1 = transverseChild1;
                 transversePopulationNode.longitudinalChild1 = longitudinalChild1;  
@@ -46,6 +47,7 @@ classdef transversePopulationNode < populationNode
                 transversePopulationNode.dephasingDegree = 0;
                 transversePopulationNode.amplitude = sym(1);
                 transversePopulationNode.amplitudeDirectlyAfterPulse = sym(1);
+                transversePopulationNode.amplitudeWithoutT2p = sym(1);
                 transversePopulationNode.amplitudeLabel = sym(1);
                 transversePopulationNode.transverseChild1 = emptyNode();
                 transversePopulationNode.longitudinalChild1 = emptyNode();   
@@ -103,6 +105,7 @@ classdef transversePopulationNode < populationNode
                     amplitudeLabel = simplify(transversePopulationNodeObject.amplitudeLabel*E2*E2pNotInverted*cosd(aFactor*a/2)^2, "IgnoreAnalyticConstraints", true);       
                     amplitude = simplify(subs(subs(transversePopulationNodeObject.amplitude*E2*E2pNotInverted*cosd(a/2)^2, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
                     amplitudeDirectlyAfterPulse = simplify(subs(subs(transversePopulationNodeObject.amplitude*cosd(a/2)^2, TR, TR_), a, a_), "IgnoreAnalyticConstraints", true);
+                    amplitudeWithoutT2p = 
 
                     if height>0
                         newLabel = "";
