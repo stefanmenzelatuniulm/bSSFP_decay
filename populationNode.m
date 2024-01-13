@@ -3,8 +3,8 @@ classdef populationNode < emptyNode
     properties (Access = public)
     
         parent emptyNode;
-        dephasingDegree double; %fraction of TR
-        dephasingDegreeDirectlyAfterPulse double;
+        phase double; 
+        phaseDirectlyAfterPulse double;
         amplitude sym; %function of T1, T2, T2p
         amplitudeWithoutT2p sym; %T2p will be considered in populationTree based on the final dephasing degree
         amplitudeDirectlyAfterPulse sym;
@@ -12,21 +12,20 @@ classdef populationNode < emptyNode
         amplitudeLabel sym;
         label string;
         level double;
-        xpos double;
-        ypos double;
+        totalTime double;
     
     end
     
     methods
 
         %Constructor
-        function populationNode = populationNode(parent, label, xpos, ypos, dephasingDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, dephasingDegreeDirectlyAfterPulse)
+        function populationNode = populationNode(parent, label, totalTime, phase, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, phaseDirectlyAfterPulse)
 
             if nargin > 1
     
                 populationNode.parent = parent;
                 populationNode.label = label;
-                populationNode.dephasingDegree = dephasingDegree;
+                populationNode.phase = phase;
                 populationNode.amplitude = amplitude;
                 populationNode.amplitudeLabel = amplitudeLabel;
 
@@ -36,28 +35,26 @@ classdef populationNode < emptyNode
                     populationNode.level = 0;
                 end
 
-                populationNode.xpos = xpos;
-                populationNode.ypos = ypos;
+                populationNode.totalTime = totalTime;
 
                 populationNode.amplitudeDirectlyAfterPulse = amplitudeDirectlyAfterPulse;
                 populationNode.amplitudeWithoutT2p = amplitudeWithoutT2p;
                 populationNode.amplitudeDirectlyAfterPulseWithoutT2p = amplitudeDirectlyAfterPulseWithoutT2p;
-                populationNode.dephasingDegreeDirectlyAfterPulse = dephasingDegreeDirectlyAfterPulse;
+                populationNode.phaseDirectlyAfterPulse = phaseDirectlyAfterPulse;
 
             else
                 
                 populationNode.parent = emptyNode();
                 populationNode.label = "";
                 populationNode.level = 0;
-                populationNode.xpos = 0;
-                populationNode.ypos = 0;
-                populationNode.dephasingDegree = 0;
+                populationNode.totalTime = 0;
+                populationNode.phase = 0;
                 populationNode.amplitude = sym(1);
                 populationNode.amplitudeLabel = sym(1);
                 populationNode.amplitudeDirectlyAfterPulse = sym(1);
                 populationNode.amplitudeWithoutT2p = sym(1);
                 populationNode.amplitudeDirectlyAfterPulseWithoutT2p = sym(1);
-                populationNode.dephasingDegreeDirectlyAfterPulse = 0;
+                populationNode.phaseDirectlyAfterPulse = 0;
 
             end
     

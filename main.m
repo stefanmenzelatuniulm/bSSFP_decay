@@ -1,4 +1,4 @@
-%implement amplitude property without relaxation
+%falls alle pulse +a -> kein min bei t=1/2 bei z.B. n=3
 
 clear all;
 close all;
@@ -30,7 +30,7 @@ TR = 10;
 
 %Range of times TR*f between initial alpha/2 and first -alpha pulse, if TR
 %is the time between -/+ alpha pulses
-f=1/3;
+f=1/2;
 
 %Calculate signal at time t_eval=f_eval*TR, measured from the end of the
 %pulse train. f_eval=0 e.g. calculates the signal directly after the end of
@@ -46,15 +46,15 @@ Meq=1;
 hyperpolarization=1;
 
 %Upper fit bounds for T1 and T2 
-T1max=20*1000; %in ms
-T2max=20*1000; %in ms
+T1max=20000; %in ms
+T2max=20000; %in ms
 
 %splitfactor loop iterations are used in vectorizedM -> high splitfactor
 %causes less RAM usage in vectorizedM, but vectorization is not as efficient
 splitfactor=128; 
 
 %Recalculate M, or read existing M from save file M.mat?
-recalculateM=false;
+recalculateM=true;
 
 %Recalculate transverse Amplitudes or read from save file transverseAmplitudes.mat?
 recalculateAmplitudes=true;
@@ -96,7 +96,7 @@ deleteFigures("Figures");
 
 if recalculateAmplitudes
 
-    transverseAmplitudes = sumTransverseAmplitudes(n_tot, a, TR, f, n_steady_state, hyperpolarization, true);
+    transverseAmplitudes = sumTransverseAmplitudes(w0, n_tot, a, TR, f, n_steady_state, hyperpolarization, true);
     save(pwd+"\"+"transverseAmplitudes.mat","transverseAmplitudes","-v7.3");
 
 else
@@ -104,6 +104,8 @@ else
     load(pwd+"\"+"transverseAmplitudes.mat");
 
 end
+
+disp(" ");
 
 for k=1:n_tot
 

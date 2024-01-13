@@ -12,7 +12,7 @@ classdef transversePopulationNode < populationNode
     methods
 
         %Constructor
-        function transversePopulationNode = transversePopulationNode(parent, transverseChild1, transverseChild2, longitudinalChild1, longitudinalChild2, label, xpos, ypos, dephasingDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, dephasingDegreeDirectlyAfterPulse)
+        function transversePopulationNode = transversePopulationNode(parent, transverseChild1, transverseChild2, longitudinalChild1, longitudinalChild2, label, totalTime, phase, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, phaseDirectlyAfterPulse)
 
             if nargin > 1
 
@@ -25,9 +25,8 @@ classdef transversePopulationNode < populationNode
                     transversePopulationNode.level = 0;
                 end
 
-                transversePopulationNode.xpos = xpos;
-                transversePopulationNode.ypos = ypos;
-                transversePopulationNode.dephasingDegree = dephasingDegree;
+                transversePopulationNode.totalTime = totalTime;
+                transversePopulationNode.phase = phase;
                 transversePopulationNode.amplitude = amplitude;
                 transversePopulationNode.amplitudeDirectlyAfterPulse = amplitudeDirectlyAfterPulse;
                 transversePopulationNode.amplitudeDirectlyAfterPulseWithoutT2p = amplitudeDirectlyAfterPulseWithoutT2p;
@@ -37,16 +36,15 @@ classdef transversePopulationNode < populationNode
                 transversePopulationNode.longitudinalChild1 = longitudinalChild1;  
                 transversePopulationNode.transverseChild2 = transverseChild2;
                 transversePopulationNode.longitudinalChild2 = longitudinalChild2;
-                transversePopulationNode.dephasingDegreeDirectlyAfterPulse = dephasingDegreeDirectlyAfterPulse;
+                transversePopulationNode.phaseDirectlyAfterPulse = phaseDirectlyAfterPulse;
 
             else
                 
                 transversePopulationNode.parent = emptyNode();
                 transversePopulationNode.label = "";
                 transversePopulationNode.level = 0;
-                transversePopulationNode.xpos = 0;
-                transversePopulationNode.ypos = 0;
-                transversePopulationNode.dephasingDegree = 0;
+                transversePopulationNode.totalTime = 0;
+                transversePopulationNode.phase = 0;
                 transversePopulationNode.amplitude = sym(1);
                 transversePopulationNode.amplitudeDirectlyAfterPulse = sym(1);
                 transversePopulationNode.amplitudeDirectlyAfterPulseWithoutT2p = sym(1);
@@ -56,13 +54,13 @@ classdef transversePopulationNode < populationNode
                 transversePopulationNode.longitudinalChild1 = emptyNode();   
                 transversePopulationNode.transverseChild2 = emptyNode();
                 transversePopulationNode.longitudinalChild2 = emptyNode(); 
-                transversePopulationNode.dephasingDegreeDirectlyAfterPulse = 0;
+                transversePopulationNode.phaseDirectlyAfterPulse = 0;
             
             end
 
         end
 
-        function [transverseBottomNodes, longitudinalBottomNodes, transversePopulationNodeObject] = applyPulse(transversePopulationNodeObject, a_, TR_, f, height, yScale)
+        function [transverseBottomNodes, longitudinalBottomNodes, transversePopulationNodeObject] = applyPulse(transversePopulationNodeObject, a_, TR_, f, height, w0)
 
             transverseBottomNodes = [];
             longitudinalBottomNodes = [];
@@ -80,22 +78,22 @@ classdef transversePopulationNode < populationNode
                 E2 = exp(-f*TR/T2);
                 
                 %Not inverted phase
-                oldDephasingDegree = transversePopulationNodeObject.dephasingDegree;
-                dephasingDegreeNotInverted = subs(oldDephasingDegree+f*TR, TR, TR_);
-                dephasingDegreeDirectlyAfterPulseNotInverted = transversePopulationNodeObject.dephasingDegree;
+                oldPhase = transversePopulationNodeObject.phase;
+                phaseNotInverted = subs(oldPhase+f*TR*w0*360, TR, TR_);
+                phaseDirectlyAfterPulseNotInverted = transversePopulationNodeObject.phase;
 
-                if oldDephasingDegree <= 0 && dephasingDegreeNotInverted <= 0
+                if oldPhase <= 0 && phaseNotInverted <= 0
 
                     E2pNotInverted = exp(f*TR/T2p);
 
-                elseif oldDephasingDegree <= 0 && dephasingDegreeNotInverted >= 0
+                elseif oldPhase <= 0 && phaseNotInverted >= 0
 
-                    as = -oldDephasingDegree/(dephasingDegreeNotInverted-oldDephasingDegree);
-                    b = dephasingDegreeNotInverted/(dephasingDegreeNotInverted-oldDephasingDegree);
+                    as = -oldPhase/(phaseNotInverted-oldPhase);
+                    b = phaseNotInverted/(phaseNotInverted-oldPhase);
 
                     E2pNotInverted = exp(as*f*TR/T2p)*exp(-b*f*TR/T2p);
 
-                else %oldDephasingDegree>0 -> dephasingDegreeNotInverted>0
+                else %oldPhase>0 -> phaseNotInverted>0
 
                     E2pNotInverted = exp(-f*TR/T2p);
 
@@ -127,7 +125,7 @@ classdef transversePopulationNode < populationNode
                     else
                         newLabel = "1";
                     end
-                    transversePopulationNodeObject.transverseChild1 = transversePopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*dephasingDegreeNotInverted, dephasingDegreeNotInverted, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, dephasingDegreeDirectlyAfterPulseNotInverted);
+                    transversePopulationNodeObject.transverseChild1 = transversePopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.totalTime+subs(f*TR, TR, TR_), phaseNotInverted, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, phaseDirectlyAfterPulseNotInverted);
                     
                     if transversePopulationNodeObject.transverseChild1.level == height+1
 
@@ -163,7 +161,7 @@ classdef transversePopulationNode < populationNode
                     else
                         newLabel = "0";
                     end
-                    transversePopulationNodeObject.longitudinalChild1 = longitudinalPopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*oldDephasingDegree, oldDephasingDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, dephasingDegreeDirectlyAfterPulseNotInverted);
+                    transversePopulationNodeObject.longitudinalChild1 = longitudinalPopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.totalTime+subs(f*TR, TR, TR_), oldPhase, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, phaseDirectlyAfterPulseNotInverted);
                     
                     if transversePopulationNodeObject.longitudinalChild1.level == height+1
 
@@ -174,22 +172,22 @@ classdef transversePopulationNode < populationNode
                 end               
 
                 %Inverted phase
-                dephasingDegreeDirectlyAfterPulseInverted = -oldDephasingDegree;
-                oldDephasingDegree = -oldDephasingDegree;
-                dephasingDegreeInverted = subs(oldDephasingDegree+f*TR, TR, TR_);
+                phaseDirectlyAfterPulseInverted = -oldPhase;
+                oldPhase = -oldPhase;
+                phaseInverted = subs(oldPhase+f*TR*w0*360, TR, TR_);
 
-                if oldDephasingDegree <= 0 && dephasingDegreeInverted <= 0
+                if oldPhase <= 0 && phaseInverted <= 0
 
                     E2pInverted = exp(f*TR/T2p);
 
-                elseif oldDephasingDegree <= 0 && dephasingDegreeInverted >= 0
+                elseif oldPhase <= 0 && phaseInverted >= 0
 
-                    as = -oldDephasingDegree/(dephasingDegreeInverted-oldDephasingDegree);
-                    b = dephasingDegreeInverted/(dephasingDegreeInverted-oldDephasingDegree);
+                    as = -oldPhase/(phaseInverted-oldPhase);
+                    b = phaseInverted/(phaseInverted-oldPhase);
 
                     E2pInverted = exp(as*f*TR/T2p)*exp(-b*f*TR/T2p);
 
-                else %oldDephasingDegree>0 -> dephasingDegreeInverted>0
+                else %oldPhase>0 -> phaseInverted>0
 
                     E2pInverted = exp(-f*TR/T2p);
 
@@ -221,7 +219,7 @@ classdef transversePopulationNode < populationNode
                     else
                         newLabel = "-1";
                     end
-                    transversePopulationNodeObject.transverseChild2 = transversePopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*dephasingDegreeInverted, dephasingDegreeInverted, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, dephasingDegreeDirectlyAfterPulseInverted);
+                    transversePopulationNodeObject.transverseChild2 = transversePopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.totalTime+subs(f*TR, TR, TR_), phaseInverted, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, phaseDirectlyAfterPulseInverted);
                     
                     if transversePopulationNodeObject.transverseChild2.level == height+1
 
@@ -257,7 +255,7 @@ classdef transversePopulationNode < populationNode
                     else
                         newLabel = "0*";
                     end
-                    transversePopulationNodeObject.longitudinalChild2 = longitudinalPopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.xpos+subs(f*TR, TR, TR_), yScale*oldDephasingDegree, oldDephasingDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, dephasingDegreeDirectlyAfterPulseInverted);
+                    transversePopulationNodeObject.longitudinalChild2 = longitudinalPopulationNode(transversePopulationNodeObject, emptyNode(), emptyNode(), newLabel, transversePopulationNodeObject.totalTime+subs(f*TR, TR, TR_), oldPhase, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, phaseDirectlyAfterPulseInverted);
                     
                     if transversePopulationNodeObject.longitudinalChild2.level == height+1
 
@@ -270,28 +268,28 @@ classdef transversePopulationNode < populationNode
             else
                 
                 if isa(transversePopulationNodeObject.transverseChild1, "transversePopulationNode")
-                    [transverseBottomNodes1, longitudinalBottomNodes1, transversePopulationNodeObject.transverseChild1] = transversePopulationNodeObject.transverseChild1.applyPulse(a_, TR_, f, height, yScale);
+                    [transverseBottomNodes1, longitudinalBottomNodes1, transversePopulationNodeObject.transverseChild1] = transversePopulationNodeObject.transverseChild1.applyPulse(a_, TR_, f, height, w0);
                 else
                     transverseBottomNodes1 = [];
                     longitudinalBottomNodes1 = [];
                 end
 
                 if isa(transversePopulationNodeObject.longitudinalChild1, "longitudinalPopulationNode")
-                    [transverseBottomNodes2, longitudinalBottomNodes2, transversePopulationNodeObject.longitudinalChild1] = transversePopulationNodeObject.longitudinalChild1.applyPulse(a_, TR_, f, height, yScale);
+                    [transverseBottomNodes2, longitudinalBottomNodes2, transversePopulationNodeObject.longitudinalChild1] = transversePopulationNodeObject.longitudinalChild1.applyPulse(a_, TR_, f, height, w0);
                 else
                     transverseBottomNodes2 = [];
                     longitudinalBottomNodes2 = [];
                 end
 
                 if isa(transversePopulationNodeObject.transverseChild2, "transversePopulationNode")
-                    [transverseBottomNodes3, longitudinalBottomNodes3, transversePopulationNodeObject.transverseChild2] = transversePopulationNodeObject.transverseChild2.applyPulse(a_, TR_, f, height, yScale);
+                    [transverseBottomNodes3, longitudinalBottomNodes3, transversePopulationNodeObject.transverseChild2] = transversePopulationNodeObject.transverseChild2.applyPulse(a_, TR_, f, height, w0);
                 else
                     transverseBottomNodes3 = [];
                     longitudinalBottomNodes3 = [];
                 end                
 
                 if isa(transversePopulationNodeObject.longitudinalChild2, "longitudinalPopulationNode")
-                    [transverseBottomNodes4, longitudinalBottomNodes4, transversePopulationNodeObject.longitudinalChild2] = transversePopulationNodeObject.longitudinalChild2.applyPulse(a_, TR_, f, height, yScale);
+                    [transverseBottomNodes4, longitudinalBottomNodes4, transversePopulationNodeObject.longitudinalChild2] = transversePopulationNodeObject.longitudinalChild2.applyPulse(a_, TR_, f, height, w0);
                 else
                     transverseBottomNodes4 = [];
                     longitudinalBottomNodes4 = [];
@@ -384,40 +382,40 @@ classdef transversePopulationNode < populationNode
 
         end
 
-        function plotPathway(transversePopulationNodeObject, TRnum, fnum)
+        function plotPathway(transversePopulationNodeObject, TRnum, fnum, w0)
 
             hold on;
 
             if isa(transversePopulationNodeObject.longitudinalChild1, "populationNode")
-                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.longitudinalChild1.xpos], [transversePopulationNodeObject.ypos, transversePopulationNodeObject.longitudinalChild1.ypos], 'color', [0 0.4470 0.7410], 'LineStyle', ':', 'LineWidth', 0.5);           
+                line([transversePopulationNodeObject.totalTime, transversePopulationNodeObject.longitudinalChild1.totalTime], [transversePopulationNodeObject.phase, transversePopulationNodeObject.longitudinalChild1.phase], 'color', [0 0.4470 0.7410], 'LineStyle', ':', 'LineWidth', 0.5);           
                 hold on;
-                transversePopulationNodeObject.longitudinalChild1.plotPathway(TRnum, fnum);
+                transversePopulationNodeObject.longitudinalChild1.plotPathway(TRnum, fnum, w0);
             end
 
             if isa(transversePopulationNodeObject.longitudinalChild2, "populationNode")
-                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.longitudinalChild2.xpos], [-transversePopulationNodeObject.ypos, transversePopulationNodeObject.longitudinalChild2.ypos], 'color', [0 0.4470 0.7410], 'LineStyle', ':', 'LineWidth', 0.5);
-                if transversePopulationNodeObject.dephasingDegree + 0.001 > TRnum*fnum+TRnum*(transversePopulationNodeObject.level-1)
+                line([transversePopulationNodeObject.totalTime, transversePopulationNodeObject.longitudinalChild2.totalTime], [-transversePopulationNodeObject.phase, transversePopulationNodeObject.longitudinalChild2.phase], 'color', [0 0.4470 0.7410], 'LineStyle', ':', 'LineWidth', 0.5);
+                if transversePopulationNodeObject.phase + 0.001 > TRnum*fnum*w0*360+TRnum*(transversePopulationNodeObject.level-1)*w0*360
                     hold on;
-                    line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.xpos], [transversePopulationNodeObject.ypos, -transversePopulationNodeObject.ypos], 'color', [0.5 0.5 0.5], 'LineStyle', ':', 'LineWidth', 0.5);               
+                    line([transversePopulationNodeObject.totalTime, transversePopulationNodeObject.totalTime], [transversePopulationNodeObject.phase, -transversePopulationNodeObject.phase], 'color', [0.5 0.5 0.5], 'LineStyle', ':', 'LineWidth', 0.5);               
                 end
                 hold on;
-                transversePopulationNodeObject.longitudinalChild2.plotPathway(TRnum, fnum)
+                transversePopulationNodeObject.longitudinalChild2.plotPathway(TRnum, fnum, w0)
             end
 
             if isa(transversePopulationNodeObject.transverseChild1, "populationNode")
-                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.transverseChild1.xpos], [transversePopulationNodeObject.ypos, transversePopulationNodeObject.transverseChild1.ypos], 'color', [0.6350 0.0780 0.1840], 'LineStyle', '--', 'LineWidth', 0.5);
+                line([transversePopulationNodeObject.totalTime, transversePopulationNodeObject.transverseChild1.totalTime], [transversePopulationNodeObject.phase, transversePopulationNodeObject.transverseChild1.phase], 'color', [0.6350 0.0780 0.1840], 'LineStyle', '--', 'LineWidth', 0.5);
                 hold on;
-                transversePopulationNodeObject.transverseChild1.plotPathway(TRnum, fnum);
+                transversePopulationNodeObject.transverseChild1.plotPathway(TRnum, fnum, w0);
             end
 
             if isa(transversePopulationNodeObject.transverseChild2, "populationNode")
-                line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.transverseChild2.xpos], [-transversePopulationNodeObject.ypos, transversePopulationNodeObject.transverseChild2.ypos], 'color', [0.6350 0.0780 0.1840], 'LineStyle', '--', 'LineWidth', 0.5);
-                if transversePopulationNodeObject.dephasingDegree + 0.001 > TRnum*fnum+TRnum*(transversePopulationNodeObject.level-1)
+                line([transversePopulationNodeObject.totalTime, transversePopulationNodeObject.transverseChild2.totalTime], [-transversePopulationNodeObject.phase, transversePopulationNodeObject.transverseChild2.phase], 'color', [0.6350 0.0780 0.1840], 'LineStyle', '--', 'LineWidth', 0.5);
+                if transversePopulationNodeObject.phase + 0.001 > TRnum*fnum*w0*360+TRnum*(transversePopulationNodeObject.level-1)*w0*360
                     hold on;
-                    line([transversePopulationNodeObject.xpos, transversePopulationNodeObject.xpos], [transversePopulationNodeObject.ypos, -transversePopulationNodeObject.ypos], 'color', [0.5 0.5 0.5], 'LineStyle', '--', 'LineWidth', 0.5);
+                    line([transversePopulationNodeObject.totalTime, transversePopulationNodeObject.totalTime], [transversePopulationNodeObject.phase, -transversePopulationNodeObject.phase], 'color', [0.5 0.5 0.5], 'LineStyle', '--', 'LineWidth', 0.5);
                 end
                 hold on;
-                transversePopulationNodeObject.transverseChild2.plotPathway(TRnum, fnum);
+                transversePopulationNodeObject.transverseChild2.plotPathway(TRnum, fnum, w0);
             end
 
             hold on;
@@ -428,26 +426,26 @@ classdef transversePopulationNode < populationNode
 
             hold on;
 
-            if dephasingDegreeIsInNodeList(plottedLongitudinalNodes, transversePopulationNodeObject.dephasingDegree, transversePopulationNodeObject.level)
+            if phaseIsInNodeList(plottedLongitudinalNodes, transversePopulationNodeObject.phase, transversePopulationNodeObject.level)
                 c = [0.8196 0 1.0000];
             else
                 c = [0.6350 0.0780 0.1840];
             end
 
-            plot(transversePopulationNodeObject.xpos, transversePopulationNodeObject.ypos, '.', 'color', c, 'MarkerSize', 20);
+            plot(transversePopulationNodeObject.totalTime, transversePopulationNodeObject.phase, '.', 'color', c, 'MarkerSize', 15);
             plottedTransverseNodes = [plottedTransverseNodes, transversePopulationNodeObject];
 
             hold on;
 
             if isa(transversePopulationNodeObject.longitudinalChild1, "populationNode")
 
-                if dephasingDegreeIsInNodeList(plottedTransverseNodes, transversePopulationNodeObject.longitudinalChild1.dephasingDegree, transversePopulationNodeObject.longitudinalChild1.level)
+                if phaseIsInNodeList(plottedTransverseNodes, transversePopulationNodeObject.longitudinalChild1.phase, transversePopulationNodeObject.longitudinalChild1.level)
                     noOverlap = false;
                 else
                     noOverlap = true;
                 end
 
-                amplitudeString = latex(transversePopulationNodeObject.longitudinalChild1.amplitudeLabel);
+                amplitudeString = latex(transversePopulationNodeObject.longitudinalChild1.amplitudeDirectlyAfterPulseWithoutT2p);
                 pathwayString = transversePopulationNodeObject.longitudinalChild1.label;
                 if strlength(amplitudeString)>1100
                     amplitudeString = "CharLimit";
@@ -458,11 +456,11 @@ classdef transversePopulationNode < populationNode
                 end                
 
                 if abs(f-0.5)>labelOverlapThreshold
-                    alignTextOnPathway(text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.longitudinalChild1.xpos)/2, transversePopulationNodeObject.ypos, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), 1, true, false); 
-                    alignTextOnPathway(text(transversePopulationNodeObject.longitudinalChild1.xpos, transversePopulationNodeObject.longitudinalChild1.ypos, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), 1, false, noOverlap); 
+                    alignTextOnPathway(text((transversePopulationNodeObject.totalTime+transversePopulationNodeObject.longitudinalChild1.totalTime)/2, transversePopulationNodeObject.phase, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), 1, true, false); 
+                    alignTextOnPathway(text(transversePopulationNodeObject.longitudinalChild1.totalTime, transversePopulationNodeObject.longitudinalChild1.phase, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), 1, false, noOverlap); 
                 else
-                    alignTextOnPathway(text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.longitudinalChild1.xpos)/2, transversePopulationNodeObject.ypos, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), -1, true, false); 
-                    alignTextOnPathway(text(transversePopulationNodeObject.longitudinalChild1.xpos, transversePopulationNodeObject.longitudinalChild1.ypos, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), -1, false, noOverlap); 
+                    alignTextOnPathway(text((transversePopulationNodeObject.totalTime+transversePopulationNodeObject.longitudinalChild1.totalTime)/2, transversePopulationNodeObject.phase, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), -1, true, false); 
+                    alignTextOnPathway(text(transversePopulationNodeObject.longitudinalChild1.totalTime, transversePopulationNodeObject.longitudinalChild1.phase, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), -1, false, noOverlap); 
                 end  
 
                 hold on;
@@ -473,13 +471,13 @@ classdef transversePopulationNode < populationNode
 
             if isa(transversePopulationNodeObject.longitudinalChild2, "populationNode")
 
-                if dephasingDegreeIsInNodeList(plottedTransverseNodes, transversePopulationNodeObject.longitudinalChild2.dephasingDegree, transversePopulationNodeObject.longitudinalChild2.level)
+                if phaseIsInNodeList(plottedTransverseNodes, transversePopulationNodeObject.longitudinalChild2.phase, transversePopulationNodeObject.longitudinalChild2.level)
                     noOverlap = false;
                 else
                     noOverlap = true;
                 end
 
-                amplitudeString = latex(transversePopulationNodeObject.longitudinalChild2.amplitudeLabel);
+                amplitudeString = latex(transversePopulationNodeObject.longitudinalChild2.amplitudeDirectlyAfterPulseWithoutT2p);
                 pathwayString = transversePopulationNodeObject.longitudinalChild2.label;
                 if strlength(amplitudeString)>1100
                     amplitudeString = "CharLimit";
@@ -490,11 +488,11 @@ classdef transversePopulationNode < populationNode
                 end             
 
                 if (~contains(transversePopulationNodeObject.label, "0") && ~contains(transversePopulationNodeObject.label, "-1")) || abs(f-0.5)>labelOverlapThreshold
-                    alignTextOnPathway(text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.longitudinalChild2.xpos)/2, -transversePopulationNodeObject.ypos, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), 1, true, false);
-                    alignTextOnPathway(text(transversePopulationNodeObject.longitudinalChild2.xpos, transversePopulationNodeObject.longitudinalChild2.ypos, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), 1, false, noOverlap);                    
+                    alignTextOnPathway(text((transversePopulationNodeObject.totalTime+transversePopulationNodeObject.longitudinalChild2.totalTime)/2, -transversePopulationNodeObject.phase, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), 1, true, false);
+                    alignTextOnPathway(text(transversePopulationNodeObject.longitudinalChild2.totalTime, transversePopulationNodeObject.longitudinalChild2.phase, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), 1, false, noOverlap);                    
                 else
-                    alignTextOnPathway(text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.longitudinalChild2.xpos)/2, -transversePopulationNodeObject.ypos, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), -1, true, false);
-                    alignTextOnPathway(text(transversePopulationNodeObject.longitudinalChild2.xpos, transversePopulationNodeObject.longitudinalChild2.ypos, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), -1, false, noOverlap);                    
+                    alignTextOnPathway(text((transversePopulationNodeObject.totalTime+transversePopulationNodeObject.longitudinalChild2.totalTime)/2, -transversePopulationNodeObject.phase, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), -1, true, false);
+                    alignTextOnPathway(text(transversePopulationNodeObject.longitudinalChild2.totalTime, transversePopulationNodeObject.longitudinalChild2.phase, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0 0.4470 0.7410], 'Interpreter', 'latex'), -1, false, noOverlap);                    
                 end  
 
                 hold on;
@@ -505,13 +503,13 @@ classdef transversePopulationNode < populationNode
 
             if isa(transversePopulationNodeObject.transverseChild1, "populationNode")
 
-                if dephasingDegreeIsInNodeList(plottedLongitudinalNodes, transversePopulationNodeObject.transverseChild1.dephasingDegree, transversePopulationNodeObject.transverseChild1.level)
+                if phaseIsInNodeList(plottedLongitudinalNodes, transversePopulationNodeObject.transverseChild1.phase, transversePopulationNodeObject.transverseChild1.level)
                     noOverlap = false;
                 else
                     noOverlap = true;
                 end
 
-                amplitudeString = latex(transversePopulationNodeObject.transverseChild1.amplitudeLabel);
+                amplitudeString = latex(transversePopulationNodeObject.transverseChild1.amplitudeDirectlyAfterPulseWithoutT2p);
                 pathwayString = transversePopulationNodeObject.transverseChild1.label;
                 if strlength(amplitudeString)>1100
                     amplitudeString = "CharLimit";
@@ -522,11 +520,11 @@ classdef transversePopulationNode < populationNode
                 end                  
 
                 if ~contains(transversePopulationNodeObject.label, "0") && ~contains(transversePopulationNodeObject.label, "-1")
-                    alignTextOnPathway(text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.transverseChild1.xpos)/2, (transversePopulationNodeObject.ypos+transversePopulationNodeObject.transverseChild1.ypos)/2, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, true, true); 
-                    alignTextOnPathway(text(transversePopulationNodeObject.transverseChild1.xpos, transversePopulationNodeObject.transverseChild1.ypos, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, false, noOverlap);                    
+                    alignTextOnPathway(text((transversePopulationNodeObject.totalTime+transversePopulationNodeObject.transverseChild1.totalTime)/2, (transversePopulationNodeObject.phase+transversePopulationNodeObject.transverseChild1.phase)/2, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, true, true); 
+                    alignTextOnPathway(text(transversePopulationNodeObject.transverseChild1.totalTime, transversePopulationNodeObject.transverseChild1.phase, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, false, noOverlap);                    
                 else
-                    alignTextOnPathway(text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.transverseChild1.xpos)/2, (transversePopulationNodeObject.ypos+transversePopulationNodeObject.transverseChild1.ypos)/2, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, true, false); 
-                    alignTextOnPathway(text(transversePopulationNodeObject.transverseChild1.xpos, transversePopulationNodeObject.transverseChild1.ypos, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, false, noOverlap);
+                    alignTextOnPathway(text((transversePopulationNodeObject.totalTime+transversePopulationNodeObject.transverseChild1.totalTime)/2, (transversePopulationNodeObject.phase+transversePopulationNodeObject.transverseChild1.phase)/2, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, true, false); 
+                    alignTextOnPathway(text(transversePopulationNodeObject.transverseChild1.totalTime, transversePopulationNodeObject.transverseChild1.phase, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, false, noOverlap);
                 end
 
                 hold on;
@@ -537,13 +535,13 @@ classdef transversePopulationNode < populationNode
 
             if isa(transversePopulationNodeObject.transverseChild2, "populationNode")
 
-                if dephasingDegreeIsInNodeList(plottedLongitudinalNodes, transversePopulationNodeObject.transverseChild2.dephasingDegree, transversePopulationNodeObject.transverseChild2.level)
+                if phaseIsInNodeList(plottedLongitudinalNodes, transversePopulationNodeObject.transverseChild2.phase, transversePopulationNodeObject.transverseChild2.level)
                     noOverlap = false;
                 else
                     noOverlap = true;
                 end
 
-                amplitudeString = latex(transversePopulationNodeObject.transverseChild2.amplitudeLabel);
+                amplitudeString = latex(transversePopulationNodeObject.transverseChild2.amplitudeDirectlyAfterPulseWithoutT2p);
                 pathwayString = transversePopulationNodeObject.transverseChild2.label;
                 if strlength(amplitudeString)>1100
                     amplitudeString = "CharLimit";
@@ -553,8 +551,8 @@ classdef transversePopulationNode < populationNode
                     pathwayString = string(pathwayString(1:min(1199,end)));
                 end  
 
-                alignTextOnPathway(text(transversePopulationNodeObject.transverseChild2.xpos, transversePopulationNodeObject.transverseChild2.ypos, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, false, noOverlap);
-                alignTextOnPathway(text((transversePopulationNodeObject.xpos+transversePopulationNodeObject.transverseChild2.xpos)/2, (-transversePopulationNodeObject.ypos+transversePopulationNodeObject.transverseChild2.ypos)/2, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, true, false);               
+                alignTextOnPathway(text(transversePopulationNodeObject.transverseChild2.totalTime, transversePopulationNodeObject.transverseChild2.phase, pathwayString, 'FontSize', pathwayLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, false, noOverlap);
+                alignTextOnPathway(text((transversePopulationNodeObject.totalTime+transversePopulationNodeObject.transverseChild2.totalTime)/2, (-transversePopulationNodeObject.phase+transversePopulationNodeObject.transverseChild2.phase)/2, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, true, false);               
                 
                 hold on;
                 [plottedTransverseNodes, plottedLongitudinalNodes] = transversePopulationNodeObject.transverseChild2.plotNode(pathwayLabelFontsize, amplitudeLabelFontsize, plottedTransverseNodes, plottedLongitudinalNodes, height, f, labelOverlapThreshold);

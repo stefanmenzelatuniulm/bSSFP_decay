@@ -1,13 +1,13 @@
-function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, updateLabels] = populationTreeMergePruneHelper(dephasingDegrees, amplitudes, amplitudeLabels, labels)
+function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, updateLabels] = populationTreeMergePruneHelper(phases, amplitudes, amplitudeLabels, labels)
     
-    values = uniquetol(dephasingDegrees);
-    counts = histcounts(dephasingDegrees, [transpose(values), 2*max(values)+1]);
+    values = uniquetol(phases);
+    counts = histcounts(phases, [transpose(values), 2*max(values)+1]);
     repeatedElements = values(counts >=  1);
-    transverseDuplicateIndices = zeros(1, length(dephasingDegrees));
+    transverseDuplicateIndices = zeros(1, length(phases));
 
     iter = 0;
     for k = 1:length(repeatedElements)
-        addElements = find(ismembertol(dephasingDegrees,repeatedElements(k)));
+        addElements = find(ismembertol(phases,repeatedElements(k)));
         for m = 1:length(addElements)
             iter = iter+1;
             transverseDuplicateIndices(iter) = addElements(m);
@@ -18,12 +18,12 @@ function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, 
         transverseDuplicateIndices(iter+1:end) = [];
     end
 
-    [transverseGC, transverseGR] = groupcounts(dephasingDegrees(transverseDuplicateIndices)); 
+    [transverseGC, transverseGR] = groupcounts(phases(transverseDuplicateIndices)); 
     transverseGC = transpose(transverseGC); %number of occurrences of duplicate elements
     transverseGR = transpose(transverseGR); %duplicate elements
-    sums = sym(zeros(1, length(unique(dephasingDegrees))));
-    sums2 = sym(zeros(1, length(unique(dephasingDegrees))));
-    updateLabels = strrep(string(zeros(1, length(unique(dephasingDegrees)))), "0", "");
+    sums = sym(zeros(1, length(unique(phases))));
+    sums2 = sym(zeros(1, length(unique(phases))));
+    updateLabels = strrep(string(zeros(1, length(unique(phases)))), "0", "");
 
     iter1 = 0;
     iter2 = 0;

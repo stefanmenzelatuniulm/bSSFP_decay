@@ -1,4 +1,4 @@
-function isInNodeList = dephasingDegreeIsInNodeList(nodeList, dephasingDegree, level)
+function isInNodeList = phaseIsInNodeList(nodeList, phase, level)
 
     isInNodeList = false;
 
@@ -10,7 +10,7 @@ function isInNodeList = dephasingDegreeIsInNodeList(nodeList, dephasingDegree, l
 
             if populationNode.level == level
 
-                if ismembertol(populationNode.dephasingDegree, dephasingDegree, 0.001)
+                if ismembertol(populationNode.phase, phase, 0.001)
     
                     isInNodeList = true;
                     break;
