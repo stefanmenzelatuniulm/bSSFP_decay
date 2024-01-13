@@ -3,18 +3,18 @@ classdef populationTree
     properties (Access = public)
 
         root longitudinalPopulationNode;
-        height int64;
+        height double;
         a double;
         TR double;
         f double;
         f_eval double;
-        n_tot int64;
+        n_tot double;
         hyperpolarizationFactor double;
         yScale double;
         pathwayLabelFontSize double;
         amplitudeLabelFontSize double;
         labelOverlapThreshold double;
-        n_steady_state int64;
+        n_steady_state double;
         summedTransverseAmplitudes sym;
 
     end
@@ -52,7 +52,7 @@ classdef populationTree
                 populationTree.pathwayLabelFontSize = 12;               
                 populationTree.amplitudeLabelFontSize = 12;
                 populationTree.labelOverlapThreshold = 0.1;
-                populationTree.n_steady_state = intmax("int64");
+                populationTree.n_steady_state = inf;
 
             end
 
@@ -88,15 +88,14 @@ classdef populationTree
                 summedAmplitudes = sym(0);
                 
                 for m = 1:length(transverseBottomNodes)
-                s
+
                     node = transverseBottomNodes(m);
                     
-                    summedAmplitudes = summedAmplitudes+node.amplitudeDirectlyAfterPulse*exp(-abs(x-abs(node.dephasingDegree))/T2p)*exp(abs(node.dephasingDegree)/T2p)*exp(-x/T2); 
+                    partialSpinEchoLocation = -node.dephasingDegreeDirectlyAfterPulse; %measured on scale with t0=0 directly after last pulse
+                    summedAmplitudes = summedAmplitudes+node.amplitudeDirectlyAfterPulseWithoutT2p*exp(-abs(x-partialSpinEchoLocation)/T2p)*exp(-x/T2); 
                 
                 end
-    
-                summedAmplitudes = simplify(summedAmplitudes, "IgnoreAnalyticConstraints", true);
-
+  
                 populationTreeObject.summedTransverseAmplitudes(k) = summedAmplitudes;
                
                 populationTreeObject = populationTreeObject.pruneMerge(transverseBottomNodes, longitudinalBottomNodes);
@@ -198,7 +197,7 @@ classdef populationTree
             fig = figure('WindowState','maximized');
             ax = gca;
             ax.FontSize = 14;
-            title("Spin pathways for "+num2str(populationTreeObject.n_tot)+" pulses with initial $\frac{\alpha}{2}$ pulse spacing "+num2str(populationTreeObject.f)+" $T_R$", "interpreter", "latex", 'fontweight', 'bold', 'fontsize', 14);
+            title("Spin pathways for "+num2str(populationTreeObject.n_tot-1)+" pulses with initial $\frac{\alpha}{2}$ pulse spacing "+num2str(populationTreeObject.f)+" $T_R$", "interpreter", "latex", 'fontweight', 'bold', 'fontsize', 14);
             xlabel("$t$ (ms)", "interpreter", "latex", 'fontweight', 'bold', 'fontsize', 14);
             ylabel("Dephasing degree (a. u.)", "interpreter", "latex", 'fontweight', 'bold', 'fontsize', 14);
 
@@ -217,12 +216,6 @@ classdef populationTree
             h(1) = plot(0, 0, '.', 'color', [0 0.4470 0.7410], 'MarkerSize', 20, 'DisplayName', '\color[rgb]{0, 0.4470, 0.7410} Longitudinal population');
 
             legend(h, 'Location', 'northwest');
-
-            yExtentMax = populationTreeObject.TR*populationTreeObject.yScale*populationTreeObject.f+populationTreeObject.TR*populationTreeObject.yScale*(double(populationTreeObject.height)-2)+populationTreeObject.f_eval*populationTreeObject.TR*populationTreeObject.yScale*(double(populationTreeObject.height)-2);
-            yExtentMin = max(0, populationTreeObject.TR*populationTreeObject.yScale*populationTreeObject.f+populationTreeObject.TR*populationTreeObject.yScale*(double(populationTreeObject.height)-2));
-            ylim([-max(0.2, yExtentMin), yExtentMax]*1.15);
-            xl = xlim;
-            xlim([xl(1), xl(2)+0.25*(double(populationTreeObject.height-2)*populationTreeObject.TR+populationTreeObject.f_eval*populationTreeObject.TR)]);
 
             saveas(fig, pwd+"\spinPathways"+num2str(populationTreeObject.n_tot-1)+".fig");
             saveas(fig, pwd+"\spinPathways"+num2str(populationTreeObject.n_tot-1)+".svg");

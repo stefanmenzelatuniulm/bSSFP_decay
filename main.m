@@ -7,11 +7,11 @@ clc;
 %-------------SETTINGS-------------
 
 %Number of isochromats
-ns=2^15;
+ns=2^13;
             
 %Number of -/+ alpha pulses -1 (no sampling after last pulse due to +/-
 %alpha/2 tip-back pulse), not counting a/2 preparation pulse
-n_tot=1;
+n_tot=3;
 
 %Assume that steady state is reached after how many pulses
 n_steady_state = 20;
@@ -47,7 +47,7 @@ hyperpolarization=1;
 
 %Upper fit bounds for T1 and T2 
 T1max=20*1000; %in ms
-T2max=5*1000; %in ms
+T2max=20*1000; %in ms
 
 %splitfactor loop iterations are used in vectorizedM -> high splitfactor
 %causes less RAM usage in vectorizedM, but vectorization is not as efficient

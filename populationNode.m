@@ -4,13 +4,14 @@ classdef populationNode < emptyNode
     
         parent emptyNode;
         dephasingDegree double; %fraction of TR
+        dephasingDegreeDirectlyAfterPulse double;
         amplitude sym; %function of T1, T2, T2p
         amplitudeWithoutT2p sym; %T2p will be considered in populationTree based on the final dephasing degree
         amplitudeDirectlyAfterPulse sym;
         amplitudeDirectlyAfterPulseWithoutT2p sym; 
         amplitudeLabel sym;
         label string;
-        level int64;
+        level double;
         xpos double;
         ypos double;
     
@@ -19,7 +20,7 @@ classdef populationNode < emptyNode
     methods
 
         %Constructor
-        function populationNode = populationNode(parent, label, xpos, ypos, dephasingDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p)
+        function populationNode = populationNode(parent, label, xpos, ypos, dephasingDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, dephasingDegreeDirectlyAfterPulse)
 
             if nargin > 1
     
@@ -41,6 +42,7 @@ classdef populationNode < emptyNode
                 populationNode.amplitudeDirectlyAfterPulse = amplitudeDirectlyAfterPulse;
                 populationNode.amplitudeWithoutT2p = amplitudeWithoutT2p;
                 populationNode.amplitudeDirectlyAfterPulseWithoutT2p = amplitudeDirectlyAfterPulseWithoutT2p;
+                populationNode.dephasingDegreeDirectlyAfterPulse = dephasingDegreeDirectlyAfterPulse;
 
             else
                 
@@ -55,6 +57,7 @@ classdef populationNode < emptyNode
                 populationNode.amplitudeDirectlyAfterPulse = sym(1);
                 populationNode.amplitudeWithoutT2p = sym(1);
                 populationNode.amplitudeDirectlyAfterPulseWithoutT2p = sym(1);
+                populationNode.dephasingDegreeDirectlyAfterPulse = 0;
 
             end
     

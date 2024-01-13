@@ -1,13 +1,13 @@
 function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, updateLabels] = populationTreeMergePruneHelper(dephasingDegrees, amplitudes, amplitudeLabels, labels)
     
-    edges = min(dephasingDegrees) : max(dephasingDegrees)+1;
-    [counts, values] = histcounts(dephasingDegrees, edges);
+    values = uniquetol(dephasingDegrees);
+    counts = histcounts(dephasingDegrees, [transpose(values), 2*max(values)+1]);
     repeatedElements = values(counts >=  1);
     transverseDuplicateIndices = zeros(1, length(dephasingDegrees));
 
     iter = 0;
     for k = 1:length(repeatedElements)
-        addElements = find(dephasingDegrees == repeatedElements(k));
+        addElements = find(ismembertol(dephasingDegrees,repeatedElements(k)));
         for m = 1:length(addElements)
             iter = iter+1;
             transverseDuplicateIndices(iter) = addElements(m);
