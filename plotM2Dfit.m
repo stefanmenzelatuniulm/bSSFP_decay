@@ -9,14 +9,14 @@ function ft=plotM2Dfit(M,X,summedTransverseAmplitudes,T1max,T2max,TR,ns,plotTitl
 
     disp("Creating 2D plot of M vs "+strrep(xLabel,"$","")+" and fitting");
 
-    summedTransverseAmplitudes = abs(summedTransverseAmplitudes);
+    syms w;
+    summedTransverseAmplitudes = subs(abs(summedTransverseAmplitudes),w,0.3);
 
     fitfunction=strrep(strrep(strrep(strrep(strrep(string(summedTransverseAmplitudes)+"+0*T1+0*T2+0*T2p+0*M_eq", "T2p", "(T3p/"+num2str(T2pScale)+")"), "T1", "(T1/"+num2str(T1Scale)+")"), "T2", "(T2/"+num2str(T2Scale)+")"), "M_eq", "(M_eq/"+num2str(M_eqScale)+")"), "T3p", "T2p");
     coeffs=["T1" "T2" "T2p" "M_eq"];
-    %fitfunction = strrep(fitfunction,"*exp(-abs(x - 10/3)/(T2p/1))","*(-1)*exp(-abs(x - 10/3)/(T2p/1))");
-    options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0 0],'Upper',[T1max*T1Scale T2max*T2Scale T2max*T2pScale inf],'StartPoint',[13.1*1000*T1Scale 0.6*1000*T2Scale T2pScale/(pi*21/1000) M_eqScale*ns]);
+    options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0 0],'Upper',[inf inf inf inf],'StartPoint',[13.1*1000*T1Scale 0.6*1000*T2Scale T2pScale/(pi*21/1000) M_eqScale*ns]);
 
-    options2=fitoptions('Method','NonlinearLeastSquares','Lower',[13.1*1000*T1Scale 0.6*1000*T2Scale T2pScale/(pi*21/1000) M_eqScale*ns],'Upper',[13.1*1000*T1Scale 0.6*1000*T2Scale T2pScale/(pi*21/1000) M_eqScale*ns],'StartPoint',[13.1*1000*T1Scale 0.6*1000*T2Scale T2pScale/(pi*21/1000) M_eqScale*ns]);
+    %options2=fitoptions('Method','NonlinearLeastSquares','Lower',[13.1*1000*T1Scale 0.6*1000*T2Scale T2pScale/(pi*21/1000) M_eqScale*ns],'Upper',[13.1*1000*T1Scale 0.6*1000*T2Scale T2pScale/(pi*21/1000) M_eqScale*ns],'StartPoint',[13.1*1000*T1Scale 0.6*1000*T2Scale T2pScale/(pi*21/1000) M_eqScale*ns]);
     
     fttype = fittype(fitfunction,coefficients=coeffs);
 
@@ -29,16 +29,17 @@ function ft=plotM2Dfit(M,X,summedTransverseAmplitudes,T1max,T2max,TR,ns,plotTitl
 
     hold on;
     ft=fit(transpose(X),M,fttype,options);
-    ft2=fit(transpose(X),M,fttype,options2);
+    %ft2=fit(transpose(X),M,fttype,options2);
     plot(ax,ft,"r");
-    plot(ax,ft2,"g");
+    %plot(ax,ft2,"g");
 
     ax.FontSize = 14;
     title(plotTitle,"interpreter","latex",'fontweight','bold','fontsize',14);
     xlabel(xLabel,"interpreter","latex",'fontweight','bold','fontsize',14);
     ylabel("Simulated signal (a. u.)","interpreter","latex",'fontweight','bold','fontsize',14);
 
-    legend("Simulated signal (a. u)","Fit", "'Fit' with exact parameters from simulation settings", "interpreter","latex",'fontweight','bold','fontsize',14,"Location","Northwest");
+    %legend("Simulated signal (a. u)","Fit", "'Fit' with exact parameters from simulation settings", "interpreter","latex",'fontweight','bold','fontsize',14,"Location","Northwest");
+    legend("Simulated signal (a. u)","Fit", "interpreter","latex",'fontweight','bold','fontsize',14,"Location","Northwest");
 
     coeffs = coeffnames(ft);
     coeffvals= coeffvalues(ft);

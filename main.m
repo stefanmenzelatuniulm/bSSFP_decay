@@ -7,7 +7,7 @@ clc;
 %-------------SETTINGS-------------
 
 %Number of isochromats
-ns=2^13;
+ns=2^15;
             
 %Number of -/+ alpha pulses -1 (no sampling after last pulse due to +/-
 %alpha/2 tip-back pulse), not counting a/2 preparation pulse
@@ -46,8 +46,8 @@ Meq=1;
 hyperpolarization=1;
 
 %Upper fit bounds for T1 and T2 
-T1max=20000; %in ms
-T2max=20000; %in ms
+T1max=inf; %in ms
+T2max=inf; %in ms
 
 %splitfactor loop iterations are used in vectorizedM -> high splitfactor
 %causes less RAM usage in vectorizedM, but vectorization is not as efficient
@@ -96,7 +96,7 @@ deleteFigures("Figures");
 
 if recalculateAmplitudes
 
-    transverseAmplitudes = sumTransverseAmplitudes(w0, n_tot, a, TR, f, n_steady_state, hyperpolarization, true);
+    transverseAmplitudes = sumTransverseAmplitudes(n_tot, a, TR, f, n_steady_state, hyperpolarization, true);
     save(pwd+"\"+"transverseAmplitudes.mat","transverseAmplitudes","-v7.3");
 
 else

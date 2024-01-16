@@ -7,7 +7,7 @@
 %hyperpolarizationFactor: Meq is initially higher by this factor
 %createPlot: plot tree?
 
-function summedTransverseAmplitudes = sumTransverseAmplitudes(w0, n_tot, a, TR, f, n_steady_state, hyperpolarizationFactor, createPlot)
+function summedTransverseAmplitudes = sumTransverseAmplitudes(n_tot, a, TR, f, n_steady_state, hyperpolarizationFactor, createPlot)
     
     %Pathway label fontsize (only affects plot)
     pathwayLabelFontSize = 4;
@@ -23,10 +23,10 @@ function summedTransverseAmplitudes = sumTransverseAmplitudes(w0, n_tot, a, TR, 
     f_eval = 1;
     
     %Create tree with equilibrium magnetization as root
-    syms M_eq;
-    %parent, transverseChild, longitudinalChild, label, totalTime, phase, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, phaseDirectlyAfterPulse
+    syms M_eq real;
+    %parent, transverseChild, longitudinalChild, label, totalTime, coherenceDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, coherenceDegreeDirectlyAfterPulse
     root = longitudinalPopulationNode(emptyNode(), emptyNode(), emptyNode(), "", 0, 0, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, 0);
-    tree = populationTree(root, a, TR, f, f_eval, n_tot, hyperpolarizationFactor, pathwayLabelFontSize, amplitudeLabelFontSize, labelOverlapThreshold, n_steady_state, w0);
+    tree = populationTree(root, a, TR, f, f_eval, n_tot, hyperpolarizationFactor, pathwayLabelFontSize, amplitudeLabelFontSize, labelOverlapThreshold, n_steady_state);
     
     %Apply pulses
     [~, ~, tree] = tree.applyPulses();

@@ -1,4 +1,4 @@
-function isInNodeList = phaseIsInNodeList(nodeList, phase, level)
+function isInNodeList = coherenceDegreeIsInNodeList(nodeList, coherenceDegree, level)
 
     isInNodeList = false;
 
@@ -10,7 +10,7 @@ function isInNodeList = phaseIsInNodeList(nodeList, phase, level)
 
             if populationNode.level == level
 
-                if ismembertol(populationNode.phase, phase, 0.001)
+                if ismembertol(populationNode.coherenceDegree, coherenceDegree, 0.001)
     
                     isInNodeList = true;
                     break;

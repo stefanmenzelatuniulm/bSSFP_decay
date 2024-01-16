@@ -1,13 +1,13 @@
-function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, updateLabels] = populationTreeMergePruneHelper(phases, amplitudes, amplitudeLabels, labels)
+function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, updateLabels] = populationTreeMergePruneHelper(coherenceDegrees, amplitudes, amplitudeLabels, labels)
     
-    values = uniquetol(phases);
-    counts = histcounts(phases, [transpose(values), 2*max(values)+1]);
+    values = uniquetol(coherenceDegrees);
+    counts = histcounts(coherenceDegrees, [transpose(values), 2*max(values)+1]);
     repeatedElements = values(counts >=  1);
-    transverseDuplicateIndices = zeros(1, length(phases));
+    transverseDuplicateIndices = zeros(1, length(coherenceDegrees));
 
     iter = 0;
     for k = 1:length(repeatedElements)
-        addElements = find(ismembertol(phases,repeatedElements(k)));
+        addElements = find(ismembertol(coherenceDegrees,repeatedElements(k)));
         for m = 1:length(addElements)
             iter = iter+1;
             transverseDuplicateIndices(iter) = addElements(m);
@@ -18,12 +18,12 @@ function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, 
         transverseDuplicateIndices(iter+1:end) = [];
     end
 
-    [transverseGC, transverseGR] = groupcounts(phases(transverseDuplicateIndices)); 
+    [transverseGC, transverseGR] = groupcounts(coherenceDegrees(transverseDuplicateIndices)); 
     transverseGC = transpose(transverseGC); %number of occurrences of duplicate elements
     transverseGR = transpose(transverseGR); %duplicate elements
-    sums = sym(zeros(1, length(unique(phases))));
-    sums2 = sym(zeros(1, length(unique(phases))));
-    updateLabels = strrep(string(zeros(1, length(unique(phases)))), "0", "");
+    sums = sym(zeros(1, length(unique(coherenceDegrees))));
+    sums2 = sym(zeros(1, length(unique(coherenceDegrees))));
+    updateLabels = strrep(string(zeros(1, length(unique(coherenceDegrees)))), "0", "");
 
     iter1 = 0;
     iter2 = 0;
@@ -52,10 +52,10 @@ function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, 
     
     end
 
-    [uniqueAmplitudes, updateIndices, ~] = unique(amplitudes);
+    [~, updateIndices, ~] = unique(coherenceDegrees);
     updateIndices = transpose(updateIndices);
     pruneIndices = setdiff(linspace(1, length(amplitudes), length(amplitudes)), updateIndices);
-    summedAmplitudes = uniqueAmplitudes;
+    summedAmplitudes = amplitudes(updateIndices);
     summedAmplitudeLabels = amplitudeLabels(updateIndices);
     updateLabels = labels(updateIndices);
 
