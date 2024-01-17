@@ -13,13 +13,15 @@ classdef populationNode < emptyNode
         label string;
         level double;
         totalTime double;
+        dephasingTimeDirectlyAfterPulse double;
+        dephasingTime double;
     
     end
     
     methods
 
         %Constructor
-        function populationNode = populationNode(parent, label, totalTime, coherenceDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, coherenceDegreeDirectlyAfterPulse)
+        function populationNode = populationNode(parent, label, totalTime, coherenceDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, coherenceDegreeDirectlyAfterPulse, dephasingTimeDirectlyAfterPulse, dephasingTime)
 
             if nargin > 1
     
@@ -41,6 +43,8 @@ classdef populationNode < emptyNode
                 populationNode.amplitudeWithoutT2p = amplitudeWithoutT2p;
                 populationNode.amplitudeDirectlyAfterPulseWithoutT2p = amplitudeDirectlyAfterPulseWithoutT2p;
                 populationNode.coherenceDegreeDirectlyAfterPulse = coherenceDegreeDirectlyAfterPulse;
+                populationNode.dephasingTimeDirectlyAfterPulse = dephasingTimeDirectlyAfterPulse;
+                populationNode.dephasingTime = dephasingTime;
 
             else
                 
@@ -55,6 +59,8 @@ classdef populationNode < emptyNode
                 populationNode.amplitudeWithoutT2p = sym(1);
                 populationNode.amplitudeDirectlyAfterPulseWithoutT2p = sym(1);
                 populationNode.coherenceDegreeDirectlyAfterPulse = 0;
+                populationNode.dephasingTimeDirectlyAfterPulse = 0;
+                populationNode.dephasingTime = 0;
 
             end
     

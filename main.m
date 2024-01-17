@@ -7,7 +7,7 @@ clc;
 %-------------SETTINGS-------------
 
 %Number of isochromats
-ns=2^15;
+ns=12800;
             
 %Number of -/+ alpha pulses -1 (no sampling after last pulse due to +/-
 %alpha/2 tip-back pulse), not counting a/2 preparation pulse
@@ -30,7 +30,7 @@ TR = 10;
 
 %Range of times TR*f between initial alpha/2 and first -alpha pulse, if TR
 %is the time between -/+ alpha pulses
-f=1/5;
+f=1/2;
 
 %Calculate signal at time t_eval=f_eval*TR, measured from the end of the
 %pulse train. f_eval=0 e.g. calculates the signal directly after the end of
@@ -68,7 +68,7 @@ f_eval=linspace(f_eval_min,f_eval_max,nf_eval);
 %1 degree of freedom) Care: sigma is HWHM
 pd=makedist('tLocationScale','mu',w0,'sigma',FWHM/2,'nu',1);
 w=random(pd,1,ns);
-w=ones(1,ns)*w0;
+%w=ones(1,ns)*w0;
 
 %Calculate M Cant fully exploit the vectorization of vectorizedM due to RAM
 %overflow Balance has to be found of CPU time vs RAM usage
@@ -97,7 +97,7 @@ deleteFigures("Figures");
 
 if recalculateAmplitudes
 
-    transverseAmplitudes = sumTransverseAmplitudes(n_tot, a, TR, f, n_steady_state, hyperpolarization, true);
+    transverseAmplitudes = sumTransverseAmplitudes(n_tot, a, TR, f, n_steady_state, hyperpolarization, true, w0);
     save(pwd+"\"+"transverseAmplitudes.mat","transverseAmplitudes","-v7.3");
 
 else
@@ -112,6 +112,6 @@ for k=1:n_tot
 
     M_=permute(M(:,:,:,:,k),[4 1 2 3 5]);
 
-    plotM2Dfit(M_,f_eval,transverseAmplitudes(k),T1max,T2max,TR,ns,"bSSFP signal from "+num2str(ns)+" isochromats, after the "+num2str(k)+" th pulse for fixed $\alpha=$ "+num2str(a)+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f)+" $T_R$","$t$ (ms)","");
+    plotM2Dfit(M_,f_eval,transverseAmplitudes(k),T1max,T2max,TR,ns,w0,"bSSFP signal from "+num2str(ns)+" isochromats, after the "+num2str(k)+" th pulse for fixed $\alpha=$ "+num2str(a)+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f)+" $T_R$","$t$ (ms)","");
 
 end

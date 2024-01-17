@@ -15,13 +15,14 @@ classdef populationTree
         labelOverlapThreshold double;
         n_steady_state double;
         summedTransverseAmplitudes sym;
+        w0 double;
 
     end
         
     methods
         
         %Constructor
-        function populationTree = populationTree(root, a, TR, f, f_eval, n_tot, hyperpolarizationFactor, pathwayLabelFontSize, amplitudeLabelFontSize, labelOverlapThreshold, n_steady_state)
+        function populationTree = populationTree(root, a, TR, f, f_eval, n_tot, hyperpolarizationFactor, pathwayLabelFontSize, amplitudeLabelFontSize, labelOverlapThreshold, n_steady_state, w0)
 
             if nargin > 1
             
@@ -36,6 +37,7 @@ classdef populationTree
                 populationTree.amplitudeLabelFontSize = amplitudeLabelFontSize;
                 populationTree.labelOverlapThreshold = labelOverlapThreshold;
                 populationTree.n_steady_state = n_steady_state;
+                populationTree.w0 = w0;
 
             else
 
@@ -50,6 +52,7 @@ classdef populationTree
                 populationTree.amplitudeLabelFontSize = 12;
                 populationTree.labelOverlapThreshold = 0.1;
                 populationTree.n_steady_state = inf;
+                populationTree.w0 = 0;
 
             end
 
@@ -61,7 +64,7 @@ classdef populationTree
         %Applies pulse to population tree
         function [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject] = applyPulses(populationTreeObject)
 
-            syms x T2p T2 w real;
+            syms x T2s T2 w real;
 
             for k = 1:min(populationTreeObject.n_tot, populationTreeObject.n_steady_state)
 
@@ -92,12 +95,14 @@ classdef populationTree
 
                     node = transverseBottomNodes(m);
                     
-                    partialSpinEchoLocation = -node.coherenceDegreeDirectlyAfterPulse/(360*w); %measured on scale with t0=0 directly after last pulse
+                    %partialSpinEchoLocation = -node.coherenceDegreeDirectlyAfterPulse/(360*w); %measured on scale with t0=0 directly after last pulse
 
-                    T2pRelaxation = exp(-abs(x-partialSpinEchoLocation)/T2p);
+                    T2pRelaxation = 1;%exp(-abs(x-partialSpinEchoLocation)/T2p);
                     T2Relaxation = exp(-x/T2);
-                    phase = exp(1i*360*w*x);
-                    summedAmplitudes = summedAmplitudes+node.amplitudeDirectlyAfterPulseWithoutT2p*T2pRelaxation*T2Relaxation*phase; 
+                    %phase = cosd(360*w*x)+1i*sind(360*w*x);
+                    %phase = exp(1i*2*pi*populationTreeObject.w0*(x+node.dephasingTimeDirectlyAfterPulse))*exp(-(1/(2*pi*T2s))*abs(x+node.dephasingTimeDirectlyAfterPulse));
+                    phase = exp(1i*2*pi*populationTreeObject.w0*(x+node.dephasingTimeDirectlyAfterPulse))*exp(-(1/(T2s))*abs(x+node.dephasingTimeDirectlyAfterPulse));
+                    summedAmplitudes = summedAmplitudes+subs(node.amplitudeDirectlyAfterPulseWithoutT2p*T2pRelaxation*T2Relaxation, w, 0)*phase; 
                     
                     if k ~= 1
                         disp(newline+"Pathway "+node.label+" has...");
