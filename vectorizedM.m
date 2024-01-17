@@ -84,7 +84,7 @@ function M_tot = vectorizedM(a, TR, w, f, f_eval, n_tot, Meq, T1, T2, hyperpolar
     relaxation_TRf_eval = permute(relaxation_TRf_eval, [1 2 5 3 6 7 4 8]); %indices: relaxation_TRf_eval 3x3, a (3rd dimension), TR (4th dimension), w (5th dimension), f (6th dimension), f_eval (7th dimension), pulse (8th dimension)
 
     %parfor possible here because the order of summation does not matter
-    for k = 1:wsplitsize
+    parfor k = 1:wsplitsize
 
         w = wsplit(k, :);        
 

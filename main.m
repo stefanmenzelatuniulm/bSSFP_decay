@@ -30,7 +30,7 @@ TR = 10;
 
 %Range of times TR*f between initial alpha/2 and first -alpha pulse, if TR
 %is the time between -/+ alpha pulses
-f=1/2;
+f=1/5;
 
 %Calculate signal at time t_eval=f_eval*TR, measured from the end of the
 %pulse train. f_eval=0 e.g. calculates the signal directly after the end of
@@ -68,6 +68,7 @@ f_eval=linspace(f_eval_min,f_eval_max,nf_eval);
 %1 degree of freedom) Care: sigma is HWHM
 pd=makedist('tLocationScale','mu',w0,'sigma',FWHM/2,'nu',1);
 w=random(pd,1,ns);
+w=ones(1,ns)*w0;
 
 %Calculate M Cant fully exploit the vectorization of vectorizedM due to RAM
 %overflow Balance has to be found of CPU time vs RAM usage

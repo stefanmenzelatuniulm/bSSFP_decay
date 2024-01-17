@@ -14,7 +14,7 @@ function ft=plotM2Dfit(M,X,summedTransverseAmplitudes,T1max,T2max,TR,ns,plotTitl
 
     fitfunction=strrep(strrep(strrep(strrep(strrep(string(summedTransverseAmplitudes)+"+0*T1+0*T2+0*T2p+0*M_eq", "T2p", "(T3p/"+num2str(T2pScale)+")"), "T1", "(T1/"+num2str(T1Scale)+")"), "T2", "(T2/"+num2str(T2Scale)+")"), "M_eq", "(M_eq/"+num2str(M_eqScale)+")"), "T3p", "T2p");
     coeffs=["T1" "T2" "T2p" "M_eq"];
-    options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0 0],'Upper',[inf inf inf inf],'StartPoint',[13.1*1000*T1Scale 0.6*1000*T2Scale T2pScale/(pi*21/1000) M_eqScale*ns]);
+    options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0 0],'Upper',[inf inf inf inf],'StartPoint',[13.1*1000*T1Scale 0.6*1000*T2Scale 10e9*T2pScale/(pi*21/1000) M_eqScale*ns]);
 
     %options2=fitoptions('Method','NonlinearLeastSquares','Lower',[13.1*1000*T1Scale 0.6*1000*T2Scale T2pScale/(pi*21/1000) M_eqScale*ns],'Upper',[13.1*1000*T1Scale 0.6*1000*T2Scale T2pScale/(pi*21/1000) M_eqScale*ns],'StartPoint',[13.1*1000*T1Scale 0.6*1000*T2Scale T2pScale/(pi*21/1000) M_eqScale*ns]);
     
