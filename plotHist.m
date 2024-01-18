@@ -1,9 +1,7 @@
 %Plots histogram for the Larmor frequencies Deltaw of the different
 %isochromats in the rotated frame
 
-function plotHist(w,w0,FWHM,subfolder)  
-
-    mkdir(pwd+"\Figures\"+subfolder);
+function plotHist(w,w0,FWHM)  
 
     [~,ns]=size(w);
 
@@ -18,8 +16,8 @@ function plotHist(w,w0,FWHM,subfolder)
     ax = gca;
     ax.FontSize = 14; 
 
-    saveas(fig,pwd+"/Figures/"+subfolder+"/"+"Histw"+num2str(ns)+"isochromats.fig");
-    saveas(fig,pwd+"/Figures/"+subfolder+"/"+"Histw"+num2str(ns)+"isochromats.svg");
+    saveas(fig,pwd+"/Figures/"+"Histw"+num2str(ns)+"isochromats.fig");
+    saveas(fig,pwd+"/Figures/"+"Histw"+num2str(ns)+"isochromats.svg");
     
     close(fig);
 

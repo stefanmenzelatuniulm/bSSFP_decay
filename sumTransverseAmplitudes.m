@@ -7,7 +7,7 @@
 %hyperpolarizationFactor: Meq is initially higher by this factor
 %createPlot: plot tree?
 
-function [summedTransverseAmplitudes, summedTransverseAmplitudesNoIntegration] = sumTransverseAmplitudes(n_tot, a, TR, f, n_steady_state, hyperpolarizationFactor, createPlot, w0)
+function summedTransverseAmplitudes = sumTransverseAmplitudes(n_tot, a, TR, f, n_steady_state, hyperpolarizationFactor, createPlot, w0)
     
     %Pathway label fontsize (only affects plot)
     pathwayLabelFontSize = 6;
@@ -39,6 +39,5 @@ function [summedTransverseAmplitudes, summedTransverseAmplitudesNoIntegration] =
     end
     
     summedTransverseAmplitudes = tree.summedTransverseAmplitudes;
-    summedTransverseAmplitudesNoIntegration = tree.summedTransverseAmplitudesNoIntegration;
 
 end

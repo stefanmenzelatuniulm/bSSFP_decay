@@ -2,184 +2,56 @@
 
 function ft=plotM2Dfit(M,X,summedTransverseAmplitudes,T1max,T2max,TR,ns,plotTitle,xLabel,subfolder)
 
-    mkdir(pwd+"\Figures\"+subfolder);
+    disp("Creating 2D plot of M vs "+strrep(xLabel,"$","")+" and fitting");
 
-    if contains(subfolder,"oneIso")
+    summedTransverseAmplitudes = abs(summedTransverseAmplitudes);
 
-        disp("Creating 2D plot of M vs "+strrep(xLabel,"$","")+" and fitting");
+    fitfunction=string(summedTransverseAmplitudes)+"+0*T1+0*T2+0*T2s+0*M_eq";
+    coeffs=["T1" "T2" "T2s" "M_eq"];
+    options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0 0],'Upper',[T1max T2max T2max inf],'StartPoint',[13.1*1000 0.6*1000 1/(pi*21/1000) ns]);
 
-        load(pwd+"\"+"w.mat");
-        w_values = w;
-        clear w;
-        sym w;
+    options2=fitoptions('Method','NonlinearLeastSquares','Lower',[13.1*1000 0.6*1000 1/(pi*21/1000) ns],'Upper',[13.1*1000 0.6*1000 1/(pi*21/1000) ns],'StartPoint',[13.1*1000 0.6*1000 1/(pi*21/1000) ns]);
     
-        summedTransverseAmplitudes = abs(subs(summedTransverseAmplitudes, w, w_values(1)));
-    
-        fitfunction=string(summedTransverseAmplitudes)+"+0*T1+0*T2+0*T2s+0*M_eq";
-        coeffs=["T1" "T2" "T2s" "M_eq"];
-        options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0 0],'Upper',[T1max T2max inf inf],'StartPoint',[13.1*1000 0.6*1000 10e9/(pi*21/1000) ns]);
-    
-        options2=fitoptions('Method','NonlinearLeastSquares','Lower',[13.1*1000 0.6*1000 0 ns],'Upper',[13.1*1000 0.6*1000 inf ns],'StartPoint',[13.1*1000 0.6*1000 10e9/(pi*21/1000) ns]);
-        
-        fttype = fittype(fitfunction,coefficients=coeffs);
-    
-        fig=figure('WindowState','maximized');
-    
-        X=X*TR; 
-        
-        plot(X,M,"+");
-        ax = gca;
-    
-        hold on;
-        ft=fit(transpose(X),M,fttype,options);
-        ft2=fit(transpose(X),M,fttype,options2);
-        pf1 = plot(ax,ft,"r");
-        set(pf1,'lineWidth',1);
-        hold on;
-        pf2 = plot(ax,ft2,"g");
-        set(pf2,'lineWidth',1);
-    
-        fitfunction3 = "M_eq*exp(-abs(x-5)/T2s)";
-        coeffs3=["T2s" "M_eq"];
-        options3=fitoptions('Method','NonlinearLeastSquares','Lower',[0 -inf],'Upper',[T2max inf],'StartPoint',[1/(pi*21/1000) ns]);
-        fttype3 = fittype(fitfunction3,coefficients=coeffs3);
-        ft3=fit(transpose(X),M,fttype3,options3);
-    
-        hold on;
-        pf3 = plot(ax,ft3,"m");
-        set(pf3,'lineWidth',1);
-    
-        ax.FontSize = 14;
-        title(plotTitle,"interpreter","latex",'fontweight','bold','fontsize',14);
-        xlabel(xLabel,"interpreter","latex",'fontweight','bold','fontsize',14);
-        ylabel("Simulated signal (a. u.)","interpreter","latex",'fontweight','bold','fontsize',14);
-    
-        latexString = latex(summedTransverseAmplitudes);
-        if strlength(latexString)>1100
-            latexString = "CharLimit";
-        end
-    
-        legend("Simulated signal","Fit with "+string("$"+latexString+"$"), "'Fit' with known "+"$T_1$"+", $T_2$, $T_2^*$ from simulation settings", "Fit with Mueller model "+string("$"+latex(str2sym("M_eq*exp(-abs(x-5)/T2s)"))+"$"), "interpreter","latex",'fontweight','bold','fontsize',10,"Location","Northwest");
-        %legend("Simulated signal (a. u)","Fit", "interpreter","latex",'fontweight','bold','fontsize',14,"Location","Northwest");
+    fttype = fittype(fitfunction,coefficients=coeffs);
 
-    elseif contains(subfolder,"\finiteIso")
+    fig=figure('WindowState','maximized');
 
-        disp("Creating 2D plot of M vs "+strrep(xLabel,"$","")+" and fitting");
+    X=X*TR; 
+    
+    plot(X,M,"+");
+    ax = gca;
 
-        load(pwd+"\"+"w.mat");
-        w_values = w;
-        clear w;
-        sym w;
+    hold on;
+    ft=fit(transpose(X),M,fttype,options);
+    ft2=fit(transpose(X),M,fttype,options2);
+    pf1 = plot(ax,ft,"r");
+    set(pf1,'lineWidth',1);
+    hold on;
+    pf2 = plot(ax,ft2,"g");
+    set(pf2,'lineWidth',1);
 
-        summedTransverseAmplitudes_sumOverIso = 0;
+    fitfunction3 = "M_eq*exp(-abs(x-5)/T2s)";
+    coeffs3=["T2s" "M_eq"];
+    options3=fitoptions('Method','NonlinearLeastSquares','Lower',[0 -inf],'Upper',[T2max inf],'StartPoint',[1/(pi*21/1000) ns]);
+    fttype3 = fittype(fitfunction3,coefficients=coeffs3);
+    ft3=fit(transpose(X),M,fttype3,options3);
 
-        for k = 1:length(w)
-            summedTransverseAmplitudes_sumOverIso = summedTransverseAmplitudes_sumOverIso + subs(summedTransverseAmplitudes(k),w,w_values(k));
-        end
-    
-        summedTransverseAmplitudes_sumOverIso = abs(summedTransverseAmplitudes_sumOverIso);
+    hold on;
+    pf3 = plot(ax,ft3,"m");
+    set(pf3,'lineWidth',1);
 
-        fitfunction=string(summedTransverseAmplitudes_sumOverIso)+"+0*T1+0*T2+0*T2s+0*M_eq";
-        coeffs=["T1" "T2" "T2s" "M_eq"];
-        options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0 0],'Upper',[T1max T2max inf inf],'StartPoint',[13.1*1000 0.6*1000 10e9/(pi*21/1000) ns]);
-    
-        options2=fitoptions('Method','NonlinearLeastSquares','Lower',[13.1*1000 0.6*1000 inf ns],'Upper',[13.1*1000 0.6*1000 inf ns],'StartPoint',[13.1*1000 0.6*1000 inf ns]);
-        
-        fttype = fittype(fitfunction,coefficients=coeffs);
-    
-        fig=figure('WindowState','maximized');
-    
-        X=X*TR; 
-        
-        plot(X,M,"+");
-        ax = gca;
-    
-        hold on;
-        ft=fit(transpose(X),M,fttype,options);
-        ft2=fit(transpose(X),M,fttype,options2);
-        pf1 = plot(ax,ft,"r");
-        set(pf1,'lineWidth',1);
-        hold on;
-        pf2 = plot(ax,ft2,"g");
-        set(pf2,'lineWidth',1);
-    
-        fitfunction3 = "M_eq*exp(-abs(x-5)/T2s)";
-        coeffs3=["T2s" "M_eq"];
-        options3=fitoptions('Method','NonlinearLeastSquares','Lower',[0 -inf],'Upper',[T2max inf],'StartPoint',[1/(pi*21/1000) ns]);
-        fttype3 = fittype(fitfunction3,coefficients=coeffs3);
-        ft3=fit(transpose(X),M,fttype3,options3);
-    
-        hold on;
-        pf3 = plot(ax,ft3,"m");
-        set(pf3,'lineWidth',1);
-    
-        ax.FontSize = 14;
-        title(plotTitle,"interpreter","latex",'fontweight','bold','fontsize',14);
-        xlabel(xLabel,"interpreter","latex",'fontweight','bold','fontsize',14);
-        ylabel("Simulated signal (a. u.)","interpreter","latex",'fontweight','bold','fontsize',14);
-    
-        latexString = latex(summedTransverseAmplitudes);
-        if strlength(latexString)>1100
-            latexString = "CharLimit";
-        end
-    
-        legend("Simulated signal","Fit with "+string("$"+latexString+"$"), "'Fit' with known "+"$T_1$"+", $T_2$, $T_2^*$ from simulation settings", "Fit with Mueller model "+string("$"+latex(str2sym("M_eq*exp(-abs(x-5)/T2s)"))+"$"), "interpreter","latex",'fontweight','bold','fontsize',10,"Location","Northwest");
-        %legend("Simulated signal (a. u)","Fit", "interpreter","latex",'fontweight','bold','fontsize',14,"Location","Northwest");
+    ax.FontSize = 14;
+    title(plotTitle,"interpreter","latex",'fontweight','bold','fontsize',14);
+    xlabel(xLabel,"interpreter","latex",'fontweight','bold','fontsize',14);
+    ylabel("Simulated signal (a. u.)","interpreter","latex",'fontweight','bold','fontsize',14);
 
-    else %infiniteIso
-
-        disp("Creating 2D plot of M vs "+strrep(xLabel,"$","")+" and fitting");
-    
-        summedTransverseAmplitudes = abs(summedTransverseAmplitudes);
-    
-        fitfunction=string(summedTransverseAmplitudes)+"+0*T1+0*T2+0*T2s+0*M_eq";
-        coeffs=["T1" "T2" "T2s" "M_eq"];
-        options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0 0],'Upper',[T1max T2max T2max inf],'StartPoint',[13.1*1000 0.6*1000 1/(pi*21/1000) ns]);
-    
-        options2=fitoptions('Method','NonlinearLeastSquares','Lower',[13.1*1000 0.6*1000 1/(pi*21/1000) ns],'Upper',[13.1*1000 0.6*1000 1/(pi*21/1000) ns],'StartPoint',[13.1*1000 0.6*1000 1/(pi*21/1000) ns]);
-        
-        fttype = fittype(fitfunction,coefficients=coeffs);
-    
-        fig=figure('WindowState','maximized');
-    
-        X=X*TR; 
-        
-        plot(X,M,"+");
-        ax = gca;
-    
-        hold on;
-        ft=fit(transpose(X),M,fttype,options);
-        ft2=fit(transpose(X),M,fttype,options2);
-        pf1 = plot(ax,ft,"r");
-        set(pf1,'lineWidth',1);
-        hold on;
-        pf2 = plot(ax,ft2,"g");
-        set(pf2,'lineWidth',1);
-    
-        fitfunction3 = "M_eq*exp(-abs(x-5)/T2s)";
-        coeffs3=["T2s" "M_eq"];
-        options3=fitoptions('Method','NonlinearLeastSquares','Lower',[0 -inf],'Upper',[T2max inf],'StartPoint',[1/(pi*21/1000) ns]);
-        fttype3 = fittype(fitfunction3,coefficients=coeffs3);
-        ft3=fit(transpose(X),M,fttype3,options3);
-    
-        hold on;
-        pf3 = plot(ax,ft3,"m");
-        set(pf3,'lineWidth',1);
-    
-        ax.FontSize = 14;
-        title(plotTitle,"interpreter","latex",'fontweight','bold','fontsize',14);
-        xlabel(xLabel,"interpreter","latex",'fontweight','bold','fontsize',14);
-        ylabel("Simulated signal (a. u.)","interpreter","latex",'fontweight','bold','fontsize',14);
-    
-        latexString = latex(summedTransverseAmplitudes);
-        if strlength(latexString)>1100
-            latexString = "CharLimit";
-        end
-    
-        legend("Simulated signal","Fit with "+string("$"+latexString+"$"), "'Fit' with known "+"$T_1$"+", $T_2$, $T_2^*$ from simulation settings", "Fit with Mueller model "+string("$"+latex(str2sym("M_eq*exp(-abs(x-5)/T2s)"))+"$"), "interpreter","latex",'fontweight','bold','fontsize',10,"Location","Northwest");
-        %legend("Simulated signal (a. u)","Fit", "interpreter","latex",'fontweight','bold','fontsize',14,"Location","Northwest");        
-
+    latexString = latex(summedTransverseAmplitudes);
+    if strlength(latexString)>1100
+        latexString = "CharLimit";
     end
+
+    legend("Simulated signal","Fit with "+string("$"+latexString+"$"), "'Fit' with known "+"$T_1$"+", $T_2$, $T_2^*$ from simulation settings", "Fit with Mueller model "+string("$"+latex(str2sym("M_eq*exp(-abs(x-5)/T2s)"))+"$"), "interpreter","latex",'fontweight','bold','fontsize',10,"Location","Northwest");
+    %legend("Simulated signal (a. u)","Fit", "interpreter","latex",'fontweight','bold','fontsize',14,"Location","Northwest");
 
     coeffs = coeffnames(ft);
     coeffvals= coeffvalues(ft);
