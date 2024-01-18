@@ -1,44 +1,50 @@
 %Plots dependency of M on 1 variable
 
-function ft=plotM2Dfit(M,X,summedTransverseAmplitudes,T1max,T2max,TR,ns,plotTitle,xLabel,subfolder)
-
-    disp("Creating 2D plot of M vs "+strrep(xLabel,"$","")+" and fitting");
-
-    summedTransverseAmplitudes = abs(summedTransverseAmplitudes);
-
-    fitfunction=string(summedTransverseAmplitudes)+"+0*T1+0*T2+0*T2s+0*M_eq";
-    coeffs=["T1" "T2" "T2s" "M_eq"];
-    options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0 0],'Upper',[T1max T2max T2max inf],'StartPoint',[13.1*1000 0.6*1000 1/(pi*21/1000) ns]);
-
-    options2=fitoptions('Method','NonlinearLeastSquares','Lower',[13.1*1000 0.6*1000 1/(pi*21/1000) ns],'Upper',[13.1*1000 0.6*1000 1/(pi*21/1000) ns],'StartPoint',[13.1*1000 0.6*1000 1/(pi*21/1000) ns]);
+function ft=plotM2Dfit(M,X,summedTransverseAmplitudes,T1max,T2max,TR,ns,plotTitle,xLabel,subfolder,discreteSum)
     
-    fttype = fittype(fitfunction,coefficients=coeffs);
+    if ~discreteSum    
 
-    fig=figure('WindowState','maximized');
-
-    X=X*TR; 
+        disp("Creating 2D plot of M vs "+strrep(xLabel,"$","")+" and fitting");
     
-    plot(X,M,"+");
-    ax = gca;
+        summedTransverseAmplitudes = abs(summedTransverseAmplitudes);
+    
+        fitfunction=string(summedTransverseAmplitudes)+"+0*T1+0*T2+0*T2s+0*M_eq";
+        coeffs=["T1" "T2" "T2s" "M_eq"];
+        options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0 0],'Upper',[T1max T2max T2max inf],'StartPoint',[13.1*1000 0.6*1000 1/(pi*21/1000) ns]);
+    
+        options2=fitoptions('Method','NonlinearLeastSquares','Lower',[13.1*1000 0.6*1000 1/(pi*21/1000) ns],'Upper',[13.1*1000 0.6*1000 1/(pi*21/1000) ns],'StartPoint',[13.1*1000 0.6*1000 1/(pi*21/1000) ns]);
+        
+        fttype = fittype(fitfunction,coefficients=coeffs);
+    
+        fig=figure('WindowState','maximized');
+    
+        X=X*TR; 
+        
+        plot(X,M,"+");
+        ax = gca;
+    
+        hold on;
+        ft=fit(transpose(X),M,fttype,options);
+        ft2=fit(transpose(X),M,fttype,options2);
+        pf1 = plot(ax,ft,"r");
+        set(pf1,'lineWidth',1);
+        hold on;
+        pf2 = plot(ax,ft2,"g");
+        set(pf2,'lineWidth',1);
+    
+        fitfunction3 = "M_eq*exp(-abs(x-5)/T2s)";
+        coeffs3=["T2s" "M_eq"];
+        options3=fitoptions('Method','NonlinearLeastSquares','Lower',[0 -inf],'Upper',[T2max inf],'StartPoint',[1/(pi*21/1000) ns]);
+        fttype3 = fittype(fitfunction3,coefficients=coeffs3);
+        ft3=fit(transpose(X),M,fttype3,options3);
+    
+        hold on;
+        pf3 = plot(ax,ft3,"m");
+        set(pf3,'lineWidth',1);
 
-    hold on;
-    ft=fit(transpose(X),M,fttype,options);
-    ft2=fit(transpose(X),M,fttype,options2);
-    pf1 = plot(ax,ft,"r");
-    set(pf1,'lineWidth',1);
-    hold on;
-    pf2 = plot(ax,ft2,"g");
-    set(pf2,'lineWidth',1);
+    else
 
-    fitfunction3 = "M_eq*exp(-abs(x-5)/T2s)";
-    coeffs3=["T2s" "M_eq"];
-    options3=fitoptions('Method','NonlinearLeastSquares','Lower',[0 -inf],'Upper',[T2max inf],'StartPoint',[1/(pi*21/1000) ns]);
-    fttype3 = fittype(fitfunction3,coefficients=coeffs3);
-    ft3=fit(transpose(X),M,fttype3,options3);
-
-    hold on;
-    pf3 = plot(ax,ft3,"m");
-    set(pf3,'lineWidth',1);
+    end
 
     ax.FontSize = 14;
     title(plotTitle,"interpreter","latex",'fontweight','bold','fontsize',14);

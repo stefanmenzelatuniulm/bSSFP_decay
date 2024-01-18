@@ -7,11 +7,11 @@ clc;
 %-------------SETTINGS-------------
 
 %Number of isochromats
-ns=2^15;
+ns=128;
             
 %Number of -/+ alpha pulses -1 (no sampling after last pulse due to +/-
 %alpha/2 tip-back pulse), not counting a/2 preparation pulse
-n_tot=32;
+n_tot=3;
 
 %Assume that steady state is reached after how many pulses
 n_steady_state = 12;
@@ -59,6 +59,10 @@ recalculateM=true;
 %Recalculate transverse Amplitudes or read from save file transverseAmplitudes.mat?
 recalculateAmplitudes=true;
 
+%Use discrete sum over known isochromats instead of integral over all
+%possible isochromats?
+discreteSum = true;
+
 %-------------END OF SETTINGS-------------
 
 f_eval=linspace(f_eval_min,f_eval_max,nf_eval);
@@ -68,7 +72,6 @@ f_eval=linspace(f_eval_min,f_eval_max,nf_eval);
 %1 degree of freedom) Care: sigma is HWHM
 pd=makedist('tLocationScale','mu',w0,'sigma',FWHM/2,'nu',1);
 w=random(pd,1,ns);
-%w=ones(1,ns)*w0;
 
 %Calculate M Cant fully exploit the vectorization of vectorizedM due to RAM
 %overflow Balance has to be found of CPU time vs RAM usage
@@ -113,7 +116,7 @@ for m = 1:length(f)
     for k=1:n_tot
     
         M_=permute(M(:,:,m,:,k),[4 1 2 3 5]);
-        plotM2Dfit(M_,f_eval,transverseAmplitudes(k),T1max,T2max,TR,ns,"bSSFP signal from "+num2str(ns)+" isochromats, after the "+num2str(k)+" th pulse for fixed $\alpha=$ "+num2str(a)+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$","$t$ (ms)","");
+        plotM2Dfit(M_,f_eval,transverseAmplitudes(k),T1max,T2max,TR,ns,"bSSFP signal from "+num2str(ns)+" isochromats, after the "+num2str(k)+" th pulse for fixed $\alpha=$ "+num2str(a)+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$","$t$ (ms)","", discreteSum);
     
     end
 

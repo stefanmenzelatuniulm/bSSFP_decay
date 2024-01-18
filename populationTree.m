@@ -67,7 +67,8 @@ classdef populationTree
         %Applies pulse to population tree
         function [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject] = applyPulses(populationTreeObject)
 
-            syms x T2s T2 w real;
+            syms x T2 w real;
+            T2s = sym("T2s", "real");
 
             for k = 1:min(populationTreeObject.n_tot, populationTreeObject.n_steady_state)
 
@@ -100,17 +101,17 @@ classdef populationTree
                     
                     %partialSpinEchoLocation = -node.coherenceDegreeDirectlyAfterPulse/(360*w); %measured on scale with t0=0 directly after last pulse
 
-                    T2pRelaxation = 1;%exp(-abs(x-partialSpinEchoLocation)/T2p);
+                    T2sRelaxation = 1;%exp(-abs(x-partialSpinEchoLocation)/T2s);
                     T2Relaxation = exp(-x/T2); %offset for correction of float errors?
                     %phase = cosd(360*w*x)+1i*sind(360*w*x);
                     %phase = exp(1i*2*pi*populationTreeObject.w0*(x+node.dephasingTimeDirectlyAfterPulse))*exp(-(1/(2*pi*T2s))*abs(x+node.dephasingTimeDirectlyAfterPulse));
                     phase = exp(1i*2*pi*populationTreeObject.w0*(x+node.dephasingTimeDirectlyAfterPulse))*exp(-(1/T2s)*abs(x+node.dephasingTimeDirectlyAfterPulse));
-                    summedAmplitudes = summedAmplitudes+subs(node.amplitudeDirectlyAfterPulseWithoutT2p*T2pRelaxation*T2Relaxation, w, 0)*phase; 
+                    summedAmplitudes = summedAmplitudes+subs(node.amplitudeDirectlyAfterPulseWithoutT2s*T2sRelaxation*T2Relaxation, w, 0)*phase; 
                     
                     if k ~= 1
                         disp(newline+"Pathway "+node.label+" has...");
-                        disp("  Amplitude (directly after pulse, with T1 and T2 relaxation at t0 = 0, but without any prior T2p relaxation): "+string(node.amplitudeDirectlyAfterPulseWithoutT2p));
-                        disp("  T2' Relaxation: "+string(T2pRelaxation));
+                        disp("  Amplitude (directly after pulse, with T1 and T2 relaxation at t0 = 0, but without any prior T2s relaxation): "+string(node.amplitudeDirectlyAfterPulseWithoutT2s));
+                        disp("  T2' Relaxation: "+string(T2sRelaxation));
                         disp("  Additional T2 Relaxation after t = t0 + x: "+string(T2Relaxation));
                         disp("  Phase: "+string(phase));
                         disp("1 of the "+num2str(length(transverseBottomNodes))+" summands for the fitting model for "+num2str(k)+" pulses is the product of the above terms.");
@@ -149,8 +150,8 @@ classdef populationTree
             transverseAmplitudeLabels = sym(zeros(length(transverseBottomNodes), 1));
             transversecoherenceDegrees = zeros(length(transverseBottomNodes), 1);
             transverseAmplitudesDirectlyAfterPulse = sym(zeros(length(transverseBottomNodes), 1));
-            transverseAmplitudesWithoutT2p = sym(zeros(length(transverseBottomNodes), 1));
-            transverseAmplitudesDirectlyAfterPulseWithoutT2p = sym(zeros(length(transverseBottomNodes), 1));
+            transverseAmplitudesWithoutT2s = sym(zeros(length(transverseBottomNodes), 1));
+            transverseAmplitudesDirectlyAfterPulseWithoutT2s = sym(zeros(length(transverseBottomNodes), 1));
 
             for k = 1:length(transverseBottomNodes)
 
@@ -161,8 +162,8 @@ classdef populationTree
                 transverseAmplitudeLabels(k,1) = node.amplitudeLabel;
                 transversecoherenceDegrees(k,1) = node.coherenceDegreeDirectlyAfterPulse;
                 transverseAmplitudesDirectlyAfterPulse(k,1) = node.amplitudeDirectlyAfterPulse;
-                transverseAmplitudesWithoutT2p(k,1) = node.amplitudeWithoutT2p;
-                transverseAmplitudesDirectlyAfterPulseWithoutT2p(k,1) = node.amplitudeDirectlyAfterPulseWithoutT2p;
+                transverseAmplitudesWithoutT2s(k,1) = node.amplitudeWithoutT2s;
+                transverseAmplitudesDirectlyAfterPulseWithoutT2s(k,1) = node.amplitudeDirectlyAfterPulseWithoutT2s;
 
             end
 
@@ -171,8 +172,8 @@ classdef populationTree
             longitudinalAmplitudeLabels = sym(zeros(length(longitudinalBottomNodes), 1));
             longitudinalcoherenceDegrees = zeros(length(longitudinalBottomNodes), 1);
             longitudinalAmplitudesDirectlyAfterPulse = sym(zeros(length(longitudinalBottomNodes), 1));
-            longitudinalAmplitudesWithoutT2p = sym(zeros(length(longitudinalBottomNodes), 1));
-            longitudinalAmplitudesDirectlyAfterPulseWithoutT2p = sym(zeros(length(longitudinalBottomNodes), 1));
+            longitudinalAmplitudesWithoutT2s = sym(zeros(length(longitudinalBottomNodes), 1));
+            longitudinalAmplitudesDirectlyAfterPulseWithoutT2s = sym(zeros(length(longitudinalBottomNodes), 1));
 
             for k = 1:length(longitudinalBottomNodes)
 
@@ -183,16 +184,16 @@ classdef populationTree
                 longitudinalAmplitudeLabels(k,1) = node.amplitudeLabel;
                 longitudinalcoherenceDegrees(k,1) = node.coherenceDegreeDirectlyAfterPulse;
                 longitudinalAmplitudesDirectlyAfterPulse(k,1) = node.amplitudeDirectlyAfterPulse;
-                longitudinalAmplitudesWithoutT2p(k,1) = node.amplitudeWithoutT2p;
-                longitudinalAmplitudesDirectlyAfterPulseWithoutT2p(k,1) = node.amplitudeDirectlyAfterPulseWithoutT2p;                
+                longitudinalAmplitudesWithoutT2s(k,1) = node.amplitudeWithoutT2s;
+                longitudinalAmplitudesDirectlyAfterPulseWithoutT2s(k,1) = node.amplitudeDirectlyAfterPulseWithoutT2s;                
 
             end
             
-            [longitudinalUpdateIndices, longitudinalPruneIndices, longitudinalSummedAmplitudes, longitudinalSummedAmplitudeLabels, longitudinalUpdateFullLabels, longitudinalSummedAmplitudesDirectlyAfterPulse, longitudinalSummedAmplitudesWithoutT2p, longitudinalSummedAmplitudesDirectlyAfterPulseWithoutT2p] = populationTreeMergePruneHelper(longitudinalcoherenceDegrees, longitudinalAmplitudes, longitudinalAmplitudeLabels, longitudinalLabels, longitudinalAmplitudesDirectlyAfterPulse, longitudinalAmplitudesWithoutT2p, longitudinalAmplitudesDirectlyAfterPulseWithoutT2p);
+            [longitudinalUpdateIndices, longitudinalPruneIndices, longitudinalSummedAmplitudes, longitudinalSummedAmplitudeLabels, longitudinalUpdateFullLabels, longitudinalSummedAmplitudesDirectlyAfterPulse, longitudinalSummedAmplitudesWithoutT2s, longitudinalSummedAmplitudesDirectlyAfterPulseWithoutT2s] = populationTreeMergePruneHelper(longitudinalcoherenceDegrees, longitudinalAmplitudes, longitudinalAmplitudeLabels, longitudinalLabels, longitudinalAmplitudesDirectlyAfterPulse, longitudinalAmplitudesWithoutT2s, longitudinalAmplitudesDirectlyAfterPulseWithoutT2s);
             longitudinalPruneLabels = longitudinalLabels(longitudinalPruneIndices);
             longitudinalUpdateLabels = longitudinalLabels(longitudinalUpdateIndices);
 
-            [transverseUpdateIndices, transversePruneIndices, transverseAmplitudes, transverseSummedAmplitudeLabels, transverseUpdateFullLabels, transverseSummedAmplitudesDirectlyAfterPulse, transverseSummedAmplitudesWithoutT2p, transverseSummedAmplitudesDirectlyAfterPulseWithoutT2p] = populationTreeMergePruneHelper(transversecoherenceDegrees, transverseAmplitudes, transverseAmplitudeLabels, transverseLabels, transverseAmplitudesDirectlyAfterPulse, transverseAmplitudesWithoutT2p, transverseAmplitudesDirectlyAfterPulseWithoutT2p);
+            [transverseUpdateIndices, transversePruneIndices, transverseAmplitudes, transverseSummedAmplitudeLabels, transverseUpdateFullLabels, transverseSummedAmplitudesDirectlyAfterPulse, transverseSummedAmplitudesWithoutT2s, transverseSummedAmplitudesDirectlyAfterPulseWithoutT2s] = populationTreeMergePruneHelper(transversecoherenceDegrees, transverseAmplitudes, transverseAmplitudeLabels, transverseLabels, transverseAmplitudesDirectlyAfterPulse, transverseAmplitudesWithoutT2s, transverseAmplitudesDirectlyAfterPulseWithoutT2s);
             transversePruneLabels = transverseLabels(transversePruneIndices);
             transverseUpdateLabels = transverseLabels(transverseUpdateIndices);
 
@@ -204,7 +205,7 @@ classdef populationTree
 
             for k = 1:length(longitudinalUpdateLabels)
 
-                populationTreeObject = populationTreeObject.updateAmplitudeLabel(longitudinalUpdateLabels(k), longitudinalSummedAmplitudes(k), longitudinalSummedAmplitudeLabels(k), longitudinalUpdateFullLabels(k), longitudinalSummedAmplitudesDirectlyAfterPulse(k), longitudinalSummedAmplitudesWithoutT2p(k), longitudinalSummedAmplitudesDirectlyAfterPulseWithoutT2p(k));
+                populationTreeObject = populationTreeObject.updateAmplitudeLabel(longitudinalUpdateLabels(k), longitudinalSummedAmplitudes(k), longitudinalSummedAmplitudeLabels(k), longitudinalUpdateFullLabels(k), longitudinalSummedAmplitudesDirectlyAfterPulse(k), longitudinalSummedAmplitudesWithoutT2s(k), longitudinalSummedAmplitudesDirectlyAfterPulseWithoutT2s(k));
             
             end
 
@@ -216,7 +217,7 @@ classdef populationTree
 
             for k = 1:length(transverseUpdateLabels)
             
-                populationTreeObject = populationTreeObject.updateAmplitudeLabel(transverseUpdateLabels(k), transverseAmplitudes(k), transverseSummedAmplitudeLabels(k), transverseUpdateFullLabels(k), transverseSummedAmplitudesDirectlyAfterPulse(k), transverseSummedAmplitudesWithoutT2p(k), transverseSummedAmplitudesDirectlyAfterPulseWithoutT2p(k));
+                populationTreeObject = populationTreeObject.updateAmplitudeLabel(transverseUpdateLabels(k), transverseAmplitudes(k), transverseSummedAmplitudeLabels(k), transverseUpdateFullLabels(k), transverseSummedAmplitudesDirectlyAfterPulse(k), transverseSummedAmplitudesWithoutT2s(k), transverseSummedAmplitudesDirectlyAfterPulseWithoutT2s(k));
             
             end
 
@@ -230,9 +231,9 @@ classdef populationTree
         end
 
         %Update node with label
-        function populationTreeObject = updateAmplitudeLabel(populationTreeObject, updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2p, summedAmplitudesDirectlyAfterPulseWithoutT2p)
+        function populationTreeObject = updateAmplitudeLabel(populationTreeObject, updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2s, summedAmplitudesDirectlyAfterPulseWithoutT2s)
 
-            populationTreeObject.root = populationTreeObject.root.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2p, summedAmplitudesDirectlyAfterPulseWithoutT2p);
+            populationTreeObject.root = populationTreeObject.root.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2s, summedAmplitudesDirectlyAfterPulseWithoutT2s);
 
         end
 
