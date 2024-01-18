@@ -5,9 +5,9 @@ classdef populationNode < emptyNode
         parent emptyNode;
         coherenceDegree double; 
         coherenceDegreeDirectlyAfterPulse double;
-        amplitude sym; %function of T1, T2, T2p
-        amplitudeWithoutT2p sym; %T2p will be considered in populationTree based on the final dephasing degree
-        amplitudeDirectlyAfterPulse sym;
+        %amplitude sym; %function of T1, T2, T2p
+        %amplitudeWithoutT2p sym; %T2p will be considered in populationTree based on the final dephasing degree
+        %amplitudeDirectlyAfterPulse sym;
         amplitudeDirectlyAfterPulseWithoutT2p sym; 
         amplitudeLabel sym;
         label string;

@@ -15,6 +15,7 @@ classdef populationTree
         labelOverlapThreshold double;
         n_steady_state double;
         summedTransverseAmplitudes sym;
+        summedTransverseAmplitudesNoIntegration sym;
         w0 double;
         maxNodeDrawLevel double;
 
@@ -61,13 +62,15 @@ classdef populationTree
 
             populationTree.height = 0;
             populationTree.summedTransverseAmplitudes = sym(zeros(1, populationTree.n_tot)); %sum of transverse amplitudes after k pulses 
+            populationTree.summedTransverseAmplitudesNoIntegration = sym(zeros(1, populationTree.n_tot));
     
         end
 
         %Applies pulse to population tree
         function [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject] = applyPulses(populationTreeObject)
 
-            syms x T2s T2 w real;
+            syms x T2 w real;
+            T2s = sym("T2s","real"); %T2s already is a function name
 
             for k = 1:min(populationTreeObject.n_tot, populationTreeObject.n_steady_state)
 
@@ -93,6 +96,7 @@ classdef populationTree
 
                 %Calculate sum of transverse amplitudes
                 summedAmplitudes = sym(0);
+                summedAmplitudesNoIntegration = sym(0);
                 
                 for m = 1:length(transverseBottomNodes)
 
@@ -105,7 +109,9 @@ classdef populationTree
                     %phase = cosd(360*w*x)+1i*sind(360*w*x);
                     %phase = exp(1i*2*pi*populationTreeObject.w0*(x+node.dephasingTimeDirectlyAfterPulse))*exp(-(1/(2*pi*T2s))*abs(x+node.dephasingTimeDirectlyAfterPulse));
                     phase = exp(1i*2*pi*populationTreeObject.w0*(x+node.dephasingTimeDirectlyAfterPulse))*exp(-(1/T2s)*abs(x+node.dephasingTimeDirectlyAfterPulse));
+                    symPhaseNoIntegration = exp(1i*2*pi*w*(x+node.dephasingTimeDirectlyAfterPulse));
                     summedAmplitudes = summedAmplitudes+subs(node.amplitudeDirectlyAfterPulseWithoutT2p*T2pRelaxation*T2Relaxation, w, 0)*phase; 
+                    summedAmplitudesNoIntegration = summedAmplitudesNoIntegration+node.amplitudeDirectlyAfterPulseWithoutT2p*T2pRelaxation*T2Relaxation*symPhaseNoIntegration;
                     
                     if k ~= 1
                         disp(newline+"Pathway "+node.label+" has...");
@@ -120,6 +126,7 @@ classdef populationTree
                 end
   
                 populationTreeObject.summedTransverseAmplitudes(k) = summedAmplitudes;
+                populationTreeObject.summedTransverseAmplitudesNoIntegration(k) = summedAmplitudesNoIntegration;
 
             end
 
@@ -128,12 +135,14 @@ classdef populationTree
                 for k = populationTreeObject.n_tot+1:populationTreeObject.n_steady_state
                 
                     populationTreeObject.summedTransverseAmplitudes(k) = populationTreeObject.summedTransverseAmplitudes(k-1);
+                    populationTreeObject.summedTransverseAmplitudesNoIntegration(k) = populationTreeObject.summedTransverseAmplitudesNoIntegration(k-1);
 
                 end
             
             end
 
             populationTreeObject.summedTransverseAmplitudes = populationTreeObject.summedTransverseAmplitudes(2:end);
+            populationTreeObject.summedTransverseAmplitudesNoIntegration = populationTreeObject.summedTransverseAmplitudesNoIntegration(2:end);
 
         end
 
@@ -262,8 +271,8 @@ classdef populationTree
 
             legend(h, 'Location', 'northwest');
 
-            saveas(fig, pwd+"\spinPathways"+num2str(populationTreeObject.n_tot-1)+"_"+num2str(populationTreeObject.f)+".fig");
-            saveas(fig, pwd+"\spinPathways"+num2str(populationTreeObject.n_tot-1)+"_"+num2str(populationTreeObject.f)+".svg");
+            saveas(fig, pwd+"\Figures"+"\spinPathways"+num2str(populationTreeObject.n_tot-1)+"_"+num2str(populationTreeObject.f)+".fig");
+            saveas(fig, pwd+"\Figures"+"\spinPathways"+num2str(populationTreeObject.n_tot-1)+"_"+num2str(populationTreeObject.f)+".svg");
 
             close(fig);
         
