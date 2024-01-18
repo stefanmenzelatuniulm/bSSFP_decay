@@ -4,7 +4,7 @@ classdef emptyNode
 
     methods (Static)
 
-        function [plottedTransverseNodes, plottedLongitudinalNodes] = plotNode(~, ~, ~, ~, ~, ~, ~, ~)
+        function [plottedTransverseNodes, plottedLongitudinalNodes] = plotNode(~, ~, ~, ~, ~, ~, ~, ~, ~)
 
             plottedTransverseNodes = [];
             plottedLongitudinalNodes = [];
@@ -21,7 +21,7 @@ classdef emptyNode
         function emptyNodeObject = prune(emptyNodeObject, ~)            
         end
 
-        function emptyNodeObject = updateAmplitudeLabel(emptyNodeObject, ~, ~, ~, ~)
+        function emptyNodeObject = updateAmplitudeLabel(emptyNodeObject, ~, ~, ~, ~, ~, ~, ~)
         end
 
     end

@@ -10,14 +10,16 @@
 function summedTransverseAmplitudes = sumTransverseAmplitudes(n_tot, a, TR, f, n_steady_state, hyperpolarizationFactor, createPlot, w0)
     
     %Pathway label fontsize (only affects plot)
-    pathwayLabelFontSize = 4;
+    pathwayLabelFontSize = 6;
     
     %Amplitude label fontsize (only affects plot)
-    amplitudeLabelFontSize = 5;
+    amplitudeLabelFontSize = 6;
     
     %Label overlap threshold (longitudinal amplitude labels are put below
     %pathways if abs(f-0.5)<labelOverlapThreshold) (only affects plot)
     labelOverlapThreshold = 0.1;
+
+    maxNodeDrawLevel = 1;
     
     %Evaluate tree at f_eval*TR after the last pulse
     f_eval = 1;
@@ -26,7 +28,7 @@ function summedTransverseAmplitudes = sumTransverseAmplitudes(n_tot, a, TR, f, n
     syms M_eq real;
     %parent, transverseChild, longitudinalChild, label, totalTime, coherenceDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, coherenceDegreeDirectlyAfterPulse
     root = longitudinalPopulationNode(emptyNode(), emptyNode(), emptyNode(), "", 0, 0, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, 0, 0, 0);
-    tree = populationTree(root, a, TR, f, f_eval, n_tot, hyperpolarizationFactor, pathwayLabelFontSize, amplitudeLabelFontSize, labelOverlapThreshold, n_steady_state, w0);
+    tree = populationTree(root, a, TR, f, f_eval, n_tot, hyperpolarizationFactor, pathwayLabelFontSize, amplitudeLabelFontSize, labelOverlapThreshold, n_steady_state, w0, maxNodeDrawLevel);
     
     %Apply pulses
     [~, ~, tree] = tree.applyPulses();

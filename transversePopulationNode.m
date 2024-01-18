@@ -82,7 +82,7 @@ classdef transversePopulationNode < populationNode
                 syms T1 T2 T2p TR a w real;
                 E1 = exp(-f*TR/T1);
                 E2 = exp(-f*TR/T2);
-                dephasing = cosd(360*w*TR_*f)+1i*sind(360*w*TR_*f);
+                dephasing = exp(1i*2*pi*w*TR_*f);
                 
                 %Not inverted coherenceDegree
                 w0 = 1;
@@ -354,7 +354,7 @@ classdef transversePopulationNode < populationNode
         end
 
         %Updates node with label
-        function transversePopulationNodeObject = updateAmplitudeLabel(transversePopulationNodeObject, updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel)
+        function transversePopulationNodeObject = updateAmplitudeLabel(transversePopulationNodeObject, updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2p, summedAmplitudesDirectlyAfterPulseWithoutT2p)
 
             if updateLabel == newLabel
                 return;
@@ -366,6 +366,9 @@ classdef transversePopulationNode < populationNode
                 transversePopulationNodeObject.transverseChild1.label = newLabel;
                 transversePopulationNodeObject.transverseChild1.amplitude = summedAmplitudes;
                 transversePopulationNodeObject.transverseChild1.amplitudeLabel = summedAmplitudeLabels;
+                transversePopulationNodeObject.transverseChild1.amplitudeDirectlyAfterPulse = summedAmplitudesDirectlyAfterPulse;
+                transversePopulationNodeObject.transverseChild1.amplitudeWithoutT2p = summedAmplitudesWithoutT2p;
+                transversePopulationNodeObject.transverseChild1.amplitudeDirectlyAfterPulseWithoutT2p = summedAmplitudesDirectlyAfterPulseWithoutT2p;
 
             elseif isa(transversePopulationNodeObject.longitudinalChild1, "populationNode") && transversePopulationNodeObject.longitudinalChild1.label == updateLabel
 
@@ -373,6 +376,9 @@ classdef transversePopulationNode < populationNode
                 transversePopulationNodeObject.longitudinalChild1.label = newLabel;
                 transversePopulationNodeObject.longitudinalChild1.amplitude = summedAmplitudes;
                 transversePopulationNodeObject.longitudinalChild1.amplitudeLabel = summedAmplitudeLabels;
+                transversePopulationNodeObject.longitudinalChild1.amplitudeDirectlyAfterPulse = summedAmplitudesDirectlyAfterPulse;
+                transversePopulationNodeObject.longitudinalChild1.amplitudeWithoutT2p = summedAmplitudesWithoutT2p;
+                transversePopulationNodeObject.longitudinalChild1.amplitudeDirectlyAfterPulseWithoutT2p = summedAmplitudesDirectlyAfterPulseWithoutT2p;                
 
             elseif isa(transversePopulationNodeObject.transverseChild2, "populationNode") && transversePopulationNodeObject.transverseChild2.label == updateLabel
 
@@ -380,6 +386,9 @@ classdef transversePopulationNode < populationNode
                 transversePopulationNodeObject.transverseChild2.label = newLabel;
                 transversePopulationNodeObject.transverseChild2.amplitude = summedAmplitudes;
                 transversePopulationNodeObject.transverseChild2.amplitudeLabel = summedAmplitudeLabels;
+                transversePopulationNodeObject.transverseChild2.amplitudeDirectlyAfterPulse = summedAmplitudesDirectlyAfterPulse;
+                transversePopulationNodeObject.transverseChild2.amplitudeWithoutT2p = summedAmplitudesWithoutT2p;
+                transversePopulationNodeObject.transverseChild2.amplitudeDirectlyAfterPulseWithoutT2p = summedAmplitudesDirectlyAfterPulseWithoutT2p;                
 
             elseif isa(transversePopulationNodeObject.longitudinalChild2, "populationNode") && transversePopulationNodeObject.longitudinalChild2.label == updateLabel
 
@@ -387,19 +396,26 @@ classdef transversePopulationNode < populationNode
                 transversePopulationNodeObject.longitudinalChild2.label = newLabel;
                 transversePopulationNodeObject.longitudinalChild2.amplitude = summedAmplitudes;
                 transversePopulationNodeObject.longitudinalChild2.amplitudeLabel = summedAmplitudeLabels;
+                transversePopulationNodeObject.longitudinalChild2.amplitudeDirectlyAfterPulse = summedAmplitudesDirectlyAfterPulse;
+                transversePopulationNodeObject.longitudinalChild2.amplitudeWithoutT2p = summedAmplitudesWithoutT2p;
+                transversePopulationNodeObject.longitudinalChild2.amplitudeDirectlyAfterPulseWithoutT2p = summedAmplitudesDirectlyAfterPulseWithoutT2p;                
              
             else
                     
-                transversePopulationNodeObject.transverseChild1 = transversePopulationNodeObject.transverseChild1.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
-                transversePopulationNodeObject.longitudinalChild1 = transversePopulationNodeObject.longitudinalChild1.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
-                transversePopulationNodeObject.transverseChild2 = transversePopulationNodeObject.transverseChild2.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
-                transversePopulationNodeObject.longitudinalChild2 = transversePopulationNodeObject.longitudinalChild2.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel);
+                transversePopulationNodeObject.transverseChild1 = transversePopulationNodeObject.transverseChild1.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2p, summedAmplitudesDirectlyAfterPulseWithoutT2p);
+                transversePopulationNodeObject.longitudinalChild1 = transversePopulationNodeObject.longitudinalChild1.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2p, summedAmplitudesDirectlyAfterPulseWithoutT2p);
+                transversePopulationNodeObject.transverseChild2 = transversePopulationNodeObject.transverseChild2.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2p, summedAmplitudesDirectlyAfterPulseWithoutT2p);
+                transversePopulationNodeObject.longitudinalChild2 = transversePopulationNodeObject.longitudinalChild2.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2p, summedAmplitudesDirectlyAfterPulseWithoutT2p);
 
             end
 
         end
 
-        function plotPathway(transversePopulationNodeObject, TRnum, fnum)
+        function plotPathway(transversePopulationNodeObject, TRnum, fnum, maxNodeLevel)
+
+            if transversePopulationNodeObject.level > maxNodeLevel
+                return;
+            end
 
             hold on;
 
@@ -408,7 +424,7 @@ classdef transversePopulationNode < populationNode
             if isa(transversePopulationNodeObject.longitudinalChild1, "populationNode")
                 line([transversePopulationNodeObject.totalTime, transversePopulationNodeObject.longitudinalChild1.totalTime], [transversePopulationNodeObject.coherenceDegree, transversePopulationNodeObject.longitudinalChild1.coherenceDegree], 'color', [0 0.4470 0.7410], 'LineStyle', ':', 'LineWidth', 0.5);           
                 hold on;
-                transversePopulationNodeObject.longitudinalChild1.plotPathway(TRnum, fnum);
+                transversePopulationNodeObject.longitudinalChild1.plotPathway(TRnum, fnum, maxNodeLevel);
             end
 
             if isa(transversePopulationNodeObject.longitudinalChild2, "populationNode")
@@ -418,13 +434,13 @@ classdef transversePopulationNode < populationNode
                     line([transversePopulationNodeObject.totalTime, transversePopulationNodeObject.totalTime], [transversePopulationNodeObject.coherenceDegree, -transversePopulationNodeObject.coherenceDegree], 'color', [0.5 0.5 0.5], 'LineStyle', ':', 'LineWidth', 0.5);               
                 end
                 hold on;
-                transversePopulationNodeObject.longitudinalChild2.plotPathway(TRnum, fnum)
+                transversePopulationNodeObject.longitudinalChild2.plotPathway(TRnum, fnum, maxNodeLevel)
             end
 
             if isa(transversePopulationNodeObject.transverseChild1, "populationNode")
                 line([transversePopulationNodeObject.totalTime, transversePopulationNodeObject.transverseChild1.totalTime], [transversePopulationNodeObject.coherenceDegree, transversePopulationNodeObject.transverseChild1.coherenceDegree], 'color', [0.6350 0.0780 0.1840], 'LineStyle', '--', 'LineWidth', 0.5);
                 hold on;
-                transversePopulationNodeObject.transverseChild1.plotPathway(TRnum, fnum);
+                transversePopulationNodeObject.transverseChild1.plotPathway(TRnum, fnum, maxNodeLevel);
             end
 
             if isa(transversePopulationNodeObject.transverseChild2, "populationNode")
@@ -434,15 +450,19 @@ classdef transversePopulationNode < populationNode
                     line([transversePopulationNodeObject.totalTime, transversePopulationNodeObject.totalTime], [transversePopulationNodeObject.coherenceDegree, -transversePopulationNodeObject.coherenceDegree], 'color', [0.5 0.5 0.5], 'LineStyle', '--', 'LineWidth', 0.5);
                 end
                 hold on;
-                transversePopulationNodeObject.transverseChild2.plotPathway(TRnum, fnum);
+                transversePopulationNodeObject.transverseChild2.plotPathway(TRnum, fnum, maxNodeLevel);
             end
 
             hold on;
 
         end
 
-        function [plottedTransverseNodes, plottedLongitudinalNodes] = plotNode(transversePopulationNodeObject, pathwayLabelFontsize, amplitudeLabelFontsize, plottedTransverseNodes, plottedLongitudinalNodes, height, f, labelOverlapThreshold)
+        function [plottedTransverseNodes, plottedLongitudinalNodes] = plotNode(transversePopulationNodeObject, pathwayLabelFontsize, amplitudeLabelFontsize, plottedTransverseNodes, plottedLongitudinalNodes, height, f, labelOverlapThreshold, maxNodeLevel)
 
+            if transversePopulationNodeObject.level > maxNodeLevel+1
+                return;
+            end
+            
             hold on;
 
             if coherenceDegreeIsInNodeList(plottedLongitudinalNodes, transversePopulationNodeObject.coherenceDegree, transversePopulationNodeObject.level)
@@ -464,7 +484,7 @@ classdef transversePopulationNode < populationNode
                     noOverlap = true;
                 end
 
-                amplitudeString = latex(transversePopulationNodeObject.longitudinalChild1.amplitudeDirectlyAfterPulseWithoutT2p);
+                amplitudeString = latex(transversePopulationNodeObject.longitudinalChild1.amplitudeLabel);
                 pathwayString = transversePopulationNodeObject.longitudinalChild1.label;
                 if strlength(amplitudeString)>1100
                     amplitudeString = "CharLimit";
@@ -483,7 +503,7 @@ classdef transversePopulationNode < populationNode
                 end  
 
                 hold on;
-                [plottedTransverseNodes, plottedLongitudinalNodes] = transversePopulationNodeObject.longitudinalChild1.plotNode(pathwayLabelFontsize, amplitudeLabelFontsize, plottedTransverseNodes, plottedLongitudinalNodes, height, f, labelOverlapThreshold);
+                [plottedTransverseNodes, plottedLongitudinalNodes] = transversePopulationNodeObject.longitudinalChild1.plotNode(pathwayLabelFontsize, amplitudeLabelFontsize, plottedTransverseNodes, plottedLongitudinalNodes, height, f, labelOverlapThreshold, maxNodeLevel);
                 hold on;
 
             end
@@ -496,7 +516,7 @@ classdef transversePopulationNode < populationNode
                     noOverlap = true;
                 end
 
-                amplitudeString = latex(transversePopulationNodeObject.longitudinalChild2.amplitudeDirectlyAfterPulseWithoutT2p);
+                amplitudeString = latex(transversePopulationNodeObject.longitudinalChild2.amplitudeLabel);
                 pathwayString = transversePopulationNodeObject.longitudinalChild2.label;
                 if strlength(amplitudeString)>1100
                     amplitudeString = "CharLimit";
@@ -515,7 +535,7 @@ classdef transversePopulationNode < populationNode
                 end  
 
                 hold on;
-                [plottedTransverseNodes, plottedLongitudinalNodes] = transversePopulationNodeObject.longitudinalChild2.plotNode(pathwayLabelFontsize, amplitudeLabelFontsize, plottedTransverseNodes, plottedLongitudinalNodes, height, f, labelOverlapThreshold);
+                [plottedTransverseNodes, plottedLongitudinalNodes] = transversePopulationNodeObject.longitudinalChild2.plotNode(pathwayLabelFontsize, amplitudeLabelFontsize, plottedTransverseNodes, plottedLongitudinalNodes, height, f, labelOverlapThreshold, maxNodeLevel);
                 hold on;
 
             end
@@ -528,7 +548,7 @@ classdef transversePopulationNode < populationNode
                     noOverlap = true;
                 end
 
-                amplitudeString = latex(transversePopulationNodeObject.transverseChild1.amplitudeDirectlyAfterPulseWithoutT2p);
+                amplitudeString = latex(transversePopulationNodeObject.transverseChild1.amplitudeLabel);
                 pathwayString = transversePopulationNodeObject.transverseChild1.label;
                 if strlength(amplitudeString)>1100
                     amplitudeString = "CharLimit";
@@ -547,7 +567,7 @@ classdef transversePopulationNode < populationNode
                 end
 
                 hold on;
-                [plottedTransverseNodes, plottedLongitudinalNodes] = transversePopulationNodeObject.transverseChild1.plotNode(pathwayLabelFontsize, amplitudeLabelFontsize, plottedTransverseNodes, plottedLongitudinalNodes, height, f, labelOverlapThreshold);
+                [plottedTransverseNodes, plottedLongitudinalNodes] = transversePopulationNodeObject.transverseChild1.plotNode(pathwayLabelFontsize, amplitudeLabelFontsize, plottedTransverseNodes, plottedLongitudinalNodes, height, f, labelOverlapThreshold, maxNodeLevel);
                 hold on;
 
             end
@@ -560,7 +580,7 @@ classdef transversePopulationNode < populationNode
                     noOverlap = true;
                 end
 
-                amplitudeString = latex(transversePopulationNodeObject.transverseChild2.amplitudeDirectlyAfterPulseWithoutT2p);
+                amplitudeString = latex(transversePopulationNodeObject.transverseChild2.amplitudeLabel);
                 pathwayString = transversePopulationNodeObject.transverseChild2.label;
                 if strlength(amplitudeString)>1100
                     amplitudeString = "CharLimit";
@@ -574,7 +594,7 @@ classdef transversePopulationNode < populationNode
                 alignTextOnPathway(text((transversePopulationNodeObject.totalTime+transversePopulationNodeObject.transverseChild2.totalTime)/2, (-transversePopulationNodeObject.coherenceDegree+transversePopulationNodeObject.transverseChild2.coherenceDegree)/2, string("$"+amplitudeString+"$"), 'FontSize', amplitudeLabelFontsize, 'Color', [0.6350 0.0780 0.1840], 'Interpreter', 'latex'), 1, true, false);               
                 
                 hold on;
-                [plottedTransverseNodes, plottedLongitudinalNodes] = transversePopulationNodeObject.transverseChild2.plotNode(pathwayLabelFontsize, amplitudeLabelFontsize, plottedTransverseNodes, plottedLongitudinalNodes, height, f, labelOverlapThreshold);
+                [plottedTransverseNodes, plottedLongitudinalNodes] = transversePopulationNodeObject.transverseChild2.plotNode(pathwayLabelFontsize, amplitudeLabelFontsize, plottedTransverseNodes, plottedLongitudinalNodes, height, f, labelOverlapThreshold, maxNodeLevel);
                 hold on;
 
             end

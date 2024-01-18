@@ -1,20 +1,20 @@
-%falls alle pulse +a -> kein min bei t=1/2 bei z.B. n=3
-
 clear all;
 close all;
 clc; 
 
+%evtl T1, T2 vernachlässigen gegenüber T2s -> auf inf setzen
+
 %-------------SETTINGS-------------
 
 %Number of isochromats
-ns=12800;
+ns=2^15;
             
 %Number of -/+ alpha pulses -1 (no sampling after last pulse due to +/-
 %alpha/2 tip-back pulse), not counting a/2 preparation pulse
-n_tot=3;
+n_tot=32;
 
 %Assume that steady state is reached after how many pulses
-n_steady_state = 20;
+n_steady_state = 12;
 
 %Metabolite properties (13C lactate)
 w0=300/1000; %in kHz, rotating frame (gamma*B0 is filtered by heterodyne mixing)
@@ -30,7 +30,7 @@ TR = 10;
 
 %Range of times TR*f between initial alpha/2 and first -alpha pulse, if TR
 %is the time between -/+ alpha pulses
-f=1/2;
+f=[1/2 1/3];
 
 %Calculate signal at time t_eval=f_eval*TR, measured from the end of the
 %pulse train. f_eval=0 e.g. calculates the signal directly after the end of
@@ -51,7 +51,7 @@ T2max=inf; %in ms
 
 %splitfactor loop iterations are used in vectorizedM -> high splitfactor
 %causes less RAM usage in vectorizedM, but vectorization is not as efficient
-splitfactor=128; 
+splitfactor=256; 
 
 %Recalculate M, or read existing M from save file M.mat?
 recalculateM=true;
@@ -93,7 +93,7 @@ mkdir("Figures");
 deleteFigures("Figures");
 
 %Plot histogram of w
-%plotHist(w,w0,FWHM);
+plotHist(w,w0,FWHM);
 
 if recalculateAmplitudes
 
@@ -110,8 +110,12 @@ disp(" ");
 
 for k=1:n_tot
 
-    M_=permute(M(:,:,:,:,k),[4 1 2 3 5]);
+    for m = 1:length(f)
 
-    plotM2Dfit(M_,f_eval,transverseAmplitudes(k),T1max,T2max,TR,ns,w0,"bSSFP signal from "+num2str(ns)+" isochromats, after the "+num2str(k)+" th pulse for fixed $\alpha=$ "+num2str(a)+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f)+" $T_R$","$t$ (ms)","");
+        M_=permute(M(:,:,m,:,k),[4 1 2 3 5]);
+
+        plotM2Dfit(M_,f_eval,transverseAmplitudes(k),T1max,T2max,TR,ns,"bSSFP signal from "+num2str(ns)+" isochromats, after the "+num2str(k)+" th pulse for fixed $\alpha=$ "+num2str(a)+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$","$t$ (ms)","");
+
+    end
 
 end
