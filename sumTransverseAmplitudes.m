@@ -19,7 +19,7 @@ function summedTransverseAmplitudes = sumTransverseAmplitudes(n_tot, a, TR, f, n
     %pathways if abs(f-0.5)<labelOverlapThreshold) (only affects plot)
     labelOverlapThreshold = 0.1;
 
-    maxNodeDrawLevel = 1;
+    maxNodeDrawLevel = 7;
     
     %Evaluate tree at f_eval*TR after the last pulse
     f_eval = 1;

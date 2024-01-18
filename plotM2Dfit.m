@@ -50,7 +50,7 @@ function ft=plotM2Dfit(M,X,summedTransverseAmplitudes,T1max,T2max,TR,ns,plotTitl
         latexString = "CharLimit";
     end
 
-    legend("Simulated signal (a. u)","Fit with "+string("$"+latexString+"$"), "'Fit' with known "+"$T_1$"+", $T_2$, $T_2^*$ from simulation settings", "Fit with Mueller model "+string("$"+latex(str2sym("M_eq*exp(-abs(x-5)/T2s)"))+"$"), "interpreter","latex",'fontweight','bold','fontsize',10,"Location","Northwest");
+    legend("Simulated signal","Fit with "+string("$"+latexString+"$"), "'Fit' with known "+"$T_1$"+", $T_2$, $T_2^*$ from simulation settings", "Fit with Mueller model "+string("$"+latex(str2sym("M_eq*exp(-abs(x-5)/T2s)"))+"$"), "interpreter","latex",'fontweight','bold','fontsize',10,"Location","Northwest");
     %legend("Simulated signal (a. u)","Fit", "interpreter","latex",'fontweight','bold','fontsize',14,"Location","Northwest");
 
     coeffs = coeffnames(ft);

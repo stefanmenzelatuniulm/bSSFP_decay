@@ -74,7 +74,7 @@ w=random(pd,1,ns);
 %overflow Balance has to be found of CPU time vs RAM usage
 if recalculateM
 
-    M=zeros(1,1,1,nf_eval,n_tot); %indices: a (1st dimension), TR (2nd dimension), f (3rd dimension), f_eval (4th dimension), pulse (5th dimension)
+    M=zeros(1,1,length(f),nf_eval,n_tot); %indices: a (1st dimension), TR (2nd dimension), f (3rd dimension), f_eval (4th dimension), pulse (5th dimension)
         
     M(:,:,:,:,:)=vectorizedM(a,TR,w,f,f_eval,n_tot,Meq,T1,T2,hyperpolarization,splitfactor); 
   
@@ -95,27 +95,26 @@ deleteFigures("Figures");
 %Plot histogram of w
 plotHist(w,w0,FWHM);
 
-if recalculateAmplitudes
+for m = 1:length(f)
 
-    transverseAmplitudes = sumTransverseAmplitudes(n_tot, a, TR, f, n_steady_state, hyperpolarization, true, w0);
-    save(pwd+"\"+"transverseAmplitudes.mat","transverseAmplitudes","-v7.3");
-
-else
-
-    load(pwd+"\"+"transverseAmplitudes.mat");
-
-end
-
-disp(" ");
-
-for k=1:n_tot
-
-    for m = 1:length(f)
-
+    if recalculateAmplitudes
+    
+        transverseAmplitudes = sumTransverseAmplitudes(n_tot, a, TR, f(m), n_steady_state, hyperpolarization, true, w0);
+        save(pwd+"\"+"transverseAmplitudes.mat","transverseAmplitudes","-v7.3");
+    
+    else
+    
+        load(pwd+"\"+"transverseAmplitudes.mat");
+    
+    end
+    
+    disp(" ");
+    
+    for k=1:n_tot
+    
         M_=permute(M(:,:,m,:,k),[4 1 2 3 5]);
-
         plotM2Dfit(M_,f_eval,transverseAmplitudes(k),T1max,T2max,TR,ns,"bSSFP signal from "+num2str(ns)+" isochromats, after the "+num2str(k)+" th pulse for fixed $\alpha=$ "+num2str(a)+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$","$t$ (ms)","");
-
+    
     end
 
 end

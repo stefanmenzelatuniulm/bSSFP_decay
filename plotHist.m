@@ -10,7 +10,7 @@ function plotHist(w,w0,FWHM)
 
     xlim([w0-FWHM*20,w0+FWHM*20]);
     title("Histogram of $\Delta\omega$ of "+num2str(ns)+" different isochromats","interpreter","latex",'fontweight','bold','fontsize',16);
-    xlabel("$\Delta\omega$ (Hz)","interpreter","latex",'fontweight','bold','fontsize',14);
+    xlabel("$\Delta\omega$ (kHz)","interpreter","latex",'fontweight','bold','fontsize',14);
     ylabel("Occurrences","interpreter","latex",'fontweight','bold','fontsize',14);
     
     ax = gca;
