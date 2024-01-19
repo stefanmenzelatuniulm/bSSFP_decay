@@ -1,4 +1,4 @@
-function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, updateLabels, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2s, summedAmplitudesDirectlyAfterPulseWithoutT2s] = populationTreeMergePruneHelper(coherenceDegrees, amplitudes, amplitudeLabels, labels, amplitudesDirectlyAfterPulse, amplitudesWithoutT2s, amplitudesDirectlyAfterPulseWithoutT2s)
+function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, updateLabels, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2p, summedAmplitudesDirectlyAfterPulseWithoutT2p] = populationTreeMergePruneHelper(coherenceDegrees, amplitudes, amplitudeLabels, labels, amplitudesDirectlyAfterPulse, amplitudesWithoutT2p, amplitudesDirectlyAfterPulseWithoutT2p)
     
     values = uniquetol(coherenceDegrees);
     counts = histcounts(coherenceDegrees, [transpose(values), 2*max(values)+1]);
@@ -38,8 +38,8 @@ function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, 
             sums(k) = sums(k)+amplitudes(index);
             sums2(k) = sums2(k)+amplitudeLabels(index);
             sums3(k) = sums3(k)+amplitudesDirectlyAfterPulse(index);
-            sums4(k) = sums4(k)+amplitudesWithoutT2s(index);
-            sums5(k) = sums5(k)+amplitudesDirectlyAfterPulseWithoutT2s(index);
+            sums4(k) = sums4(k)+amplitudesWithoutT2p(index);
+            sums5(k) = sums5(k)+amplitudesDirectlyAfterPulseWithoutT2p(index);
             if m~= transverseGC(k)
                 updateLabels(k) = updateLabels(k)+labels(index)+" + ";
             else
@@ -53,8 +53,8 @@ function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, 
             amplitudes(index) = sums(k); %A now contains the sum over all occurences of each element
             amplitudeLabels(index) = sums2(k);
             amplitudesDirectlyAfterPulse(index) = sums3(k);
-            amplitudesWithoutT2s(index) = sums4(k);
-            amplitudesDirectlyAfterPulseWithoutT2s(index) = sums5(k);
+            amplitudesWithoutT2p(index) = sums4(k);
+            amplitudesDirectlyAfterPulseWithoutT2p(index) = sums5(k);
             labels(index) = updateLabels(k);
         end
 
@@ -67,8 +67,8 @@ function [updateIndices, pruneIndices, summedAmplitudes, summedAmplitudeLabels, 
     summedAmplitudes = amplitudes(updateIndices);
     summedAmplitudeLabels = amplitudeLabels(updateIndices);
     summedAmplitudesDirectlyAfterPulse = amplitudesDirectlyAfterPulse(updateIndices);
-    summedAmplitudesWithoutT2s = amplitudesWithoutT2s(updateIndices);
-    summedAmplitudesDirectlyAfterPulseWithoutT2s = amplitudesDirectlyAfterPulseWithoutT2s(updateIndices);
+    summedAmplitudesWithoutT2p = amplitudesWithoutT2p(updateIndices);
+    summedAmplitudesDirectlyAfterPulseWithoutT2p = amplitudesDirectlyAfterPulseWithoutT2p(updateIndices);
     updateLabels = labels(updateIndices);
 
 end

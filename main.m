@@ -7,11 +7,11 @@ clc;
 %-------------SETTINGS-------------
 
 %Number of isochromats
-ns=128;
+ns=2^15;
             
 %Number of -/+ alpha pulses -1 (no sampling after last pulse due to +/-
 %alpha/2 tip-back pulse), not counting a/2 preparation pulse
-n_tot=3;
+n_tot=8;
 
 %Assume that steady state is reached after how many pulses
 n_steady_state = 12;
@@ -59,9 +59,7 @@ recalculateM=true;
 %Recalculate transverse Amplitudes or read from save file transverseAmplitudes.mat?
 recalculateAmplitudes=true;
 
-%Use discrete sum over known isochromats instead of integral over all
-%possible isochromats?
-discreteSum = true;
+discreteSumInsteadOfIntegral = true;
 
 %-------------END OF SETTINGS-------------
 
@@ -102,12 +100,14 @@ for m = 1:length(f)
 
     if recalculateAmplitudes
     
-        transverseAmplitudes = sumTransverseAmplitudes(n_tot, a, TR, f(m), n_steady_state, hyperpolarization, true, w0);
+        [transverseAmplitudes, transverseAmplitudesPhaseNoInt] = sumTransverseAmplitudes(n_tot, a, TR, f(m), n_steady_state, hyperpolarization, true, w0);
         save(pwd+"\"+"transverseAmplitudes.mat","transverseAmplitudes","-v7.3");
+        save(pwd+"\"+"transverseAmplitudesPhaseNoInt.mat","transverseAmplitudesPhaseNoInt","-v7.3");
     
     else
     
         load(pwd+"\"+"transverseAmplitudes.mat");
+        load(pwd+"\"+"transverseAmplitudesPhaseNoInt.mat");
     
     end
     
@@ -116,7 +116,7 @@ for m = 1:length(f)
     for k=1:n_tot
     
         M_=permute(M(:,:,m,:,k),[4 1 2 3 5]);
-        plotM2Dfit(M_,f_eval,transverseAmplitudes(k),T1max,T2max,TR,ns,"bSSFP signal from "+num2str(ns)+" isochromats, after the "+num2str(k)+" th pulse for fixed $\alpha=$ "+num2str(a)+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$","$t$ (ms)","", discreteSum);
+        plotM2Dfit(M_,f_eval,transverseAmplitudes(k),transverseAmplitudesPhaseNoInt(k),T1max,T2max,TR,ns,"bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+" th pulse for fixed $\alpha=$ "+num2str(a)+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$","$t$ (ms)","",discreteSumInsteadOfIntegral);
     
     end
 

@@ -5,10 +5,10 @@ classdef populationNode < emptyNode
         parent emptyNode;
         coherenceDegree double; 
         coherenceDegreeDirectlyAfterPulse double;
-        amplitude sym; %function of T1, T2, T2s
-        amplitudeWithoutT2s sym; %T2s will be considered in populationTree based on the final dephasing degree
+        amplitude sym; %function of T1, T2, T2p
+        amplitudeWithoutT2p sym; %T2p will be considered in populationTree based on the final dephasing degree
         amplitudeDirectlyAfterPulse sym;
-        amplitudeDirectlyAfterPulseWithoutT2s sym; 
+        amplitudeDirectlyAfterPulseWithoutT2p sym; 
         amplitudeLabel sym;
         label string;
         level double;
@@ -21,7 +21,7 @@ classdef populationNode < emptyNode
     methods
 
         %Constructor
-        function populationNode = populationNode(parent, label, totalTime, coherenceDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2s, amplitudeDirectlyAfterPulseWithoutT2s, coherenceDegreeDirectlyAfterPulse, dephasingTimeDirectlyAfterPulse, dephasingTime)
+        function populationNode = populationNode(parent, label, totalTime, coherenceDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, coherenceDegreeDirectlyAfterPulse, dephasingTimeDirectlyAfterPulse, dephasingTime)
 
             if nargin > 1
     
@@ -40,8 +40,8 @@ classdef populationNode < emptyNode
                 populationNode.totalTime = totalTime;
 
                 populationNode.amplitudeDirectlyAfterPulse = amplitudeDirectlyAfterPulse;
-                populationNode.amplitudeWithoutT2s = amplitudeWithoutT2s;
-                populationNode.amplitudeDirectlyAfterPulseWithoutT2s = amplitudeDirectlyAfterPulseWithoutT2s;
+                populationNode.amplitudeWithoutT2p = amplitudeWithoutT2p;
+                populationNode.amplitudeDirectlyAfterPulseWithoutT2p = amplitudeDirectlyAfterPulseWithoutT2p;
                 populationNode.coherenceDegreeDirectlyAfterPulse = coherenceDegreeDirectlyAfterPulse;
                 populationNode.dephasingTimeDirectlyAfterPulse = dephasingTimeDirectlyAfterPulse;
                 populationNode.dephasingTime = dephasingTime;
@@ -56,8 +56,8 @@ classdef populationNode < emptyNode
                 populationNode.amplitude = sym(1);
                 populationNode.amplitudeLabel = sym(1);
                 populationNode.amplitudeDirectlyAfterPulse = sym(1);
-                populationNode.amplitudeWithoutT2s = sym(1);
-                populationNode.amplitudeDirectlyAfterPulseWithoutT2s = sym(1);
+                populationNode.amplitudeWithoutT2p = sym(1);
+                populationNode.amplitudeDirectlyAfterPulseWithoutT2p = sym(1);
                 populationNode.coherenceDegreeDirectlyAfterPulse = 0;
                 populationNode.dephasingTimeDirectlyAfterPulse = 0;
                 populationNode.dephasingTime = 0;

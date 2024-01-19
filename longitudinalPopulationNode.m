@@ -10,7 +10,7 @@ classdef longitudinalPopulationNode < populationNode
     methods
 
         %Constructor
-        function longitudinalPopulationNode = longitudinalPopulationNode(parent, transverseChild, longitudinalChild, label, totalTime, coherenceDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2s, amplitudeDirectlyAfterPulseWithoutT2s, coherenceDegreeDirectlyAfterPulse, dephasingTimeDirectlyAfterPulse, dephasingTime)
+        function longitudinalPopulationNode = longitudinalPopulationNode(parent, transverseChild, longitudinalChild, label, totalTime, coherenceDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, coherenceDegreeDirectlyAfterPulse, dephasingTimeDirectlyAfterPulse, dephasingTime)
 
             if nargin > 1
 
@@ -27,8 +27,8 @@ classdef longitudinalPopulationNode < populationNode
                 longitudinalPopulationNode.coherenceDegree = coherenceDegree;
                 longitudinalPopulationNode.amplitude = amplitude;
                 longitudinalPopulationNode.amplitudeDirectlyAfterPulse = amplitudeDirectlyAfterPulse;
-                longitudinalPopulationNode.amplitudeWithoutT2s = amplitudeWithoutT2s;
-                longitudinalPopulationNode.amplitudeDirectlyAfterPulseWithoutT2s = amplitudeDirectlyAfterPulseWithoutT2s;
+                longitudinalPopulationNode.amplitudeWithoutT2p = amplitudeWithoutT2p;
+                longitudinalPopulationNode.amplitudeDirectlyAfterPulseWithoutT2p = amplitudeDirectlyAfterPulseWithoutT2p;
                 longitudinalPopulationNode.amplitudeLabel = amplitudeLabel;
                 longitudinalPopulationNode.transverseChild = transverseChild;
                 longitudinalPopulationNode.longitudinalChild = longitudinalChild;
@@ -47,8 +47,8 @@ classdef longitudinalPopulationNode < populationNode
                 longitudinalPopulationNode.amplitude = M_eq;
                 longitudinalPopulationNode.amplitudeDirectlyAfterPulse = sym(1);
                 longitudinalPopulationNode.amplitudeLabel = M_eq;
-                longitudinalPopulationNode.amplitudeWithoutT2s = sym(1);
-                longitudinalPopulationNode.amplitudeDirectlyAfterPulseWithoutT2s = sym(1);
+                longitudinalPopulationNode.amplitudeWithoutT2p = sym(1);
+                longitudinalPopulationNode.amplitudeDirectlyAfterPulseWithoutT2p = sym(1);
                 longitudinalPopulationNode.transverseChild = emptyNode();
                 longitudinalPopulationNode.longitudinalChild = emptyNode();    
                 longitudinalPopulationNode.coherenceDegreeDirectlyAfterPulse = 0;
@@ -71,13 +71,11 @@ classdef longitudinalPopulationNode < populationNode
                 else
                     aFactor = (-1)^height;
                 end
-
-                syms T1 T2 TR a M_eq w real;
-                T2s = sym("T2s", "real");
-
+ 
+                syms T1 T2 T2p TR a M_eq w real;
                 E1 = exp(-f*TR/T1);
                 E2 = exp(-f*TR/T2);
-                dephasing = exp(1i*2*pi*w*TR_*f);
+                dephasing = exp(1i*2*pi*w*TR*f);
                                 
                 %Not inverted coherenceDegree
                 w0 = 1;
@@ -87,18 +85,18 @@ classdef longitudinalPopulationNode < populationNode
 
                 if oldCoherenceDegree <= 0 && coherenceDegreeNotInverted <= 0
 
-                    E2p = exp(f*TR/T2s);
+                    E2p = exp(f*TR/T2p);
 
                 elseif oldCoherenceDegree <= 0 && coherenceDegreeNotInverted >= 0
 
                     as = -oldCoherenceDegree/(coherenceDegreeNotInverted-oldCoherenceDegree);
                     b = coherenceDegreeNotInverted/(coherenceDegreeNotInverted-oldCoherenceDegree);
 
-                    E2p = exp(as*f*TR/T2s)*exp(-b*f*TR/T2s);
+                    E2p = exp(as*f*TR/T2p)*exp(-b*f*TR/T2p);
 
                 else %oldCoherenceDegree>0 -> coherenceDegreeNotInverted>0
 
-                    E2p = exp(-f*TR/T2s);
+                    E2p = exp(-f*TR/T2p);
 
                 end
 
@@ -109,10 +107,10 @@ classdef longitudinalPopulationNode < populationNode
                     end
 
                     amplitudeLabel = dephasing*longitudinalPopulationNodeObject.amplitudeLabel*1i*sind(aFactor*a)*E2*E2p;
-                    amplitude = dephasing*subs(subs(longitudinalPopulationNodeObject.amplitude*1i*sind(a)*E2*E2p, TR, TR_), a, a_);
+                    amplitude = subs(subs(dephasing*longitudinalPopulationNodeObject.amplitude*1i*sind(a)*E2*E2p, TR, TR_), a, a_);
                     amplitudeDirectlyAfterPulse = subs(subs(longitudinalPopulationNodeObject.amplitude*1i*sind(a), TR, TR_), a, a_);
-                    amplitudeWithoutT2s = dephasing*subs(subs(longitudinalPopulationNodeObject.amplitudeWithoutT2s*1i*sind(a)*E2, TR, TR_), a, a_);
-                    amplitudeDirectlyAfterPulseWithoutT2s = subs(subs(longitudinalPopulationNodeObject.amplitudeWithoutT2s*1i*sind(a), TR, TR_), a, a_);
+                    amplitudeWithoutT2p = subs(subs(dephasing*longitudinalPopulationNodeObject.amplitudeWithoutT2p*1i*sind(a)*E2, TR, TR_), a, a_);
+                    amplitudeDirectlyAfterPulseWithoutT2p = subs(subs(longitudinalPopulationNodeObject.amplitudeWithoutT2p*1i*sind(a), TR, TR_), a, a_);
                     dephasingTimeDirectlyAfterPulse = longitudinalPopulationNodeObject.dephasingTime;
                     dephasingTime = longitudinalPopulationNodeObject.dephasingTime+TR_*f;
 
@@ -130,7 +128,7 @@ classdef longitudinalPopulationNode < populationNode
                     else
                         newLabel = "1";
                     end
-                    longitudinalPopulationNodeObject.transverseChild = transversePopulationNode(longitudinalPopulationNodeObject, emptyNode(), emptyNode(), emptyNode(), emptyNode(), newLabel, longitudinalPopulationNodeObject.totalTime+subs(f*TR, TR, TR_), coherenceDegreeNotInverted, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2s, amplitudeDirectlyAfterPulseWithoutT2s, coherenceDegreeDirectlyAfterPulseNotInverted, dephasingTimeDirectlyAfterPulse, dephasingTime);
+                    longitudinalPopulationNodeObject.transverseChild = transversePopulationNode(longitudinalPopulationNodeObject, emptyNode(), emptyNode(), emptyNode(), emptyNode(), newLabel, longitudinalPopulationNodeObject.totalTime+subs(f*TR, TR, TR_), coherenceDegreeNotInverted, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, coherenceDegreeDirectlyAfterPulseNotInverted, dephasingTimeDirectlyAfterPulse, dephasingTime);
                     
                     if longitudinalPopulationNodeObject.transverseChild.level == height+1
 
@@ -146,11 +144,21 @@ classdef longitudinalPopulationNode < populationNode
                     	disp("Applying pulse "+longitudinalPopulationNodeObject.label+" -> 0");
                     end
 
-                    amplitudeLabel = (cosd(aFactor*a)*longitudinalPopulationNodeObject.amplitudeLabel-M_eq)*E1+M_eq;
-                    amplitude = subs(subs((cosd(a)*longitudinalPopulationNodeObject.amplitude-M_eq)*E1+M_eq, TR, TR_), a, a_);
-                    amplitudeDirectlyAfterPulse = subs(subs((cosd(a)*longitudinalPopulationNodeObject.amplitude-M_eq)+M_eq, TR, TR_), a, a_);
-                    amplitudeWithoutT2s = subs(subs((cosd(a)*longitudinalPopulationNodeObject.amplitudeWithoutT2s-M_eq)*E1+M_eq, TR, TR_), a, a_);
-                    amplitudeDirectlyAfterPulseWithoutT2s = subs(subs((cosd(a)*longitudinalPopulationNodeObject.amplitudeWithoutT2s-M_eq)+M_eq, TR, TR_), a, a_);
+                    %CARE: Longitudinal magnetization with phase memory decays to 0, not to Meq!
+                    if contains(longitudinalPopulationNodeObject.label,"1") || contains(longitudinalPopulationNodeObject.label,"0*") || contains(longitudinalPopulationNodeObject.label,"-1")
+                        amplitudeLabel = cosd(aFactor*a)*longitudinalPopulationNodeObject.amplitudeLabel*E1;
+                        amplitude = subs(subs(cosd(a)*longitudinalPopulationNodeObject.amplitude*E1, TR, TR_), a, a_);
+                        amplitudeDirectlyAfterPulse = subs(subs(cosd(a)*longitudinalPopulationNodeObject.amplitude, TR, TR_), a, a_);
+                        amplitudeWithoutT2p = subs(subs(cosd(a)*longitudinalPopulationNodeObject.amplitudeWithoutT2p*E1, TR, TR_), a, a_);
+                        amplitudeDirectlyAfterPulseWithoutT2p = subs(subs(cosd(a)*longitudinalPopulationNodeObject.amplitudeWithoutT2p, TR, TR_), a, a_);
+                    else 
+                        amplitudeLabel = (cosd(aFactor*a)*longitudinalPopulationNodeObject.amplitudeLabel-M_eq)*E1+M_eq;
+                        amplitude = subs(subs((cosd(a)*longitudinalPopulationNodeObject.amplitude-M_eq)*E1+M_eq, TR, TR_), a, a_);
+                        amplitudeDirectlyAfterPulse = subs(subs((cosd(a)*longitudinalPopulationNodeObject.amplitude-M_eq)+M_eq, TR, TR_), a, a_);
+                        amplitudeWithoutT2p = subs(subs((cosd(a)*longitudinalPopulationNodeObject.amplitudeWithoutT2p-M_eq)*E1+M_eq, TR, TR_), a, a_);
+                        amplitudeDirectlyAfterPulseWithoutT2p = subs(subs((cosd(a)*longitudinalPopulationNodeObject.amplitudeWithoutT2p-M_eq)+M_eq, TR, TR_), a, a_);
+                    end
+                     
                     dephasingTimeDirectlyAfterPulse = longitudinalPopulationNodeObject.dephasingTime;
                     dephasingTime = longitudinalPopulationNodeObject.dephasingTime;
 
@@ -168,7 +176,7 @@ classdef longitudinalPopulationNode < populationNode
                     else
                         newLabel = "0";
                     end
-                    longitudinalPopulationNodeObject.longitudinalChild = longitudinalPopulationNode(longitudinalPopulationNodeObject, emptyNode(), emptyNode(), newLabel, longitudinalPopulationNodeObject.totalTime+subs(f*TR, TR, TR_), oldCoherenceDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2s, amplitudeDirectlyAfterPulseWithoutT2s, coherenceDegreeDirectlyAfterPulseNotInverted, dephasingTimeDirectlyAfterPulse, dephasingTime);
+                    longitudinalPopulationNodeObject.longitudinalChild = longitudinalPopulationNode(longitudinalPopulationNodeObject, emptyNode(), emptyNode(), newLabel, longitudinalPopulationNodeObject.totalTime+subs(f*TR, TR, TR_), oldCoherenceDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, coherenceDegreeDirectlyAfterPulseNotInverted, dephasingTimeDirectlyAfterPulse, dephasingTime);
                     
                     if longitudinalPopulationNodeObject.longitudinalChild.level == height+1
                     
@@ -224,7 +232,7 @@ classdef longitudinalPopulationNode < populationNode
         end
         
         %Updates node with label
-        function longitudinalPopulationNodeObject = updateAmplitudeLabel(longitudinalPopulationNodeObject, updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2s, summedAmplitudesDirectlyAfterPulseWithoutT2s)
+        function longitudinalPopulationNodeObject = updateAmplitudeLabel(longitudinalPopulationNodeObject, updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2p, summedAmplitudesDirectlyAfterPulseWithoutT2p)
 
             if updateLabel == newLabel
                 return;
@@ -237,8 +245,8 @@ classdef longitudinalPopulationNode < populationNode
                 longitudinalPopulationNodeObject.transverseChild.amplitude = summedAmplitudes;
                 longitudinalPopulationNodeObject.transverseChild.amplitudeLabel = summedAmplitudeLabels;
                 longitudinalPopulationNodeObject.transverseChild.amplitudeDirectlyAfterPulse = summedAmplitudesDirectlyAfterPulse;
-                longitudinalPopulationNodeObject.transverseChild.amplitudeWithoutT2s = summedAmplitudesWithoutT2s;
-                longitudinalPopulationNodeObject.transverseChild.amplitudeDirectlyAfterPulseWithoutT2s = summedAmplitudesDirectlyAfterPulseWithoutT2s;
+                longitudinalPopulationNodeObject.transverseChild.amplitudeWithoutT2p = summedAmplitudesWithoutT2p;
+                longitudinalPopulationNodeObject.transverseChild.amplitudeDirectlyAfterPulseWithoutT2p = summedAmplitudesDirectlyAfterPulseWithoutT2p;
 
             elseif isa(longitudinalPopulationNodeObject.longitudinalChild, "populationNode") && longitudinalPopulationNodeObject.longitudinalChild.label == updateLabel
 
@@ -247,13 +255,13 @@ classdef longitudinalPopulationNode < populationNode
                 longitudinalPopulationNodeObject.longitudinalChild.amplitude = summedAmplitudes;
                 longitudinalPopulationNodeObject.longitudinalChild.amplitudeLabel = summedAmplitudeLabels;
                 longitudinalPopulationNodeObject.longitudinalChild.amplitudeDirectlyAfterPulse = summedAmplitudesDirectlyAfterPulse;
-                longitudinalPopulationNodeObject.longitudinalChild.amplitudeWithoutT2s = summedAmplitudesWithoutT2s;
-                longitudinalPopulationNodeObject.longitudinalChild.amplitudeDirectlyAfterPulseWithoutT2s = summedAmplitudesDirectlyAfterPulseWithoutT2s;
+                longitudinalPopulationNodeObject.longitudinalChild.amplitudeWithoutT2p = summedAmplitudesWithoutT2p;
+                longitudinalPopulationNodeObject.longitudinalChild.amplitudeDirectlyAfterPulseWithoutT2p = summedAmplitudesDirectlyAfterPulseWithoutT2p;
 
             else
                     
-                longitudinalPopulationNodeObject.transverseChild = longitudinalPopulationNodeObject.transverseChild.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2s, summedAmplitudesDirectlyAfterPulseWithoutT2s);
-                longitudinalPopulationNodeObject.longitudinalChild = longitudinalPopulationNodeObject.longitudinalChild.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2s, summedAmplitudesDirectlyAfterPulseWithoutT2s);
+                longitudinalPopulationNodeObject.transverseChild = longitudinalPopulationNodeObject.transverseChild.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2p, summedAmplitudesDirectlyAfterPulseWithoutT2p);
+                longitudinalPopulationNodeObject.longitudinalChild = longitudinalPopulationNodeObject.longitudinalChild.updateAmplitudeLabel(updateLabel, summedAmplitudes, summedAmplitudeLabels, newLabel, summedAmplitudesDirectlyAfterPulse, summedAmplitudesWithoutT2p, summedAmplitudesDirectlyAfterPulseWithoutT2p);
 
             end
 
@@ -316,8 +324,7 @@ classdef longitudinalPopulationNode < populationNode
                     amplitudeString = "CharLimit";
                 end
                 if strlength(pathwayString)>1100
-                    pathwayString = char(pathwayString);
-                    pathwayString = string(pathwayString(1:min(1199,end)));
+                    pathwayString = "CharLimit";
                 end
 
                 if longitudinalPopulationNodeObject.longitudinalChild.level == 1 || abs(f-0.5)>labelOverlapThreshold
@@ -348,8 +355,7 @@ classdef longitudinalPopulationNode < populationNode
                     amplitudeString = "CharLimit";
                 end
                 if strlength(pathwayString)>1100
-                    pathwayString = char(pathwayString);
-                    pathwayString = string(pathwayString(1:min(1199,end)));
+                    pathwayString = "CharLimit";
                 end                
 
                 if ~contains(longitudinalPopulationNodeObject.label, "0") && ~contains(longitudinalPopulationNodeObject.label, "-1")
