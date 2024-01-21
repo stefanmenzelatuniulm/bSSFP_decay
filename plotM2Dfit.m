@@ -1,6 +1,6 @@
 %Plots dependency of M on 1 variable
 
-function ft=plotM2Dfit(M,X,summedTransverseAmplitudes,transverseAmplitudesPhaseNoInt,T1max,T2max,TR,ns,plotTitle,xLabel,subfolder,discreteSumInsteadOfIntegral)
+function ft=plotM2Dfit(M,X,summedTransverseAmplitudes,transverseAmplitudesPhaseNoInt,T1,T2,FWHM,TR,ns,plotTitle,xLabel,subfolder,discreteSumInsteadOfIntegral,f)
 
     disp("Creating 2D plot of M vs "+strrep(xLabel,"$","")+" and fitting");
 
@@ -9,63 +9,6 @@ function ft=plotM2Dfit(M,X,summedTransverseAmplitudes,transverseAmplitudesPhaseN
     if ~discreteSumInsteadOfIntegral
 
         summedTransverseAmplitudes = abs(summedTransverseAmplitudes);
-
-        fitfunction=string(summedTransverseAmplitudes)+"+0*T1+0*T2+0*T2s+0*M_eq";
-        coeffs=["T1" "T2" "T2s" "M_eq"];
-        options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0 0],'Upper',[T1max T2max T2max inf],'StartPoint',[13.1*1000 0.6*1000 1/(pi*21/1000) ns]);
-    
-        options2=fitoptions('Method','NonlinearLeastSquares','Lower',[13.1*1000 0.6*1000 1/(pi*21/1000) ns],'Upper',[13.1*1000 0.6*1000 1/(pi*21/1000) ns],'StartPoint',[13.1*1000 0.6*1000 1/(pi*21/1000) ns]);
-        
-        fttype = fittype(fitfunction,coefficients=coeffs);
-    
-        fig=figure('WindowState','maximized');
-    
-        X=X*TR; 
-        
-        plot(X,M,"+");
-        ax = gca;
-    
-        hold on;
-        ft=fit(transpose(X),M,fttype,options);
-        ft2=fit(transpose(X),M,fttype,options2);
-        pf1 = plot(ax,ft,"r");
-        set(pf1,'lineWidth',2);
-        hold on;
-        pf2 = plot(ax,ft2,"g");
-        set(pf2,'lineWidth',1);
-    
-        fitfunction3 = "M_eq*exp(-abs(x-5)/T2s)";
-        coeffs3=["T2s" "M_eq"];
-        options3=fitoptions('Method','NonlinearLeastSquares','Lower',[0 -inf],'Upper',[T2max inf],'StartPoint',[1/(pi*21/1000) ns]);
-        fttype3 = fittype(fitfunction3,coefficients=coeffs3);
-        ft3=fit(transpose(X),M,fttype3,options3);
-    
-        hold on;
-        pf3 = plot(ax,ft3,"m");
-        set(pf3,'lineWidth',1);
-    
-        ax.FontSize = 14;
-        title(plotTitle,"interpreter","latex",'fontweight','bold','fontsize',14);
-        xlabel(xLabel,"interpreter","latex",'fontweight','bold','fontsize',14);
-        ylabel("Simulated signal (a. u.)","interpreter","latex",'fontweight','bold','fontsize',14);
-    
-        latexString = latex(summedTransverseAmplitudes);
-        if strlength(latexString)>1100
-            latexString = "CharLimit";
-        end
-    
-        legend("Simulated signal","Fit with "+string("$"+latexString+"$"), "'Fit' with known "+"$T_1$"+", $T_2$, $T_2^*$ from simulation settings", "Fit with Mueller model "+string("$"+latex(str2sym("M_eq*exp(-abs(x-5)/T2s)"))+"$"), "interpreter","latex",'fontweight','bold','fontsize',10,"Location","Northwest");
-        %legend("Simulated signal (a. u)","Fit", "interpreter","latex",'fontweight','bold','fontsize',14,"Location","Northwest");
-    
-        coeffs = coeffnames(ft);
-        coeffvals= coeffvalues(ft);
-        ci = confint(ft,0.95);
-        str1 = sprintf('\n %s = %0.9f   (%0.9f   %0.9f)',coeffs{1},coeffvals(1),ci(:,1));
-        str2 = sprintf('\n %s = %0.9f   (%0.9f   %0.9f)',coeffs{2},coeffvals(2),ci(:,2));
-        str3 = sprintf('\n %s = %0.9f   (%0.9f   %0.9f)',coeffs{3},coeffvals(3),ci(:,3));
-        str4 = sprintf('\n %s = %0.9f   (%0.9f   %0.9f)',strrep(coeffs{4},"_",""),coeffvals(4),ci(:,4));
-       
-        annotation('textbox',[0.521 0.62 0.2 0.2],'String',['Fit coefficients with 95% confidence bounds: ', str1, str2, str3, str4],'EdgeColor','none',"FitBoxToText","on");
 
     else
 
@@ -84,64 +27,75 @@ function ft=plotM2Dfit(M,X,summedTransverseAmplitudes,transverseAmplitudesPhaseN
 
         summedTransverseAmplitudes = abs(summedTransverseAmplitudes_sumOverIsochromats);
 
-        fitfunction=string(summedTransverseAmplitudes)+"+0*T1+0*T2+0*T2s+0*M_eq";
-        coeffs=["T1" "T2" "T2s" "M_eq"];
-        options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 10e12 0],'Upper',[T1max T2max inf inf],'StartPoint',[13.1*1000 0.6*1000 10e12 ns]);
-    
-        options2=fitoptions('Method','NonlinearLeastSquares','Lower',[13.1*1000 0.6*1000 10e12 1],'Upper',[13.1*1000 0.6*1000 inf 1],'StartPoint',[13.1*1000 0.6*1000 10e12 1]);
-        
-        fttype = fittype(fitfunction,coefficients=coeffs);
-    
-        fig=figure('WindowState','maximized');
-    
-        X=X*TR; 
-        
-        plot(X,M,"+");
-        ax = gca;
-    
-        hold on;
-        ft=fit(transpose(X),M,fttype,options);
-        ft2=fit(transpose(X),M,fttype,options2);
-        pf1 = plot(ax,ft,"r");
-        set(pf1,'lineWidth',2);
-        hold on;
-        pf2 = plot(ax,ft2,"g");
-        set(pf2,'lineWidth',1);
-    
-        fitfunction3 = "M_eq*exp(-abs(x-5)/T2s)";
-        coeffs3=["T2s" "M_eq"];
-        options3=fitoptions('Method','NonlinearLeastSquares','Lower',[0 -inf],'Upper',[inf inf],'StartPoint',[10e12 ns]);
-        fttype3 = fittype(fitfunction3,coefficients=coeffs3);
-        ft3=fit(transpose(X),M,fttype3,options3);
-    
-        hold on;
-        pf3 = plot(ax,ft3,"m");
-        set(pf3,'lineWidth',1);
-    
-        ax.FontSize = 14;
-        title(plotTitle,"interpreter","latex",'fontweight','bold','fontsize',14);
-        xlabel(xLabel,"interpreter","latex",'fontweight','bold','fontsize',14);
-        ylabel("Simulated signal (a. u.)","interpreter","latex",'fontweight','bold','fontsize',14);
-    
-        latexString = latex(summedTransverseAmplitudes);
-        if strlength(latexString)>1100
-            latexString = "CharLimit";
-        end
-    
-        legend("Simulated signal","Fit with "+string("$"+latexString+"$"), "'Fit' with known "+"$T_1$"+", $T_2$, $T_2^*$ from simulation settings", "Fit with Mueller model "+string("$"+latex(str2sym("M_eq*exp(-abs(x-5)/T2s)"))+"$"), "interpreter","latex",'fontweight','bold','fontsize',10,"Location","Northwest");
-        %legend("Simulated signal (a. u)","Fit", "interpreter","latex",'fontweight','bold','fontsize',14,"Location","Northwest");
-    
-        coeffs = coeffnames(ft);
-        coeffvals= coeffvalues(ft);
-        ci = confint(ft,0.95);
-        str1 = sprintf('\n %s = %0.9f   (%0.9f   %0.9f)',coeffs{1},coeffvals(1),ci(:,1));
-        str2 = sprintf('\n %s = %0.9f   (%0.9f   %0.9f)',coeffs{2},coeffvals(2),ci(:,2));
-        str3 = sprintf('\n %s = %0.9f   (%0.9f   %0.9f)',coeffs{3},coeffvals(3),ci(:,3));
-        str4 = sprintf('\n %s = %0.9f   (%0.9f   %0.9f)',strrep(coeffs{4},"_",""),coeffvals(4),ci(:,4));
-       
-        annotation('textbox',[0.521 0.62 0.2 0.2],'String',['Fit coefficients with 95% confidence bounds: ', str1, str2, str3, str4],'EdgeColor','none',"FitBoxToText","on");
+        %Meq is equilibrium magnetization per isochromats, in this case
+        ns = 1;
 
     end
+        
+    fitfunction = string(summedTransverseAmplitudes);
+    fitfunctionMueller = "C*exp(-abs(x-"+num2str(TR*f)+")/T2s)";
+        
+    coeffs = ["T1" "T2" "T2s" "M_eq"];
+    coeffsMueller = ["T2s" "C"];
+
+    options = fitoptions('Method','NonlinearLeastSquares','Lower',[T1 T2 1/(pi*FWHM) ns],'Upper',[T1 T2 1/(pi*FWHM) ns],'StartPoint',[T1 T2 1/(pi*FWHM) ns]);
+    optionsT2Dominated = fitoptions('Method','NonlinearLeastSquares','Lower',[realmax T2 1/(pi*FWHM) ns],'Upper',[realmax T2 1/(pi*FWHM) ns],'StartPoint',[realmax T2 1/(pi*FWHM) ns]);    
+    optionsT2sDominated = fitoptions('Method','NonlinearLeastSquares','Lower',[realmax realmax 1/(pi*FWHM) ns],'Upper',[realmax realmax 1/(pi*FWHM) ns],'StartPoint',[realmax realmax 1/(pi*FWHM) ns]);
+    optionsMueller = fitoptions('Method','NonlinearLeastSquares','Lower',[1/(pi*FWHM) 0],'Upper',[1/(pi*FWHM) inf],'StartPoint',[1/(pi*FWHM) ns]);
+    
+    fttype = fittype(fitfunction,coefficients=coeffs);
+    fttypeMueller = fittype(fitfunctionMueller,coefficients=coeffsMueller);
+
+    fig=figure('WindowState','maximized');
+
+    X=X*TR; 
+    plot(X,M,"+");
+    ax = gca;
+
+    hold on;
+    ft=fit(transpose(X),M,fttype,options);
+    pf = plot(ax,ft);
+    set(pf,'lineWidth',1);
+    set(pf,'color', [0.4660 0.6740 0.1880]);
+
+    hold on;
+    ftT2Dominated=fit(transpose(X),M,fttype,optionsT2Dominated);
+    pfT2Dominated = plot(ax,ftT2Dominated,"m");
+    set(pfT2Dominated,'lineWidth',1);
+
+    hold on;
+    ftT2sDominated=fit(transpose(X),M,fttype,optionsT2sDominated);
+    pfT2sDominated = plot(ax,ftT2sDominated,"c");
+    set(pfT2sDominated,'lineWidth',1);
+
+    hold on;
+    ftMueller=fit(transpose(X),M,fttypeMueller,optionsMueller);
+    pfMueller = plot(ax,ftMueller,"r");
+    set(pfMueller,'lineWidth',1);
+
+    ax.FontSize = 14;
+    title(plotTitle,"interpreter","latex",'fontweight','bold','fontsize',14);
+    xlabel(xLabel,"interpreter","latex",'fontweight','bold','fontsize',14);
+    ylabel("Simulated signal (a. u.)","interpreter","latex",'fontweight','bold','fontsize',14);
+
+    shortLatexString = "f \bigl( T_1,\: T_2,\: T_2^*,\: M_{eq} \bigr)";
+
+    latexString = latex(summedTransverseAmplitudes);
+    interpreter_ = "latex";
+
+    if strlength(latexString)>1100
+        latexString = tex(summedTransverseAmplitudes);
+        interpreter_ = "tex";
+    end
+
+    legend("Simulated signal","Exact theoretical signal $$"+shortLatexString+"$$ with known "+"$T_1$"+", $T_2$, $T_2^*$, $M_{eq}$ from simulation settings", "Approximated theoretical signal $$\lim_{T_1 \: \to \: \infty} \: "+shortLatexString+"$$ with known $T_2$, $T_2^*$, $M_{eq}$ from simulation settings", "Approximated theoretical signal $$\lim_{T_{1, \: 2} \: \to \: \infty} \: "+shortLatexString+"$$ with known $T_2^*$, $M_{eq}$ from simulation settings", "State-of-the-art theoretical signal (Mueller et al.) "+string("$$"+strrep(latex(str2sym(fitfunctionMueller)),"T2s","T_2^*")+"$$")+" with known $T_2^*$ from simulation settings", "interpreter","latex",'fontweight','bold','fontsize',10,"Location","Northwest");
+
+    %Difficult to wrap tex/latex strings, therefore plain text
+    modelText = text(0.0025,0,textwrap({strrep(strrep(strrep("f(T1, T2, T2*, M_eq) = "+string(summedTransverseAmplitudes),"M_eq","M_{eq}"),"T1","T_1"),"T2","T_2")}, 2400),'EdgeColor','none',"Color","black",'FontSize',1,'Units','normalized');
+
+    extent = get(modelText).Extent;
+    height = extent(4);
+    set(modelText, 'Position', get(modelText).Position+[0 height/3 0]);
 
     saveas(fig,pwd+"\Figures\"+subfolder+"\"+strrep(strrep(strrep(strrep(strrep(strrep(strrep(strrep(strrep(strrep(plotTitle," ","_"),".","_"),"$",""),",","_"),"{","_"),"}","_"),"\","_"),"*","_"),"^","_"),"=","_")+".fig");
     saveas(fig,pwd+"\Figures\"+subfolder+"\"+strrep(strrep(strrep(strrep(strrep(strrep(strrep(strrep(strrep(strrep(plotTitle," ","_"),".","_"),"$",""),",","_"),"{","_"),"}","_"),"\","_"),"*","_"),"^","_"),"=","_")+".svg");

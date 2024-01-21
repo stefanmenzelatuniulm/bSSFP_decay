@@ -249,7 +249,7 @@ classdef populationTree
             ax.FontSize = 14;
             title("Spin pathways for "+num2str(min(populationTreeObject.n_tot-1, populationTreeObject.maxNodeDrawLevel))+" pulses with initial $\frac{\alpha}{2}$ pulse spacing "+num2str(populationTreeObject.f)+" $T_R$", "interpreter", "latex", 'fontweight', 'bold', 'fontsize', 14);
             xlabel("$t$ (ms)", "interpreter", "latex", 'fontweight', 'bold', 'fontsize', 14);
-            ylabel("Coherence Degree (a. u.)", "interpreter", "latex", 'fontweight', 'bold', 'fontsize', 14);
+            ylabel("Coherence Level (a. u.)", "interpreter", "latex", 'fontweight', 'bold', 'fontsize', 14);
 
             hold on;
             populationTreeObject.root.plotPathway(populationTreeObject.TR, populationTreeObject.f, populationTreeObject.maxNodeDrawLevel);
