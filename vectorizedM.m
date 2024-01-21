@@ -6,7 +6,7 @@
 %isochromat. Returns M_tot = M(a, TR, f, f_eval, pulse). Will calculate
 %M_tot for every isochromat and then sum the result over the isochromats
 
-function M_tot = vectorizedM(a, TR, w, f, f_eval, n_tot, Meq, T1, T2, hyperpolarization, splitfactor)
+function M_tot = vectorizedM(a, TR, w, f, f_eval, n_tot, Meq, T1, T2, hyperpolarization, Psi, splitfactor)
 
     %Number of flip angles, repetition times, isochromats, alpha/2 pulse
     %spacings, evaluation times
@@ -15,6 +15,8 @@ function M_tot = vectorizedM(a, TR, w, f, f_eval, n_tot, Meq, T1, T2, hyperpolar
     [~, ns] = size(w);
     [~, nf] = size(f);
     [~, nf_eval] = size(f_eval);
+
+    w = w+Psi;
 
     %How many isochromats are considered per loop iteration (only affects
     %balance between RAM usage and computation speed)
@@ -95,6 +97,10 @@ function M_tot = vectorizedM(a, TR, w, f, f_eval, n_tot, Meq, T1, T2, hyperpolar
         dephasing = @(b) [cosd(b) sind(b) 0; -sind(b) cosd(b) 0; 0 0 1];
         wT_ = kron(360*w, TR); %Care: dont apply mod(wT_, 360) because wTf will use wT_*f
         wT = mod(reshape(wT_, [nTR ns]), 360);
+        %wTf_gradientError = permute(repmat(sign(-cos(2*pi*numberOfGradientEchosPerTR*f))*gradientPhaseError, [1 nTR ns]), [2 3 1]);
+        %wTf_eval_gradientError = permute(repmat(sign(-cos(2*pi*numberOfGradientEchosPerTR*f_eval))*gradientPhaseError, [1 nTR ns]), [2 3 1]);
+        %wTf = mod(reshape(kron(f, wT_+wTf_gradientError), [nTR ns nf]), 360);
+        %wTf_eval = mod(reshape(kron(f_eval, wT_+wTf_eval_gradientError), [nTR ns nf_eval]), 360);
         wTf = mod(reshape(kron(f, wT_), [nTR ns nf]), 360);
         wTf_eval = mod(reshape(kron(f_eval, wT_), [nTR ns nf_eval]), 360);
     

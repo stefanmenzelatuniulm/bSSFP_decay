@@ -69,7 +69,7 @@ classdef populationTree
         %Applies pulse to population tree
         function [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject] = applyPulses(populationTreeObject)
             
-            syms x T2s T2 w real;
+            syms x T2s T2 w Psi real;
 
             for k = 1:min(populationTreeObject.n_tot, populationTreeObject.n_steady_state)
 
@@ -79,15 +79,15 @@ classdef populationTree
      
                 if populationTreeObject.height ==  0
     
-                    [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject.root] = populationTreeObject.root.applyPulse(populationTreeObject.a/2, populationTreeObject.TR, populationTreeObject.f, populationTreeObject.height); 
+                    [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject.root] = populationTreeObject.root.applyPulse(populationTreeObject.a/2, populationTreeObject.TR, populationTreeObject.f, populationTreeObject.height, populationTreeObject.maxNodeDrawLevel); 
     
                 elseif populationTreeObject.height ==  populationTreeObject.n_tot-1
     
-                     [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject.root] = populationTreeObject.root.applyPulse(((-1)^(k+1))*populationTreeObject.a, populationTreeObject.TR, populationTreeObject.f_eval, populationTreeObject.height);                
+                     [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject.root] = populationTreeObject.root.applyPulse(((-1)^(k+1))*populationTreeObject.a, populationTreeObject.TR, populationTreeObject.f_eval, populationTreeObject.height, populationTreeObject.maxNodeDrawLevel);                
                
                 else
     
-                     [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject.root] = populationTreeObject.root.applyPulse(((-1)^(k+1))*populationTreeObject.a, populationTreeObject.TR, 1, populationTreeObject.height);  
+                     [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject.root] = populationTreeObject.root.applyPulse(((-1)^(k+1))*populationTreeObject.a, populationTreeObject.TR, 1, populationTreeObject.height, populationTreeObject.maxNodeDrawLevel);  
     
                 end
     
@@ -104,8 +104,8 @@ classdef populationTree
                     node = transverseBottomNodes(m);
 
                     T2Relaxation = exp(-x/T2);
-                    phase = exp(1i*2*pi*populationTreeObject.w0*(x+node.dephasingTimeDirectlyAfterPulse))*exp(-(1/T2s)*abs(x+node.dephasingTimeDirectlyAfterPulse));
-                    phaseNoInt = exp(1i*2*pi*w*(x+node.dephasingTimeDirectlyAfterPulse));
+                    phase = exp(1i*2*pi*(populationTreeObject.w0+Psi)*(x+node.dephasingTimeDirectlyAfterPulse))*exp(-(1/T2s)*abs(x+node.dephasingTimeDirectlyAfterPulse));
+                    phaseNoInt = exp(1i*2*pi*(w+Psi)*(x+node.dephasingTimeDirectlyAfterPulse));
                     summedAmplitudes = summedAmplitudes+subs(node.amplitudeDirectlyAfterPulseWithoutT2s*T2Relaxation, w, 0)*phase; 
                     summedAmplitudesPhaseSym = summedAmplitudesPhaseSym+subs(node.amplitudeDirectlyAfterPulseWithoutT2s*T2Relaxation, w, 0)*phaseNoInt; 
                     

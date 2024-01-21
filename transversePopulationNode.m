@@ -60,7 +60,7 @@ classdef transversePopulationNode < populationNode
 
         end
 
-        function [transverseBottomNodes, longitudinalBottomNodes, transversePopulationNodeObject] = applyPulse(transversePopulationNodeObject, a_, TR_, f, height)
+        function [transverseBottomNodes, longitudinalBottomNodes, transversePopulationNodeObject] = applyPulse(transversePopulationNodeObject, a_, TR_, f, height, maxNodeDrawLevel)
 
             transverseBottomNodes = [];
             longitudinalBottomNodes = [];
@@ -108,8 +108,13 @@ classdef transversePopulationNode < populationNode
                     if isa(transversePopulationNodeObject, "populationNode")
                     	disp("Applying pulse "+transversePopulationNodeObject.label+" -> 1");
                     end
+                    
+                    if transversePopulationNodeObject.level>maxNodeDrawLevel
+                        amplitudeLabel = sym(0); 
+                    else
+                        amplitudeLabel = dephasing*transversePopulationNodeObject.amplitudeLabel*E2*E2pNotInverted*cosd(aFactor*a/2)^2; 
+                    end
 
-                    amplitudeLabel = dephasing*transversePopulationNodeObject.amplitudeLabel*E2*E2pNotInverted*cosd(aFactor*a/2)^2;       
                     amplitudeDirectlyAfterPulseWithoutT2s = subs(subs(transversePopulationNodeObject.amplitudeWithoutT2s*cosd(a/2)^2, TR, TR_), a, a_);
                     amplitudeWithoutT2s = subs(dephasing*E2, TR, TR_)*amplitudeDirectlyAfterPulseWithoutT2s;
                     dephasingTimeDirectlyAfterPulse = transversePopulationNodeObject.dephasingTime;
@@ -145,7 +150,12 @@ classdef transversePopulationNode < populationNode
                     	disp("Applying pulse "+transversePopulationNodeObject.label+" -> 0");
                     end 
 
-                    amplitudeLabel = (1i/2)*sind(aFactor*a)*E1*transversePopulationNodeObject.amplitudeLabel;
+                    if transversePopulationNodeObject.level>maxNodeDrawLevel
+                        amplitudeLabel = sym(0); 
+                    else
+                        amplitudeLabel = (1i/2)*sind(aFactor*a)*E1*transversePopulationNodeObject.amplitudeLabel;
+                    end
+
                     amplitudeDirectlyAfterPulseWithoutT2s = subs(subs((1i/2)*sind(a)*transversePopulationNodeObject.amplitudeWithoutT2s, TR, TR_), a, a_);
                     amplitudeWithoutT2s = subs(E1, TR, TR_)*amplitudeDirectlyAfterPulseWithoutT2s;
                     dephasingTimeDirectlyAfterPulse = transversePopulationNodeObject.dephasingTime;
@@ -204,7 +214,13 @@ classdef transversePopulationNode < populationNode
                     	disp("Applying pulse "+transversePopulationNodeObject.label+" -> -1");
                     end  
 
-                    amplitudeLabel = dephasing*conj(transversePopulationNodeObject.amplitudeLabel)*E2*E2pInverted*sind(aFactor*a/2)^2;                   
+
+                    if transversePopulationNodeObject.level>maxNodeDrawLevel
+                        amplitudeLabel = sym(0); 
+                    else
+                        amplitudeLabel = dephasing*conj(transversePopulationNodeObject.amplitudeLabel)*E2*E2pInverted*sind(aFactor*a/2)^2;  
+                    end
+                 
                     amplitudeDirectlyAfterPulseWithoutT2s = subs(subs(conj(transversePopulationNodeObject.amplitudeWithoutT2s)*sind(a/2)^2, TR, TR_), a, a_);
                     amplitudeWithoutT2s = subs(dephasing*E2, TR, TR_)*amplitudeDirectlyAfterPulseWithoutT2s;
                     dephasingTimeDirectlyAfterPulse = -transversePopulationNodeObject.dephasingTime;
@@ -240,7 +256,12 @@ classdef transversePopulationNode < populationNode
                     	disp("Applying pulse "+transversePopulationNodeObject.label+" -> 0*");
                     end   
 
-                    amplitudeLabel = -(1i/2)*sind(aFactor*a)*E1*conj(transversePopulationNodeObject.amplitudeLabel);                    
+                    if transversePopulationNodeObject.level>maxNodeDrawLevel
+                        amplitudeLabel = sym(0); 
+                    else
+                        amplitudeLabel = -(1i/2)*sind(aFactor*a)*E1*conj(transversePopulationNodeObject.amplitudeLabel);   
+                    end                    
+
                     amplitudeDirectlyAfterPulseWithoutT2s = subs(subs(-(1i/2)*sind(a)*conj(transversePopulationNodeObject.amplitudeWithoutT2s), TR, TR_), a, a_); 
                     amplitudeWithoutT2s = subs(E1, TR, TR_)*amplitudeDirectlyAfterPulseWithoutT2s;
                     dephasingTimeDirectlyAfterPulse = -transversePopulationNodeObject.dephasingTime;
@@ -273,28 +294,28 @@ classdef transversePopulationNode < populationNode
             else
                 
                 if isa(transversePopulationNodeObject.transverseChild1, "transversePopulationNode")
-                    [transverseBottomNodes1, longitudinalBottomNodes1, transversePopulationNodeObject.transverseChild1] = transversePopulationNodeObject.transverseChild1.applyPulse(a_, TR_, f, height);
+                    [transverseBottomNodes1, longitudinalBottomNodes1, transversePopulationNodeObject.transverseChild1] = transversePopulationNodeObject.transverseChild1.applyPulse(a_, TR_, f, height, maxNodeDrawLevel);
                 else
                     transverseBottomNodes1 = [];
                     longitudinalBottomNodes1 = [];
                 end
 
                 if isa(transversePopulationNodeObject.longitudinalChild1, "longitudinalPopulationNode")
-                    [transverseBottomNodes2, longitudinalBottomNodes2, transversePopulationNodeObject.longitudinalChild1] = transversePopulationNodeObject.longitudinalChild1.applyPulse(a_, TR_, f, height);
+                    [transverseBottomNodes2, longitudinalBottomNodes2, transversePopulationNodeObject.longitudinalChild1] = transversePopulationNodeObject.longitudinalChild1.applyPulse(a_, TR_, f, height, maxNodeDrawLevel);
                 else
                     transverseBottomNodes2 = [];
                     longitudinalBottomNodes2 = [];
                 end
 
                 if isa(transversePopulationNodeObject.transverseChild2, "transversePopulationNode")
-                    [transverseBottomNodes3, longitudinalBottomNodes3, transversePopulationNodeObject.transverseChild2] = transversePopulationNodeObject.transverseChild2.applyPulse(a_, TR_, f, height);
+                    [transverseBottomNodes3, longitudinalBottomNodes3, transversePopulationNodeObject.transverseChild2] = transversePopulationNodeObject.transverseChild2.applyPulse(a_, TR_, f, height, maxNodeDrawLevel);
                 else
                     transverseBottomNodes3 = [];
                     longitudinalBottomNodes3 = [];
                 end                
 
                 if isa(transversePopulationNodeObject.longitudinalChild2, "longitudinalPopulationNode")
-                    [transverseBottomNodes4, longitudinalBottomNodes4, transversePopulationNodeObject.longitudinalChild2] = transversePopulationNodeObject.longitudinalChild2.applyPulse(a_, TR_, f, height);
+                    [transverseBottomNodes4, longitudinalBottomNodes4, transversePopulationNodeObject.longitudinalChild2] = transversePopulationNodeObject.longitudinalChild2.applyPulse(a_, TR_, f, height, maxNodeDrawLevel);
                 else
                     transverseBottomNodes4 = [];
                     longitudinalBottomNodes4 = [];

@@ -65,6 +65,9 @@ recalculateAmplitudes = true;
 %whole frequency distribution (only affects fit)
 discreteSumInsteadOfIntegral = false;
 
+%Frequency offset due to B0 field inhomogeneity (kHz)
+Psi = 100/1000; 
+
 %-------------END OF SETTINGS-------------
 
 f_eval = linspace(f_eval_min, f_eval_max, nf_eval);
@@ -81,7 +84,7 @@ if recalculateM
 
     M = zeros(1, 1, length(f), nf_eval, n_tot); %indices: a (1st dimension), TR (2nd dimension), f (3rd dimension), f_eval (4th dimension), pulse (5th dimension)
         
-    M(:, :, :, :, :) = vectorizedM(a, TR, w, f, f_eval, n_tot, Meq, T1, T2, hyperpolarization, splitfactor); 
+    M(:, :, :, :, :) = vectorizedM(a, TR, w, f, f_eval, n_tot, Meq, T1, T2, hyperpolarization, Psi, splitfactor); 
   
     %Save M and w
     save(pwd+"\"+"M.mat", "M", "-v7.3");
@@ -104,7 +107,7 @@ for m = 1:length(f)
 
     if recalculateAmplitudes
     
-        [transverseAmplitudes, transverseAmplitudesPhaseNoInt] = sumTransverseAmplitudes(n_tot, a, TR, f(m), n_steady_state, hyperpolarization, true, w0);
+        [transverseAmplitudes, transverseAmplitudesPhaseNoInt] = sumTransverseAmplitudes(n_tot, a, TR, f(m), n_steady_state, hyperpolarization, false, w0);
         save(pwd+"\"+"transverseAmplitudes.mat", "transverseAmplitudes", "-v7.3");
         save(pwd+"\"+"transverseAmplitudesPhaseNoInt.mat", "transverseAmplitudesPhaseNoInt", "-v7.3");
     
@@ -123,19 +126,19 @@ for m = 1:length(f)
 
         if k ==  1
 
-            plotM2Dfit(M_, f_eval, transverseAmplitudes(k), transverseAmplitudesPhaseNoInt(k), T1, T2, FWHM, TR, ns, "bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"st pulse for fixed $\alpha = $ "+num2str(a)+" $^{\circ}$ for fixed $T_R = $ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$", "$t$ (ms)", "", discreteSumInsteadOfIntegral, f(m));
+            plotM2Dfit(M_, f_eval, transverseAmplitudes(k), transverseAmplitudesPhaseNoInt(k), T1, T2, FWHM, TR, ns, "bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"st pulse for fixed $\alpha = $ "+num2str(a)+" $^{\circ}$ for fixed $T_R = $ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$", "$t$ (ms)", "", discreteSumInsteadOfIntegral, f(m), Psi);
         
         elseif k ==  2
 
-            plotM2Dfit(M_, f_eval, transverseAmplitudes(k), transverseAmplitudesPhaseNoInt(k), T1, T2, FWHM, TR, ns, "bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"nd pulse for fixed $\alpha = $ "+num2str(a)+" $^{\circ}$ for fixed $T_R = $ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$", "$t$ (ms)", "", discreteSumInsteadOfIntegral, f(m));
+            plotM2Dfit(M_, f_eval, transverseAmplitudes(k), transverseAmplitudesPhaseNoInt(k), T1, T2, FWHM, TR, ns, "bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"nd pulse for fixed $\alpha = $ "+num2str(a)+" $^{\circ}$ for fixed $T_R = $ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$", "$t$ (ms)", "", discreteSumInsteadOfIntegral, f(m), Psi);
 
         elseif k ==  3
 
-            plotM2Dfit(M_, f_eval, transverseAmplitudes(k), transverseAmplitudesPhaseNoInt(k), T1, T2, FWHM, TR, ns, "bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"rd pulse for fixed $\alpha = $ "+num2str(a)+" $^{\circ}$ for fixed $T_R = $ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$", "$t$ (ms)", "", discreteSumInsteadOfIntegral, f(m));
+            plotM2Dfit(M_, f_eval, transverseAmplitudes(k), transverseAmplitudesPhaseNoInt(k), T1, T2, FWHM, TR, ns, "bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"rd pulse for fixed $\alpha = $ "+num2str(a)+" $^{\circ}$ for fixed $T_R = $ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$", "$t$ (ms)", "", discreteSumInsteadOfIntegral, f(m), Psi);
 
         else
 
-            plotM2Dfit(M_, f_eval, transverseAmplitudes(k), transverseAmplitudesPhaseNoInt(k), T1, T2, FWHM, TR, ns, "bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"th pulse for fixed $\alpha = $ "+num2str(a)+" $^{\circ}$ for fixed $T_R = $ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$", "$t$ (ms)", "", discreteSumInsteadOfIntegral, f(m));
+            plotM2Dfit(M_, f_eval, transverseAmplitudes(k), transverseAmplitudesPhaseNoInt(k), T1, T2, FWHM, TR, ns, "bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"th pulse for fixed $\alpha = $ "+num2str(a)+" $^{\circ}$ for fixed $T_R = $ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$", "$t$ (ms)", "", discreteSumInsteadOfIntegral, f(m), Psi);
        
         end
 

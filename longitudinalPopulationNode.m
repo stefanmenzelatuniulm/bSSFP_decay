@@ -55,7 +55,7 @@ classdef longitudinalPopulationNode < populationNode
     
         end
 
-        function [transverseBottomNodes, longitudinalBottomNodes, longitudinalPopulationNodeObject] = applyPulse(longitudinalPopulationNodeObject, a_, TR_, f, height)
+        function [transverseBottomNodes, longitudinalBottomNodes, longitudinalPopulationNodeObject] = applyPulse(longitudinalPopulationNodeObject, a_, TR_, f, height, maxNodeDrawLevel)
 
             transverseBottomNodes = [];
             longitudinalBottomNodes = [];
@@ -102,7 +102,12 @@ classdef longitudinalPopulationNode < populationNode
                     	disp("Applying pulse "+longitudinalPopulationNodeObject.label+" -> 1");
                     end
 
-                    amplitudeLabel = dephasing*longitudinalPopulationNodeObject.amplitudeLabel*1i*sind(aFactor*a)*E2*E2p;
+                    if longitudinalPopulationNodeObject.level>maxNodeDrawLevel
+                        amplitudeLabel = sym(0); 
+                    else
+                        amplitudeLabel = dephasing*longitudinalPopulationNodeObject.amplitudeLabel*1i*sind(aFactor*a)*E2*E2p;
+                    end 
+
                     amplitudeDirectlyAfterPulseWithoutT2s = subs(subs(longitudinalPopulationNodeObject.amplitudeWithoutT2s*1i*sind(a), TR, TR_), a, a_);
                     amplitudeWithoutT2s = subs(dephasing*E2, TR, TR_)*amplitudeDirectlyAfterPulseWithoutT2s;
                     dephasingTimeDirectlyAfterPulse = longitudinalPopulationNodeObject.dephasingTime;
@@ -141,11 +146,25 @@ classdef longitudinalPopulationNode < populationNode
                     %Longitudinal magnetization with phase memory decays to 0, not to Meq
                     amplitudeDirectlyAfterPulseWithoutT2s = subs(subs(cosd(a)*longitudinalPopulationNodeObject.amplitudeWithoutT2s, TR, TR_), a, a_);
                     if abs(longitudinalPopulationNodeObject.coherenceDegree)>min(10e-12, (10e-6)*TR_*f)
-                        amplitudeLabel = cosd(aFactor*a)*longitudinalPopulationNodeObject.amplitudeLabel*E1;
+
+                        if longitudinalPopulationNodeObject.level>maxNodeDrawLevel
+                            amplitudeLabel = sym(0); 
+                        else
+                            amplitudeLabel = cosd(aFactor*a)*longitudinalPopulationNodeObject.amplitudeLabel*E1;
+                        end 
+
                         amplitudeWithoutT2s = subs(E1, TR, TR_)*amplitudeDirectlyAfterPulseWithoutT2s;
+
                     else 
-                        amplitudeLabel = (cosd(aFactor*a)*longitudinalPopulationNodeObject.amplitudeLabel-M_eq)*E1+M_eq;
+
+                        if longitudinalPopulationNodeObject.level>maxNodeDrawLevel
+                            amplitudeLabel = sym(0); 
+                        else
+                            amplitudeLabel = (cosd(aFactor*a)*longitudinalPopulationNodeObject.amplitudeLabel-M_eq)*E1+M_eq;
+                        end 
+
                         amplitudeWithoutT2s = subs(E1, TR, TR_)*(amplitudeDirectlyAfterPulseWithoutT2s-M_eq)+M_eq;
+
                     end
 
                     dephasingTimeDirectlyAfterPulse = longitudinalPopulationNodeObject.dephasingTime;
@@ -178,14 +197,14 @@ classdef longitudinalPopulationNode < populationNode
             else
 
                 if isa(longitudinalPopulationNodeObject.transverseChild, "transversePopulationNode")
-                    [transverseBottomNodes1, longitudinalBottomNodes1, longitudinalPopulationNodeObject.transverseChild] = longitudinalPopulationNodeObject.transverseChild.applyPulse(a_, TR_, f, height);
+                    [transverseBottomNodes1, longitudinalBottomNodes1, longitudinalPopulationNodeObject.transverseChild] = longitudinalPopulationNodeObject.transverseChild.applyPulse(a_, TR_, f, height, maxNodeDrawLevel);
                 else
                     transverseBottomNodes1 = [];
                     longitudinalBottomNodes1 = [];
                 end
 
                  if isa(longitudinalPopulationNodeObject.longitudinalChild, "longitudinalPopulationNode")               
-                    [transverseBottomNodes2, longitudinalBottomNodes2, longitudinalPopulationNodeObject.longitudinalChild] = longitudinalPopulationNodeObject.longitudinalChild.applyPulse(a_, TR_, f, height);
+                    [transverseBottomNodes2, longitudinalBottomNodes2, longitudinalPopulationNodeObject.longitudinalChild] = longitudinalPopulationNodeObject.longitudinalChild.applyPulse(a_, TR_, f, height, maxNodeDrawLevel);
                  else
                     transverseBottomNodes2 = [];
                     longitudinalBottomNodes2 = [];
