@@ -10,7 +10,7 @@
 function [summedTransverseAmplitudes, summedTransverseAmplitudesPhaseNoInt] = sumTransverseAmplitudes(n_tot, a, TR, f, n_steady_state, hyperpolarizationFactor, createPlot, w0)
     
     %Pathway label fontsize (only affects plot)
-    pathwayLabelFontSize = 3;
+    pathwayLabelFontSize = 1;
     
     %Amplitude label fontsize (only affects plot)
     amplitudeLabelFontSize = 3;
@@ -26,8 +26,7 @@ function [summedTransverseAmplitudes, summedTransverseAmplitudesPhaseNoInt] = su
     
     %Create tree with equilibrium magnetization as root
     syms M_eq real;
-    %parent, transverseChild, longitudinalChild, label, totalTime, coherenceDegree, amplitude, amplitudeLabel, amplitudeDirectlyAfterPulse, amplitudeWithoutT2p, amplitudeDirectlyAfterPulseWithoutT2p, coherenceDegreeDirectlyAfterPulse
-    root = longitudinalPopulationNode(emptyNode(), emptyNode(), emptyNode(), "", 0, 0, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, 0, 0, 0);
+    root = longitudinalPopulationNode(emptyNode(), emptyNode(), emptyNode(), "", 0, 0, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, hyperpolarizationFactor*M_eq, 0, 0, 0);
     tree = populationTree(root, a, TR, f, f_eval, n_tot, hyperpolarizationFactor, pathwayLabelFontSize, amplitudeLabelFontSize, labelOverlapThreshold, n_steady_state, w0, maxNodeDrawLevel);
     
     %Apply pulses

@@ -31,7 +31,7 @@ function M_tot = vectorizedM(a, TR, w, f, f_eval, n_tot, Meq, T1, T2, hyperpolar
     %alternating -/+ alpha pulses with repetition time TR occurs.
     %M_n(:, 1, k, l, m, n, o, p) will contain the transverse magnetizations of
     %k-th flip angle, the l-th repetition time, the m-th a/2 pulse spacing, 
-    %the n-th evaluation time (0< = fraction< = 1 of TR) and the o-th pulse
+    %the n-th evaluation time (0<= fraction<= 1 of TR) and the o-th pulse
     M_tot = zeros(3, 1, na, nTR, nf, nf_eval, n_tot);
 
     %alpha (in degree) rotation matrix around x axis

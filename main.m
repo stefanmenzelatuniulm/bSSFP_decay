@@ -6,27 +6,27 @@ clc;
 %Isochromat -> haufen identischer spins -> T2, da die einzelnen Spins durch
 %Dipol-Dipol WW interferieren
 %Summe aus Isochromaten -> T2 (Interferenz von Spins aus demselben
-%Isochromaten)  + T2* (Interferenz zwischen verschiedenen Isochromaten,
+%Isochromaten) + T2* (Interferenz zwischen verschiedenen Isochromaten, 
 %endliche Linienbreite) 
 %Tobi fragen!
 
 %-------------SETTINGS-------------
 
 %Number of isochromats
-ns=2^15;
+ns = 2^15;
             
 %Number of -/+ alpha pulses -1 (no sampling after last pulse due to +/-
 %alpha/2 tip-back pulse), not counting a/2 preparation pulse
-n_tot=5;
+n_tot = 33;
 
 %Assume that steady state is reached after how many pulses
-n_steady_state = 12;
+n_steady_state = 15;
 
 %Metabolite properties (13C lactate)
-w0=300/1000; %in kHz, rotating frame (gamma*B0 is filtered by heterodyne mixing)
-FWHM=21/1000; %in kHz %Simulation depends sensitively on FWHM
-T1=13.1*100; %in ms
-T2=0.6*100; %in ms
+w0 = 300/1000; %in kHz, rotating frame (gamma*B0 is filtered by heterodyne mixing)
+FWHM = 21/1000; %in kHz %Simulation depends sensitively on FWHM
+T1 = 13.1*100; %in ms
+T2 = 0.6*100; %in ms
 
 %Flip angle (deg)
 a = 55;
@@ -36,30 +36,30 @@ TR = 10;
 
 %Range of times TR*f between initial alpha/2 and first -alpha pulse, if TR
 %is the time between -/+ alpha pulses
-f=1/2;
+f = 1/2;
 
-%Calculate signal at time t_eval=f_eval*TR, measured from the end of the
-%pulse train. f_eval=0 e.g. calculates the signal directly after the end of
+%Calculate signal at time t_eval = f_eval*TR, measured from the end of the
+%pulse train. f_eval = 0 e.g. calculates the signal directly after the end of
 %the pulse train
-f_eval_min=0;
-f_eval_max=1;
-nf_eval=1001; 
+f_eval_min = 0;
+f_eval_max = 1;
+nf_eval = 1001; 
 
 %Equilibrium magnetization per isochromat
-Meq=1;
+Meq = 1;
 
 %Hyperpolarization factor
-hyperpolarization=1;
+hyperpolarization = 1;
 
 %splitfactor loop iterations are used in vectorizedM -> high splitfactor
 %causes less RAM usage in vectorizedM, but vectorization is not as efficient
-splitfactor=256; 
+splitfactor = 256; 
 
 %Recalculate M, or read existing M from save file M.mat?
-recalculateM=true;
+recalculateM = true;
 
 %Recalculate transverse Amplitudes or read from save file transverseAmplitudes.mat?
-recalculateAmplitudes=true;
+recalculateAmplitudes = true;
 
 %Sum over known frequency distribution, instead of integrating over the
 %whole frequency distribution (only affects fit)
@@ -67,25 +67,25 @@ discreteSumInsteadOfIntegral = false;
 
 %-------------END OF SETTINGS-------------
 
-f_eval=linspace(f_eval_min,f_eval_max,nf_eval);
+f_eval = linspace(f_eval_min, f_eval_max, nf_eval);
 
 %Lorentzian distribution with FWHM around w0 for Larmor frequencies in Hz
 %(Lorentzian distribution is special case of Student's t distribution with
 %1 degree of freedom) Care: sigma is HWHM
-pd=makedist('tLocationScale','mu',w0,'sigma',FWHM/2,'nu',1);
-w=random(pd,1,ns);
+pd = makedist('tLocationScale', 'mu', w0, 'sigma', FWHM/2, 'nu', 1);
+w = random(pd, 1, ns);
 
 %Calculate M Cant fully exploit the vectorization of vectorizedM due to RAM
 %overflow Balance has to be found of CPU time vs RAM usage
 if recalculateM
 
-    M=zeros(1,1,length(f),nf_eval,n_tot); %indices: a (1st dimension), TR (2nd dimension), f (3rd dimension), f_eval (4th dimension), pulse (5th dimension)
+    M = zeros(1, 1, length(f), nf_eval, n_tot); %indices: a (1st dimension), TR (2nd dimension), f (3rd dimension), f_eval (4th dimension), pulse (5th dimension)
         
-    M(:,:,:,:,:)=vectorizedM(a,TR,w,f,f_eval,n_tot,Meq,T1,T2,hyperpolarization,splitfactor); 
+    M(:, :, :, :, :) = vectorizedM(a, TR, w, f, f_eval, n_tot, Meq, T1, T2, hyperpolarization, splitfactor); 
   
     %Save M and w
-    save(pwd+"\"+"M.mat","M","-v7.3");
-    save(pwd+"\"+"w.mat","w","-v7.3");
+    save(pwd+"\"+"M.mat", "M", "-v7.3");
+    save(pwd+"\"+"w.mat", "w", "-v7.3");
 
 else
 
@@ -98,15 +98,15 @@ mkdir("Figures");
 deleteFigures("Figures");
 
 %Plot histogram of w
-%plotHist(w,w0,FWHM);
+%plotHist(w, w0, FWHM);
 
 for m = 1:length(f)
 
     if recalculateAmplitudes
     
         [transverseAmplitudes, transverseAmplitudesPhaseNoInt] = sumTransverseAmplitudes(n_tot, a, TR, f(m), n_steady_state, hyperpolarization, true, w0);
-        save(pwd+"\"+"transverseAmplitudes.mat","transverseAmplitudes","-v7.3");
-        save(pwd+"\"+"transverseAmplitudesPhaseNoInt.mat","transverseAmplitudesPhaseNoInt","-v7.3");
+        save(pwd+"\"+"transverseAmplitudes.mat", "transverseAmplitudes", "-v7.3");
+        save(pwd+"\"+"transverseAmplitudesPhaseNoInt.mat", "transverseAmplitudesPhaseNoInt", "-v7.3");
     
     else
     
@@ -117,25 +117,25 @@ for m = 1:length(f)
     
     disp(" ");
     
-    for k=1:n_tot
+    for k = 1:n_tot
     
-        M_=permute(M(:,:,m,:,k),[4 1 2 3 5]);
+        M_ = permute(M(:, :, m, :, k), [4 1 2 3 5]);
 
-        if k == 1
+        if k ==  1
 
-            plotM2Dfit(M_,f_eval,transverseAmplitudes(k),transverseAmplitudesPhaseNoInt(k),T1,T2,FWHM,TR,ns,"bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"st pulse for fixed $\alpha=$ "+num2str(a)+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$","$t$ (ms)","",discreteSumInsteadOfIntegral,f(m));
+            plotM2Dfit(M_, f_eval, transverseAmplitudes(k), transverseAmplitudesPhaseNoInt(k), T1, T2, FWHM, TR, ns, "bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"st pulse for fixed $\alpha = $ "+num2str(a)+" $^{\circ}$ for fixed $T_R = $ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$", "$t$ (ms)", "", discreteSumInsteadOfIntegral, f(m));
         
-        elseif k == 2
+        elseif k ==  2
 
-            plotM2Dfit(M_,f_eval,transverseAmplitudes(k),transverseAmplitudesPhaseNoInt(k),T1,T2,FWHM,TR,ns,"bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"nd pulse for fixed $\alpha=$ "+num2str(a)+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$","$t$ (ms)","",discreteSumInsteadOfIntegral,f(m));
+            plotM2Dfit(M_, f_eval, transverseAmplitudes(k), transverseAmplitudesPhaseNoInt(k), T1, T2, FWHM, TR, ns, "bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"nd pulse for fixed $\alpha = $ "+num2str(a)+" $^{\circ}$ for fixed $T_R = $ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$", "$t$ (ms)", "", discreteSumInsteadOfIntegral, f(m));
 
-        elseif k == 3
+        elseif k ==  3
 
-            plotM2Dfit(M_,f_eval,transverseAmplitudes(k),transverseAmplitudesPhaseNoInt(k),T1,T2,FWHM,TR,ns,"bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"rd pulse for fixed $\alpha=$ "+num2str(a)+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$","$t$ (ms)","",discreteSumInsteadOfIntegral,f(m));
+            plotM2Dfit(M_, f_eval, transverseAmplitudes(k), transverseAmplitudesPhaseNoInt(k), T1, T2, FWHM, TR, ns, "bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"rd pulse for fixed $\alpha = $ "+num2str(a)+" $^{\circ}$ for fixed $T_R = $ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$", "$t$ (ms)", "", discreteSumInsteadOfIntegral, f(m));
 
         else
 
-            plotM2Dfit(M_,f_eval,transverseAmplitudes(k),transverseAmplitudesPhaseNoInt(k),T1,T2,FWHM,TR,ns,"bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"th pulse for fixed $\alpha=$ "+num2str(a)+" $^{\circ}$ for fixed $T_R=$ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$","$t$ (ms)","",discreteSumInsteadOfIntegral,f(m));
+            plotM2Dfit(M_, f_eval, transverseAmplitudes(k), transverseAmplitudesPhaseNoInt(k), T1, T2, FWHM, TR, ns, "bSSFP signal from "+num2str(ns)+" isochromats after the "+num2str(k)+"th pulse for fixed $\alpha = $ "+num2str(a)+" $^{\circ}$ for fixed $T_R = $ "+num2str(TR)+" ms for initial $\frac{\alpha}{2}$ pulse spacing "+num2str(f(m))+" $T_R$", "$t$ (ms)", "", discreteSumInsteadOfIntegral, f(m));
        
         end
 
