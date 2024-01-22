@@ -17,7 +17,7 @@ ns = 2^15;
             
 %Number of -/+ alpha pulses -1 (no sampling after last pulse due to +/-
 %alpha/2 tip-back pulse), not counting a/2 preparation pulse
-n_tot = 33;
+n_tot = 5;
 
 %Assume that steady state is reached after how many pulses
 n_steady_state = 15;
@@ -63,10 +63,10 @@ recalculateAmplitudes = true;
 
 %Sum over known frequency distribution, instead of integrating over the
 %whole frequency distribution (only affects fit)
-discreteSumInsteadOfIntegral = false;
+discreteSumInsteadOfIntegral = true;
 
 %Frequency offset due to B0 field inhomogeneity (kHz)
-Psi = 100/1000; 
+Psi = 10/1000; 
 
 %-------------END OF SETTINGS-------------
 

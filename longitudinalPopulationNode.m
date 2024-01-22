@@ -68,7 +68,8 @@ classdef longitudinalPopulationNode < populationNode
                     aFactor = (-1)^height;
                 end
  
-                syms T1 T2 T2s TR a M_eq w real;
+                syms T1 T2 TR a M_eq w real;
+                T2s = sym("T2s", "real");
                 E1 = exp(-f*TR/T1);
                 E2 = exp(-f*TR/T2);
                 dephasing = exp(1i*2*pi*w*TR*f);

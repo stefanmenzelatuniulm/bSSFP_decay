@@ -75,7 +75,8 @@ classdef transversePopulationNode < populationNode
 
 
 
-                syms T1 T2 T2s TR a w real;
+                syms T1 T2 TR a w real;
+                T2s = sym("T2s", "real");                
                 E1 = exp(-f*TR/T1);
                 E2 = exp(-f*TR/T2);
                 dephasing = exp(1i*2*pi*w*TR*f);

@@ -69,7 +69,8 @@ classdef populationTree
         %Applies pulse to population tree
         function [transverseBottomNodes, longitudinalBottomNodes, populationTreeObject] = applyPulses(populationTreeObject)
             
-            syms x T2s T2 w Psi real;
+            syms x T2 w Psi real;
+            T2s = sym("T2s", "real");
 
             for k = 1:min(populationTreeObject.n_tot, populationTreeObject.n_steady_state)
 
