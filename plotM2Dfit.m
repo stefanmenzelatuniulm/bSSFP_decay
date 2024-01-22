@@ -32,7 +32,7 @@ function ft = plotM2Dfit(M, X, summedTransverseAmplitudes, transverseAmplitudesP
 
     end
         
-    fitfunction = string(summedTransverseAmplitudes);
+    fitfunction = string(summedTransverseAmplitudes)+"+0*T2s";
     fitfunctionMueller = "C*exp(-abs(x-"+num2str(TR*f)+")/T2s)";
         
     coeffs = ["T1" "T2" "T2s" "M_eq" "Psi"];
