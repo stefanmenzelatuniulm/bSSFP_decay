@@ -23,7 +23,7 @@ n_tot = 32;
 n_steady_state = 15;
 
 %Metabolite properties (13C lactate)
-w0 = 300/1000; %in kHz, rotating frame (gamma*B0 is filtered by heterodyne mixing)
+w0 = 500/1000; %in kHz, rotating frame (gamma*B0 is filtered by heterodyne mixing)
 FWHM = 21/1000; %in kHz %Simulation depends sensitively on FWHM
 T1 = 250; %in ms
 T2 = 70; %in ms
