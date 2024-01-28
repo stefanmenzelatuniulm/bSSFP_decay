@@ -103,7 +103,7 @@ classdef longitudinalPopulationNode < populationNode
                     	disp("Applying pulse "+longitudinalPopulationNodeObject.label+" -> 1");
                     end
 
-                    if longitudinalPopulationNodeObject.level>maxNodeDrawLevel
+                    if longitudinalPopulationNodeObject.level>maxNodeDrawLevel+1
                         amplitudeLabel = sym(0); 
                     else
                         amplitudeLabel = dephasing*longitudinalPopulationNodeObject.amplitudeLabel*1i*sind(aFactor*a)*E2*E2p;
@@ -148,7 +148,7 @@ classdef longitudinalPopulationNode < populationNode
                     amplitudeDirectlyAfterPulseWithoutT2s = subs(subs(cosd(a)*longitudinalPopulationNodeObject.amplitudeWithoutT2s, TR, TR_), a, a_);
                     if abs(longitudinalPopulationNodeObject.coherenceDegree)>min(10e-12, (10e-6)*TR_*f)
 
-                        if longitudinalPopulationNodeObject.level>maxNodeDrawLevel
+                        if longitudinalPopulationNodeObject.level>maxNodeDrawLevel+1
                             amplitudeLabel = sym(0); 
                         else
                             amplitudeLabel = cosd(aFactor*a)*longitudinalPopulationNodeObject.amplitudeLabel*E1;
@@ -158,7 +158,7 @@ classdef longitudinalPopulationNode < populationNode
 
                     else 
 
-                        if longitudinalPopulationNodeObject.level>maxNodeDrawLevel
+                        if longitudinalPopulationNodeObject.level>maxNodeDrawLevel+1
                             amplitudeLabel = sym(0); 
                         else
                             amplitudeLabel = (cosd(aFactor*a)*longitudinalPopulationNodeObject.amplitudeLabel-M_eq)*E1+M_eq;

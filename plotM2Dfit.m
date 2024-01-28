@@ -1,10 +1,10 @@
 %Plots dependency of M on 1 variable
 
-function ft = plotM2Dfit(M, X, summedTransverseAmplitudes, transverseAmplitudesPhaseNoInt, T1, T2, FWHM, TR, ns, plotTitle, xLabel, subfolder, discreteSumInsteadOfIntegral, f, Psi)
+function plotM2Dfit(M, X, summedTransverseAmplitudes, transverseAmplitudesPhaseNoInt, T1num, T2num, FWHM, TR, ns, plotTitle, xLabel, subfolder, discreteSumInsteadOfIntegral, f, Psinum)
 
     disp("Creating 2D plot of M vs "+strrep(xLabel, "$", "")+" and fitting");
 
-    syms w;
+    syms w T1 T2 T2s Psi M_eq;
 
     if ~discreteSumInsteadOfIntegral
 
@@ -32,21 +32,16 @@ function ft = plotM2Dfit(M, X, summedTransverseAmplitudes, transverseAmplitudesP
 
     end
         
-    fitfunction = string(summedTransverseAmplitudes)+"+0*T2s";
-    fitfunctionMueller = "C*exp(-abs(x-"+num2str(TR*f)+")/T2s)";
-        
-    coeffs = ["T1" "T2" "T2s" "M_eq" "Psi"];
+    fitfunctionMueller = "C*(exp(-abs(x-"+num2str(TR*f)+")/T2s)+exp(-abs(x-"+(num2str(TR-TR*f))+")/T2s))";
     coeffsMueller = ["T2s" "C"];
-
-    options = fitoptions('Method', 'NonlinearLeastSquares', 'Lower', [T1 T2 1/(pi*FWHM) ns Psi], 'Upper', [T1 T2 1/(pi*FWHM) ns Psi], 'StartPoint', [T1 T2 1/(pi*FWHM) ns Psi]);
-    optionsT2Dominated = fitoptions('Method', 'NonlinearLeastSquares', 'Lower', [realmax T2 1/(pi*FWHM) ns Psi], 'Upper', [realmax T2 1/(pi*FWHM) ns Psi], 'StartPoint', [realmax T2 1/(pi*FWHM) ns Psi]);    
-    optionsT2sDominated = fitoptions('Method', 'NonlinearLeastSquares', 'Lower', [realmax realmax 1/(pi*FWHM) ns Psi], 'Upper', [realmax realmax 1/(pi*FWHM) ns Psi], 'StartPoint', [realmax realmax 1/(pi*FWHM) ns Psi]);
-    optionsT1T2sDominated = fitoptions('Method', 'NonlinearLeastSquares', 'Lower', [T1 realmax 1/(pi*FWHM) ns Psi], 'Upper', [T1 realmax 1/(pi*FWHM) ns Psi], 'StartPoint', [T1 realmax 1/(pi*FWHM) ns Psi]);
-    optionsMueller = fitoptions('Method', 'NonlinearLeastSquares', 'Lower', [1/(pi*FWHM) 0], 'Upper', [1/(pi*FWHM) inf], 'StartPoint', [1/(pi*FWHM) ns]);
-    
-    fttype = fittype(fitfunction, coefficients = coeffs);
     fttypeMueller = fittype(fitfunctionMueller, coefficients = coeffsMueller);
+    optionsMueller = fitoptions('Method', 'NonlinearLeastSquares', 'Lower', [1/(pi*FWHM) 0], 'Upper', [1/(pi*FWHM) inf], 'StartPoint', [1/(pi*FWHM) ns]);
 
+    theoreticalSignalExact = subs(subs(subs(subs(subs(summedTransverseAmplitudes, T1, T1num), T2, T2num), T2s, 1/(pi*FWHM)), Psi, Psinum), M_eq, ns);
+    theoreticalSignalT2T2s = subs(subs(subs(subs(subs(summedTransverseAmplitudes, T1, inf), T2, T2num), T2s, 1/(pi*FWHM)), Psi, Psinum), M_eq, ns); 
+    theoreticalSignalT1T2s = subs(subs(subs(subs(subs(summedTransverseAmplitudes, T1, T1num), T2, inf), T2s, 1/(pi*FWHM)), Psi, Psinum), M_eq, ns);
+    theoreticalSignalT2s = subs(subs(subs(subs(subs(summedTransverseAmplitudes, T1, inf), T2, inf), T2s, 1/(pi*FWHM)), Psi, Psinum), M_eq, ns);    
+    
     fig = figure('WindowState', 'maximized');
 
     X = X*TR; 
@@ -54,26 +49,22 @@ function ft = plotM2Dfit(M, X, summedTransverseAmplitudes, transverseAmplitudesP
     ax = gca;
 
     hold on;
-    ft = fit(transpose(X), M, fttype, options);
-    pf = plot(ax, ft);
-    set(pf, 'lineWidth', 1);
-    set(pf, 'color', [0.4660 0.6740 0.1880]);
+    pExact = fplot(ax, theoreticalSignalExact, [min(X), max(X)]);
+    set(pExact, 'lineWidth', 1);
+    set(pExact, 'color', [0.4660 0.6740 0.1880]);
 
     hold on;
-    ftT2Dominated = fit(transpose(X), M, fttype, optionsT2Dominated);
-    pfT2Dominated = plot(ax, ftT2Dominated, "m");
-    set(pfT2Dominated, 'lineWidth', 1);
+    pT2T2s = fplot(ax, theoreticalSignalT2T2s, [min(X), max(X)], "m");
+    set(pT2T2s, 'lineWidth', 1);
 
     hold on;
-    ftT1T2sDominated = fit(transpose(X), M, fttype, optionsT1T2sDominated);
-    pfT1T2sDominated = plot(ax, ftT1T2sDominated);
-    set(pfT1T2sDominated, 'lineWidth', 1);
-    set(pfT1T2sDominated, 'color', [0.4940 0.1840 0.5560]);
+    pT1T2s = fplot(ax, theoreticalSignalT1T2s, [min(X), max(X)]);
+    set(pT1T2s, 'lineWidth', 1);
+    set(pT1T2s, 'color', [0.9290 0.6940 0.1250]);
 
     hold on;
-    ftT2sDominated = fit(transpose(X), M, fttype, optionsT2sDominated);
-    pfT2sDominated = plot(ax, ftT2sDominated, "c");
-    set(pfT2sDominated, 'lineWidth', 1);
+    pT2s = fplot(ax, theoreticalSignalT2s, [min(X), max(X)], "c");
+    set(pT2s, 'lineWidth', 1);
 
     hold on;
     ftMueller = fit(transpose(X), M, fttypeMueller, optionsMueller);

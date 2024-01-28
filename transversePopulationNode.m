@@ -110,7 +110,7 @@ classdef transversePopulationNode < populationNode
                     	disp("Applying pulse "+transversePopulationNodeObject.label+" -> 1");
                     end
                     
-                    if transversePopulationNodeObject.level>maxNodeDrawLevel
+                    if transversePopulationNodeObject.level>maxNodeDrawLevel+1
                         amplitudeLabel = sym(0); 
                     else
                         amplitudeLabel = dephasing*transversePopulationNodeObject.amplitudeLabel*E2*E2pNotInverted*cosd(aFactor*a/2)^2; 
@@ -151,7 +151,7 @@ classdef transversePopulationNode < populationNode
                     	disp("Applying pulse "+transversePopulationNodeObject.label+" -> 0");
                     end 
 
-                    if transversePopulationNodeObject.level>maxNodeDrawLevel
+                    if transversePopulationNodeObject.level>maxNodeDrawLevel+1
                         amplitudeLabel = sym(0); 
                     else
                         amplitudeLabel = (1i/2)*sind(aFactor*a)*E1*transversePopulationNodeObject.amplitudeLabel;
@@ -216,7 +216,7 @@ classdef transversePopulationNode < populationNode
                     end  
 
 
-                    if transversePopulationNodeObject.level>maxNodeDrawLevel
+                    if transversePopulationNodeObject.level>maxNodeDrawLevel+1
                         amplitudeLabel = sym(0); 
                     else
                         amplitudeLabel = dephasing*conj(transversePopulationNodeObject.amplitudeLabel)*E2*E2pInverted*sind(aFactor*a/2)^2;  
@@ -257,7 +257,7 @@ classdef transversePopulationNode < populationNode
                     	disp("Applying pulse "+transversePopulationNodeObject.label+" -> 0*");
                     end   
 
-                    if transversePopulationNodeObject.level>maxNodeDrawLevel
+                    if transversePopulationNodeObject.level>maxNodeDrawLevel+1
                         amplitudeLabel = sym(0); 
                     else
                         amplitudeLabel = -(1i/2)*sind(aFactor*a)*E1*conj(transversePopulationNodeObject.amplitudeLabel);   
