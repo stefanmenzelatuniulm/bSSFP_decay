@@ -261,8 +261,8 @@ classdef populationTree
 
             legend(h, 'Location', 'northwest');
 
-            saveas(fig, pwd+"\Figures\spinPathways"+num2str(populationTreeObject.n_tot-1)+"_"+num2str(populationTreeObject.f)+".fig");
-            saveas(fig, pwd+"\Figures\spinPathways"+num2str(populationTreeObject.n_tot-1)+"_"+num2str(populationTreeObject.f)+".svg");
+            saveas(fig, pwd+"\spinPathways"+num2str(populationTreeObject.n_tot-1)+"_"+num2str(populationTreeObject.f)+".fig");
+            saveas(fig, pwd+"\spinPathways"+num2str(populationTreeObject.n_tot-1)+"_"+num2str(populationTreeObject.f)+".svg");
 
             close(fig);
         

@@ -23,10 +23,10 @@ n_tot = 8;
 n_steady_state = 15;
 
 %Metabolite properties (13C lactate)
-w0 = 500/1000; %in kHz, rotating frame (gamma*B0 is filtered by heterodyne mixing)
+w0 = 300/1000; %in kHz, rotating frame (gamma*B0 is filtered by heterodyne mixing)
 FWHM = 21/1000; %in kHz %Simulation depends sensitively on FWHM
-T1 = 250; %in ms
-T2 = 70; %in ms
+T1 = 13000; %in ms
+T2 = 600; %in ms
 
 %Flip angle (deg)
 a = 55;
@@ -56,10 +56,10 @@ hyperpolarization = 1;
 splitfactor = 1024; 
 
 %Recalculate M, or read existing M from save file M.mat?
-recalculateM = true;
+recalculateM = false;
 
 %Recalculate transverse Amplitudes or read from save file transverseAmplitudes.mat?
-recalculateAmplitudes = true;
+recalculateAmplitudes = false;
 
 %Sum over known frequency distribution, instead of integrating over the
 %whole frequency distribution (only affects fit)
