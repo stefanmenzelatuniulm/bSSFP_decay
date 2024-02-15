@@ -116,7 +116,7 @@ classdef populationTree
                         disp("  Additional T2 Relaxation after t = t0 + x: "+string(T2Relaxation));
                         disp("  Phase & T2* Relaxation: "+string(phase));
                         disp("  Phase without integration over isochromats, and therefore without T2* Relaxation: "+string(phaseNoInt));
-                        disp("1 of the "+num2str(length(transverseBottomNodes))+" summands for the fitting model for "+num2str(k)+" pulses is the product of the above terms.");
+                        disp("1 of the "+num2str(length(transverseBottomNodes))+" summands for the fitting model for "+num2str(k)+" pulses is the product of the first three terms.");
                         disp("Parameters: alpha = "+num2str(populationTreeObject.a)+" deg, TR = "+num2str(populationTreeObject.TR)+" ms, f = "+num2str(populationTreeObject.f));
                     end
 
