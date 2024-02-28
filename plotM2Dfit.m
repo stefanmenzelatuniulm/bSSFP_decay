@@ -155,7 +155,7 @@ function plotM2Dfit(M, X, summedTransverseAmplitudes, transverseAmplitudesPhaseN
 
     coeffs = coeffnames(ftMueller);
     coeffvals= coeffvalues(ftMueller);
-    ci = confint(ft,0.95);
+    ci = confint(ftMueller,0.95);
     str1 = sprintf('\n %s = %0.9f   (%0.9f   %0.9f)',coeffs{1},coeffvals(1),ci(:,1));
     str2 = sprintf('\n %s = %0.9f   (%0.9f   %0.9f)',coeffs{2},coeffvals(2),ci(:,2));
 

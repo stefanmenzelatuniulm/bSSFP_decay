@@ -37,7 +37,7 @@ TR = 10;
 
 %Time TR*f between initial alpha/2 and first -alpha pulse, if TR
 %is the time between -/+ alpha pulses
-f = 2/3;
+f = 1;
 
 %Calculate signal at time t_eval = f_eval*TR, measured from the end of the
 %pulse train. f_eval = 0 e.g. calculates the signal directly after the end of
