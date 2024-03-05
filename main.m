@@ -2,13 +2,14 @@ clear all;
 close all;
 clc; 
 
-%Einzelner/isolierter Spin -> kein T2, kein T2* da nichts mit ihm interferieren kann
-%Isochromat (unendlich kleine Linienbreite) -> haufen identischer spins -> T2, da die einzelnen Spins durch
-%Dipol-Dipol WW interferieren
-%Summe aus verschiedenen Isochromaten (endlich große Linienbreite) -> T2 (Interferenz von Spins aus demselben
-%Isochromaten) + T2* (Interferenz zwischen verschiedenen Isochromaten
-%Tobi fragen!
+%Einzelner/isolierter Spin -> kein T2, kein T2* da nichts mit ihm
+%interferieren kann Isochromat (unendlich kleine Linienbreite) -> haufen
+%identischer spins -> T2, da die einzelnen Spins durch Dipol-Dipol WW
+%interferieren Summe aus verschiedenen Isochromaten (endlich große
+%Linienbreite) -> T2 (Interferenz von Spins aus demselben Isochromaten) +
+%T2* (Interferenz zwischen verschiedenen Isochromaten Tobi fragen!
 
+%TODO: Auf calculate amplitudeLabel verzichten, weil es zu lang dauert
 %TODO: Falls es zu lange dauert, T1,2 auf inf setzen im Baum
 
 %-------------SETTINGS-------------
@@ -35,13 +36,13 @@ a = 55;
 %Repetition time (ms)
 TR = 10;
 
-%Time TR*f between initial alpha/2 and first -alpha pulse, if TR
-%is the time between -/+ alpha pulses
-f = 1;
+%Time TR*f between initial alpha/2 and first -alpha pulse, if TR is the
+%time between -/+ alpha pulses
+f = 1/3;
 
 %Calculate signal at time t_eval = f_eval*TR, measured from the end of the
-%pulse train. f_eval = 0 e.g. calculates the signal directly after the end of
-%the pulse train
+%pulse train. f_eval = 0 e.g. calculates the signal directly after the end
+%of the pulse train
 f_eval_min = 0;
 f_eval_max = 1;
 nf_eval = 1001; 
@@ -56,13 +57,15 @@ hyperpolarization = 1;
 Psi = 0/1000; 
 
 %splitfactor loop iterations are used in vectorizedM -> high splitfactor
-%causes less RAM usage in vectorizedM, but vectorization is not as efficient
+%causes less RAM usage in vectorizedM, but vectorization is not as
+%efficient
 splitfactor = 1024; 
 
 %Recalculate M, or read existing M from save file M.mat?
 recalculateM = true;
 
-%Recalculate transverse Amplitudes or read from save file transverseAmplitudes.mat?
+%Recalculate transverse Amplitudes or read from save file
+%transverseAmplitudes.mat?
 recalculateAmplitudes = true;
 
 %Sum over known frequency distribution, instead of integrating over the
@@ -101,8 +104,7 @@ end
 mkdir("Figures");
 %deleteFigures("Figures");
 
-%Plot histogram of w
-%plotHist(w, w0, FWHM);
+%Plot histogram of w plotHist(w, w0, FWHM);
 
 if recalculateAmplitudes
 
