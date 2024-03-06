@@ -62,7 +62,7 @@ Psi = 0/1000;
 splitfactor = 1024; 
 
 %Recalculate M, or read existing M from save file M.mat?
-recalculateM = true;
+recalculateM = false;
 
 %Recalculate transverse Amplitudes or read from save file
 %transverseAmplitudes.mat?

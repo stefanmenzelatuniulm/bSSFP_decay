@@ -38,7 +38,7 @@ classdef populationTree
                 populationTree.pathwayLabelFontSize = pathwayLabelFontSize;
                 populationTree.amplitudeLabelFontSize = amplitudeLabelFontSize;
                 populationTree.labelOverlapThreshold = labelOverlapThreshold;
-                populationTree.n_steady_state = n_steady_state;
+                populationTree.n_steady_state = n_steady_state+1; %counting a/2 preparation pulse 
                 populationTree.w0 = w0;
                 populationTree.maxNodeDrawLevel = maxNodeDrawLevel;
 
@@ -129,7 +129,7 @@ classdef populationTree
 
             if populationTreeObject.n_tot > populationTreeObject.n_steady_state
             
-                for k = populationTreeObject.n_tot+1:populationTreeObject.n_steady_state
+                for k = populationTreeObject.n_steady_state+1:populationTreeObject.n_tot
                 
                     populationTreeObject.summedTransverseAmplitudes(k) = populationTreeObject.summedTransverseAmplitudes(k-1);
                     populationTreeObject.summedTransverseAmplitudesPhaseNoInt(k) = populationTreeObject.summedTransverseAmplitudesPhaseNoInt(k-1);
