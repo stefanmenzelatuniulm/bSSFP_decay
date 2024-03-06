@@ -36,7 +36,7 @@ function plotM2Dfit(M, X, summedTransverseAmplitudes, transverseAmplitudesPhaseN
     fitfunctionMueller = "C*(exp(-abs(x-"+num2str(TR*f)+")/T2s)+exp(-abs(x-"+(num2str(TR-TR*f))+")/T2s))";
     coeffsMueller = ["T2s" "C"];
     fttypeMueller = fittype(fitfunctionMueller, coefficients = coeffsMueller);
-    optionsMueller = fitoptions('Method', 'NonlinearLeastSquares', 'Lower', [1/(pi*FWHM) 0], 'Upper', [1/(pi*FWHM) inf], 'StartPoint', [1/(pi*FWHM) ns]);
+    optionsMueller = fitoptions('Method', 'NonlinearLeastSquares', 'Lower', [1/(pi*FWHM) 0], 'Upper', [inf inf], 'StartPoint', [1/(pi*FWHM) ns]);
     theoreticalSignalExact = subs(subs(subs(subs(subs(summedTransverseAmplitudes, T1, T1num), T2, T2num), T2s, 1/(pi*FWHM)), Psi, Psinum), M_eq, ns);
     theoreticalSignalT2s = subs(subs(subs(subs(subs(summedTransverseAmplitudes, T1, inf), T2, inf), T2s, 1/(pi*FWHM)), Psi, Psinum), M_eq, ns);  
     shortLatexString = "f \bigl( T_1, \: T_2, \: T_2^*, \: M_{eq}, \: \Psi \bigr)";
@@ -86,12 +86,12 @@ function plotM2Dfit(M, X, summedTransverseAmplitudes, transverseAmplitudesPhaseN
 
     fitfunction=string(summedTransverseAmplitudes)+"+0*T1+0*T2+0*T2s+0*M_eq+0*Psi";
     coeffs=["T1" "T2" "T2s" "M_eq" "Psi"];
-    options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0 0 0],'Upper',[inf inf inf inf inf],'StartPoint',[13.1*1000 0.6*1000 1/(pi*21/1000) ns 0]);
+    options=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0 0 0],'Upper',[inf inf inf inf inf],'StartPoint',[T1num T2num 1/(pi*FWHM) ns 0]);
     fttype = fittype(fitfunction,coefficients=coeffs);
 
     fitfunction2 = string(subs(subs(summedTransverseAmplitudes, T1, inf), T2, inf))+"+0*T2s+0*M_eq+0*Psi"; 
     coeffs2=["T2s" "M_eq" "Psi"];
-    options2=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0],'Upper',[inf inf inf],'StartPoint',[1/(pi*21/1000) ns 0]);
+    options2=fitoptions('Method','NonlinearLeastSquares','Lower',[0 0 0],'Upper',[inf inf inf],'StartPoint',[1/(pi*FWHM) ns 0]);
     fttype2 = fittype(fitfunction2,coefficients=coeffs2);
     
     fig = figure('WindowState', 'maximized');

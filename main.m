@@ -29,6 +29,8 @@ w0 = 300/1000; %in kHz, rotating frame (gamma*B0 is filtered by heterodyne mixin
 FWHM = 21/1000; %in kHz %Simulation depends sensitively on FWHM
 T1 = 13000; %in ms
 T2 = 600; %in ms
+%Care: T1, T2, FWHM determine the starting points of the fits -> should
+%have sensible order of magnitude
 
 %Flip angle (deg)
 a = 55;
