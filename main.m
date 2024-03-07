@@ -15,7 +15,7 @@ clc;
 %-------------SETTINGS-------------
 
 %Number of isochromats (only affects Bloch simulation)
-ns = 2^17;
+ns = 2^15;
             
 %Number of -/+ alpha pulses -1 (no sampling after last pulse due to +/-
 %alpha/2 tip-back pulse), not counting a/2 preparation pulse
@@ -40,7 +40,7 @@ TR = 10;
 
 %Time TR*f between initial alpha/2 and first -alpha pulse, if TR is the
 %time between -/+ alpha pulses
-f = 1/3;
+f = 1/2;
 
 %Calculate signal at time t_eval = f_eval*TR, measured from the end of the
 %pulse train. f_eval = 0 e.g. calculates the signal directly after the end
@@ -64,7 +64,7 @@ Psi = 0/1000;
 splitfactor = 1024; 
 
 %Recalculate M, or read existing M from save file M.mat?
-recalculateM = false;
+recalculateM = true;
 
 %Recalculate transverse Amplitudes or read from save file
 %transverseAmplitudes.mat?

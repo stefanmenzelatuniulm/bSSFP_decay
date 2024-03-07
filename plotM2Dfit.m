@@ -36,7 +36,7 @@ function plotM2Dfit(M, X, summedTransverseAmplitudes, transverseAmplitudesPhaseN
     fitfunctionMueller = "C*(exp(-abs(x-"+num2str(TR*f)+")/T2s)+exp(-abs(x-"+(num2str(TR-TR*f))+")/T2s))";
     coeffsMueller = ["T2s" "C"];
     fttypeMueller = fittype(fitfunctionMueller, coefficients = coeffsMueller);
-    optionsMueller = fitoptions('Method', 'NonlinearLeastSquares', 'Lower', [1/(pi*FWHM) 0], 'Upper', [inf inf], 'StartPoint', [1/(pi*FWHM) ns]);
+    optionsMueller = fitoptions('Method', 'NonlinearLeastSquares', 'Lower', [0 0], 'Upper', [inf inf], 'StartPoint', [1/(pi*FWHM) ns]);
     theoreticalSignalExact = subs(subs(subs(subs(subs(summedTransverseAmplitudes, T1, T1num), T2, T2num), T2s, 1/(pi*FWHM)), Psi, Psinum), M_eq, ns);
     theoreticalSignalT2s = subs(subs(subs(subs(subs(summedTransverseAmplitudes, T1, inf), T2, inf), T2s, 1/(pi*FWHM)), Psi, Psinum), M_eq, ns);  
     shortLatexString = "f \bigl( T_1, \: T_2, \: T_2^*, \: M_{eq}, \: \Psi \bigr)";
