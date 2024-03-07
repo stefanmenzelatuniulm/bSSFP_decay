@@ -14,7 +14,7 @@ clc;
 
 %-------------SETTINGS-------------
 
-%Number of isochromats
+%Number of isochromats (only affects Bloch simulation)
 ns = 2^17;
             
 %Number of -/+ alpha pulses -1 (no sampling after last pulse due to +/-

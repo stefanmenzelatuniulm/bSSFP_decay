@@ -335,29 +335,40 @@ classdef transversePopulationNode < populationNode
             if isa(transversePopulationNodeObject.transverseChild1, "populationNode") && transversePopulationNodeObject.transverseChild1.label ==  label
 
                 disp("Pruning "+transversePopulationNodeObject.transverseChild1.label);
-                transversePopulationNodeObject.transverseChild1 = prunedNode();
+                transversePopulationNodeObject.transverseChild1 = emptyNode();
 
             elseif isa(transversePopulationNodeObject.transverseChild2, "populationNode") && transversePopulationNodeObject.transverseChild2.label ==  label
                 
                 disp("Pruning "+transversePopulationNodeObject.transverseChild2.label);
-                transversePopulationNodeObject.transverseChild2 = prunedNode();
+                transversePopulationNodeObject.transverseChild2 = emptyNode();
 
             elseif isa(transversePopulationNodeObject.longitudinalChild1, "populationNode") && transversePopulationNodeObject.longitudinalChild1.label ==  label
 
                 disp("Pruning "+transversePopulationNodeObject.longitudinalChild1.label);
-                transversePopulationNodeObject.longitudinalChild1 = prunedNode();
+                transversePopulationNodeObject.longitudinalChild1 = emptyNode();
 
             elseif isa(transversePopulationNodeObject.longitudinalChild2, "populationNode") && transversePopulationNodeObject.longitudinalChild2.label ==  label
 
                 disp("Pruning "+transversePopulationNodeObject.longitudinalChild2.label);                
-                transversePopulationNodeObject.longitudinalChild2 = prunedNode();
+                transversePopulationNodeObject.longitudinalChild2 = emptyNode();
 
             else
 
-                transversePopulationNodeObject.transverseChild1 = transversePopulationNodeObject.transverseChild1.prune(label);
-                transversePopulationNodeObject.transverseChild2 = transversePopulationNodeObject.transverseChild2.prune(label);
-                transversePopulationNodeObject.longitudinalChild1 = transversePopulationNodeObject.longitudinalChild1.prune(label);
-                transversePopulationNodeObject.longitudinalChild2 = transversePopulationNodeObject.longitudinalChild2.prune(label);
+                if ~isequal(class(transversePopulationNodeObject.transverseChild1), "emptyNode")
+                    transversePopulationNodeObject.transverseChild1 = transversePopulationNodeObject.transverseChild1.prune(label);
+                end
+
+                if ~isequal(class(transversePopulationNodeObject.transverseChild2), "emptyNode")
+                    transversePopulationNodeObject.transverseChild2 = transversePopulationNodeObject.transverseChild2.prune(label);
+                end
+
+                if ~isequal(class(transversePopulationNodeObject.longitudinalChild1), "emptyNode")
+                    transversePopulationNodeObject.longitudinalChild1 = transversePopulationNodeObject.longitudinalChild1.prune(label);
+                end
+
+                if ~isequal(class(transversePopulationNodeObject.longitudinalChild2), "emptyNode")
+                    transversePopulationNodeObject.longitudinalChild2 = transversePopulationNodeObject.longitudinalChild2.prune(label);
+                end
 
             end
 
@@ -403,11 +414,22 @@ classdef transversePopulationNode < populationNode
                 transversePopulationNodeObject.longitudinalChild2.amplitudeDirectlyAfterPulseWithoutT2s = summedAmplitudesDirectlyAfterPulseWithoutT2s;                
              
             else
-                    
-                transversePopulationNodeObject.transverseChild1 = transversePopulationNodeObject.transverseChild1.updateAmplitudeLabel(updateLabel, summedAmplitudeLabels, newLabel, summedAmplitudesWithoutT2s, summedAmplitudesDirectlyAfterPulseWithoutT2s);
-                transversePopulationNodeObject.longitudinalChild1 = transversePopulationNodeObject.longitudinalChild1.updateAmplitudeLabel(updateLabel, summedAmplitudeLabels, newLabel, summedAmplitudesWithoutT2s, summedAmplitudesDirectlyAfterPulseWithoutT2s);
-                transversePopulationNodeObject.transverseChild2 = transversePopulationNodeObject.transverseChild2.updateAmplitudeLabel(updateLabel, summedAmplitudeLabels, newLabel, summedAmplitudesWithoutT2s, summedAmplitudesDirectlyAfterPulseWithoutT2s);
-                transversePopulationNodeObject.longitudinalChild2 = transversePopulationNodeObject.longitudinalChild2.updateAmplitudeLabel(updateLabel, summedAmplitudeLabels, newLabel, summedAmplitudesWithoutT2s, summedAmplitudesDirectlyAfterPulseWithoutT2s);
+                   
+                if ~isequal(class(transversePopulationNodeObject.transverseChild1), "emptyNode")
+                    transversePopulationNodeObject.transverseChild1 = transversePopulationNodeObject.transverseChild1.updateAmplitudeLabel(updateLabel, summedAmplitudeLabels, newLabel, summedAmplitudesWithoutT2s, summedAmplitudesDirectlyAfterPulseWithoutT2s);
+                end
+
+                if ~isequal(class(transversePopulationNodeObject.longitudinalChild1), "emptyNode")
+                    transversePopulationNodeObject.longitudinalChild1 = transversePopulationNodeObject.longitudinalChild1.updateAmplitudeLabel(updateLabel, summedAmplitudeLabels, newLabel, summedAmplitudesWithoutT2s, summedAmplitudesDirectlyAfterPulseWithoutT2s);
+                end
+
+                if ~isequal(class(transversePopulationNodeObject.transverseChild2), "emptyNode")
+                    transversePopulationNodeObject.transverseChild2 = transversePopulationNodeObject.transverseChild2.updateAmplitudeLabel(updateLabel, summedAmplitudeLabels, newLabel, summedAmplitudesWithoutT2s, summedAmplitudesDirectlyAfterPulseWithoutT2s);
+                end
+
+                if ~isequal(class(transversePopulationNodeObject.longitudinalChild2), "emptyNode")
+                    transversePopulationNodeObject.longitudinalChild2 = transversePopulationNodeObject.longitudinalChild2.updateAmplitudeLabel(updateLabel, summedAmplitudeLabels, newLabel, summedAmplitudesWithoutT2s, summedAmplitudesDirectlyAfterPulseWithoutT2s);
+                end
 
             end
 
